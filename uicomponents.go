@@ -443,8 +443,8 @@ func searchUserDir(dir string) {
 		fileSearchResultListBox.Add(row)
 		fileSearchResultListBox.ShowAll()
 
-		for fileName, path := range fileSearchResults {
-			row := setUpUserFileSearchResultRow(fileName, path)
+		for _, path := range fileSearchResults {
+			row := setUpUserFileSearchResultRow(path, path)
 			fileSearchResultListBox.Add(row)
 		}
 		fileSearchResultListBox.ShowAll()
@@ -488,9 +488,11 @@ func setUpUserDirsListRow(iconName, displayName, entryName string, userDirsMap m
 	eventBox, _ := gtk.EventBoxNew()
 	hBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 6)
 	eventBox.Add(hBox)
-	vBox.PackStart(eventBox, false, false, *itemPadding*3)
+	vBox.PackStart(eventBox, false, false, *itemPadding)
 
-	img, _ := gtk.ImageNewFromIconName(iconName, gtk.ICON_SIZE_DND)
+	//img, _ := gtk.ImageNewFromIconName(iconName, gtk.ICON_SIZE_DND)
+	pixbuf, _ := createPixbuf(iconName, *iconSizeLarge)
+	img, _ := gtk.ImageNewFromPixbuf(pixbuf)
 	hBox.PackStart(img, false, false, 0)
 
 	if len(displayName) > 45 {
@@ -526,9 +528,9 @@ func setUpUserFileSearchResultRow(fileName, filePath string) *gtk.ListBoxRow {
 	eventBox.Add(hBox)
 	vBox.PackStart(eventBox, false, false, *itemPadding)
 
-	if len(fileName) > 45 {
+	/*if len(fileName) > 45 {
 		fileName = fmt.Sprintf("%s...", fileName[:42])
-	}
+	}*/
 	lbl, _ := gtk.LabelNew(fileName)
 	hBox.PackStart(lbl, false, false, 0)
 	row.Add(vBox)
@@ -553,7 +555,7 @@ func setUpButtonBox() *gtk.EventBox {
 	eventBox, _ := gtk.EventBoxNew()
 	wrapperHbox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	box, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
-	wrapperHbox.PackStart(box, true, true, 10)
+	wrapperHbox.PackStart(box, true, true, 0)
 	eventBox.Add(wrapperHbox)
 
 	btn, _ := gtk.ButtonNew()
@@ -561,7 +563,7 @@ func setUpButtonBox() *gtk.EventBox {
 	img, _ := gtk.ImageNewFromPixbuf(pixbuf)
 	btn.SetImage(img)
 	btn.SetCanFocus(false)
-	box.PackStart(btn, true, true, 6)
+	box.PackStart(btn, true, true, 0)
 	btn.Connect("clicked", func() {
 		launch(*cmdLock, false)
 		//confirmationBox = setUpConfirmationBox("system-lock-screen", *cmdLock)
@@ -573,7 +575,7 @@ func setUpButtonBox() *gtk.EventBox {
 	img, _ = gtk.ImageNewFromPixbuf(pixbuf)
 	btn.SetImage(img)
 	btn.SetCanFocus(false)
-	box.PackStart(btn, true, true, 6)
+	box.PackStart(btn, true, true, 0)
 	btn.Connect("clicked", func() {
 		confirmationBox = setUpConfirmationBox("system-log-out", *cmdLogout)
 		buttonBox.Hide()
@@ -584,7 +586,7 @@ func setUpButtonBox() *gtk.EventBox {
 	img, _ = gtk.ImageNewFromPixbuf(pixbuf)
 	btn.SetImage(img)
 	btn.SetCanFocus(false)
-	box.PackStart(btn, true, true, 6)
+	box.PackStart(btn, true, true, 0)
 	btn.Connect("clicked", func() {
 		confirmationBox = setUpConfirmationBox("system-reboot", *cmdRestart)
 		buttonBox.Hide()
@@ -595,7 +597,7 @@ func setUpButtonBox() *gtk.EventBox {
 	img, _ = gtk.ImageNewFromPixbuf(pixbuf)
 	btn.SetImage(img)
 	btn.SetCanFocus(false)
-	box.PackStart(btn, true, true, 6)
+	box.PackStart(btn, true, true, 0)
 	btn.Connect("clicked", func() {
 		confirmationBox = setUpConfirmationBox("system-shutdown", *cmdShutdown)
 		buttonBox.Hide()
@@ -616,7 +618,7 @@ func setUpConfirmationBox(icon string, command string) *gtk.Box {
 	img, _ := gtk.ImageNewFromPixbuf(pixbuf)
 	btn.SetImage(img)
 	btn.SetCanFocus(false)
-	box.PackEnd(btn, false, false, 6)
+	box.PackEnd(btn, true, true, 6)
 	btn.Connect("clicked", func() {
 		defer restoreButtonBox()
 		launch(command, false)
@@ -631,7 +633,7 @@ func setUpConfirmationBox(icon string, command string) *gtk.Box {
 	img, _ = gtk.ImageNewFromPixbuf(pixbuf)
 	btn.SetImage(img)
 	btn.SetCanFocus(false)
-	box.PackEnd(btn, false, false, 6)
+	box.PackEnd(btn, true, true, 6)
 	btn.Connect("clicked", func() {
 		restoreButtonBox()
 	})

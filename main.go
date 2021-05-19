@@ -19,7 +19,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-const version = "0.0.3"
+const version = "0.0.1"
 
 var (
 	appDirs                   []string
@@ -103,7 +103,7 @@ var (
 )
 
 // Flags
-var cssFileName = flag.String("s", "menu-start.css", "Styling: css file name")
+var cssFileName = flag.String("s", "drawer.css", "Styling: css file name")
 var targetOutput = flag.String("o", "", "name of the Output to display the menu on")
 var displayVersion = flag.Bool("v", false, "display Version information")
 var autohide = flag.Bool("d", false, "auto-hiDe: close window when left")
@@ -131,7 +131,7 @@ func main() {
 	flag.Parse()
 
 	if *displayVersion {
-		fmt.Printf("nwg-menu version %s\n", version)
+		fmt.Printf("nwg-drawer version %s\n", version)
 		os.Exit(0)
 	}
 
@@ -149,7 +149,7 @@ func main() {
 	}()
 
 	// We want the same key/mouse binding to turn the dock off: kill the running instance and exit.
-	lockFilePath := fmt.Sprintf("%s/nwg-menu.lock", tempDir())
+	lockFilePath := fmt.Sprintf("%s/nwg-drawer.lock", tempDir())
 	lockFile, err := singleinstance.CreateLockFile(lockFilePath)
 	if err != nil {
 		pid, err := readTextFile(lockFilePath)
@@ -179,8 +179,8 @@ func main() {
 	// ENVIRONMENT
 	configDirectory = configDir()
 
-	if !pathExists(filepath.Join(configDirectory, "menu-start.css")) {
-		copyFile("/usr/share/nwg-menu/menu-start.css", filepath.Join(configDirectory, "menu-start.css"))
+	if !pathExists(filepath.Join(configDirectory, "drawer.css")) {
+		copyFile("/usr/share/nwg-drawer/drawer.css", filepath.Join(configDirectory, "drawer.css"))
 	}
 
 	cacheDirectory := cacheDir()
@@ -241,17 +241,10 @@ func main() {
 		}
 	}
 
-	if *valign == "bottom" {
-		layershell.SetAnchor(win, layershell.LAYER_SHELL_EDGE_BOTTOM, true)
-	} else {
-		layershell.SetAnchor(win, layershell.LAYER_SHELL_EDGE_TOP, true)
-	}
-
-	if *halign == "left" {
-		layershell.SetAnchor(win, layershell.LAYER_SHELL_EDGE_LEFT, true)
-	} else {
-		layershell.SetAnchor(win, layershell.LAYER_SHELL_EDGE_RIGHT, true)
-	}
+	layershell.SetAnchor(win, layershell.LAYER_SHELL_EDGE_BOTTOM, true)
+	layershell.SetAnchor(win, layershell.LAYER_SHELL_EDGE_TOP, true)
+	layershell.SetAnchor(win, layershell.LAYER_SHELL_EDGE_LEFT, true)
+	layershell.SetAnchor(win, layershell.LAYER_SHELL_EDGE_RIGHT, true)
 
 	layershell.SetLayer(win, layershell.LAYER_SHELL_LAYER_TOP)
 
@@ -311,23 +304,20 @@ func main() {
 	leftColumn, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
 	leftBox.PackStart(leftColumn, false, false, 0)
 
-	searchEntry = setUpSearchEntry()
-	if *valign == "top" {
-		leftColumn.PackStart(searchEntry, false, false, 10)
-	}
-
 	pinnedListBox = setUpPinnedListBox()
 	leftColumn.PackStart(pinnedListBox, false, false, 10)
-
-	/*sep, _ := gtk.SeparatorNew(gtk.ORIENTATION_HORIZONTAL)
-	leftColumn.PackStart(sep, false, false, 10)*/
 
 	categoriesListBox = setUpCategoriesListBox()
 	leftColumn.PackStart(categoriesListBox, false, false, 10)
 
-	if *valign != "top" {
-		leftColumn.PackEnd(searchEntry, false, false, 10)
-	}
+	userDirsListBox = setUpUserDirsList()
+	leftColumn.PackStart(userDirsListBox, false, true, 10)
+
+	buttonsWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
+
+	buttonBox = setUpButtonBox()
+	buttonsWrapper.PackStart(buttonBox, false, false, 10)
+	leftColumn.PackEnd(buttonsWrapper, false, true, 0)
 
 	rightBox, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	alignmentBox.PackStart(rightBox, true, true, 10)
@@ -336,24 +326,23 @@ func main() {
 
 	rightBox.PackStart(rightColumn, true, true, 0)
 
-	userDirsListBox = setUpUserDirsList()
-	rightColumn.PackStart(userDirsListBox, false, true, 10)
+	wrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	searchEntry = setUpSearchEntry()
+	searchEntry.SetMaxWidthChars(30)
+	wrapper.PackStart(searchEntry, true, false, 0)
+	emptyBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+
+	wrapper.PackEnd(emptyBox, false, false, 0)
+	rightColumn.PackStart(wrapper, false, false, 10)
 
 	backButton = setUpBackButton()
-	rightColumn.PackStart(backButton, false, false, 10)
+	wrapper.PackEnd(backButton, false, false, 10)
 
 	resultWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
 	rightColumn.PackStart(resultWrapper, true, true, 0)
 
-	buttonsWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
-
-	buttonBox = setUpButtonBox()
-	buttonsWrapper.PackStart(buttonBox, false, false, 10)
-	rightColumn.PackEnd(buttonsWrapper, false, true, 0)
-
-	//win.SetSizeRequest(0, *windowHeigth)
-
 	win.ShowAll()
+	emptyBox.SetSizeRequest(leftColumn.GetAllocatedWidth(), 0)
 
 	backButton.Hide()
 

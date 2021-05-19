@@ -7,16 +7,16 @@ get:
 	go get github.com/allan-simon/go-singleinstance
 
 build:
-	go build -o bin/nwg-menu *.go
+	go build -o bin/nwg-drawer *.go
 
 install:
-	mkdir -p /usr/share/nwg-menu
-	cp -r desktop-directories /usr/share/nwg-menu
-	cp menu-start.css /usr/share/nwg-menu
-	cp bin/nwg-menu /usr/bin
+	mkdir -p /usr/share/nwg-drawer
+	cp -r desktop-directories /usr/share/nwg-drawer
+	cp drawer.css /usr/share/nwg-drawer
+	cp bin/nwg-drawer /usr/bin
 
 uninstall:
-	rm /usr/bin/nwg-menu
+	rm /usr/bin/nwg-drawer
 
 run:
 	go run *.go
