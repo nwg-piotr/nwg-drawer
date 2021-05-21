@@ -100,6 +100,9 @@ var (
 	buttonBox               *gtk.EventBox
 	confirmationBox         *gtk.Box
 	userDirsMap             map[string]string
+	appFlowBox              *gtk.FlowBox
+	appFlowBoxWrapper       *gtk.Box
+	catButtons              []*gtk.Button
 )
 
 // Flags
@@ -329,20 +332,36 @@ func main() {
 	wrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	searchEntry = setUpSearchEntry()
 	searchEntry.SetMaxWidthChars(30)
-	wrapper.PackStart(searchEntry, true, false, 0)
-	emptyBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	wrapper.PackEnd(searchEntry, true, false, 0)
+	rightColumn.PackStart(wrapper, false, false, 10)
 
-	wrapper.PackEnd(emptyBox, false, false, 0)
+	wrapper, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	categoriesMenuBar := setUpCategoriesButtonBox()
+	wrapper.PackStart(categoriesMenuBar, true, false, 0)
 	rightColumn.PackStart(wrapper, false, false, 10)
 
 	backButton = setUpBackButton()
-	wrapper.PackEnd(backButton, false, false, 10)
+	/*wrapper.PackEnd(backButton, false, false, 10)*/
 
+	wrapper, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	resultWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
-	rightColumn.PackStart(resultWrapper, true, true, 0)
+	wrapper.PackStart(resultWrapper, true, false, 0)
+
+	rightColumn.PackStart(wrapper, true, true, 0)
+
+	resultWindow, _ = gtk.ScrolledWindowNew(nil, nil)
+	resultWindow.SetPolicy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+	resultWindow.Connect("enter-notify-event", func() {
+		cancelClose()
+		restoreButtonBox()
+	})
+	resultWrapper.PackStart(resultWindow, true, true, 0)
+
+	appFlowBoxWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
+	resultWindow.Add(appFlowBoxWrapper)
+	appFlowBox = setUpAppsFlowBox(nil, "")
 
 	win.ShowAll()
-	emptyBox.SetSizeRequest(leftColumn.GetAllocatedWidth(), 0)
 
 	backButton.Hide()
 

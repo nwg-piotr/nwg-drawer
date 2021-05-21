@@ -119,6 +119,64 @@ func setUpCategoriesListBox() *gtk.ListBox {
 	return listBox
 }
 
+func setUpCategoriesButtonBox() *gtk.EventBox {
+	lists := map[string][]string{
+		"utility":              listUtility,
+		"development":          listDevelopment,
+		"game":                 listGame,
+		"graphics":             listGraphics,
+		"internet-and-network": listInternetAndNetwork,
+		"office":               listOffice,
+		"audio-video":          listAudioVideo,
+		"system-tools":         listSystemTools,
+		"other":                listOther,
+	}
+
+	eventBox, _ := gtk.EventBoxNew()
+	eventBox.Connect("enter-notify-event", func() {
+		cancelClose()
+	})
+	hBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	eventBox.Add(hBox)
+	button, _ := gtk.ButtonNewWithLabel("All")
+	button.Connect("clicked", func(item *gtk.Button) {
+		//clearSearchResult()
+		searchEntry.GrabFocus()
+		searchEntry.SetText("")
+		appFlowBox = setUpAppsFlowBox(nil, "")
+		for _, btn := range catButtons {
+			btn.SetImagePosition(gtk.POS_LEFT)
+			btn.SetSizeRequest(0, 0)
+		}
+	})
+	hBox.PackStart(button, false, false, 0)
+
+	for _, cat := range categories {
+		if isSupposedToShowUp(cat.Name) {
+			button, _ = gtk.ButtonNewFromIconName(cat.Icon, gtk.ICON_SIZE_MENU)
+			catButtons = append(catButtons, button)
+			button.SetLabel(cat.DisplayName)
+			hBox.PackStart(button, false, false, 0)
+			name := cat.Name
+			b := *button
+			button.Connect("clicked", func(item *gtk.Button) {
+				//clearSearchResult()
+				searchEntry.GrabFocus()
+				searchEntry.SetText("")
+				// !!! since gotk3 FlowBox type does not implement set_filter_func, we need to rebuild appFlowBox
+				appFlowBox = setUpAppsFlowBox(lists[name], "")
+				for _, btn := range catButtons {
+					btn.SetImagePosition(gtk.POS_LEFT)
+				}
+				w := b.GetAllocatedWidth()
+				b.SetImagePosition(gtk.POS_TOP)
+				b.SetSizeRequest(w, 0)
+			})
+		}
+	}
+	return eventBox
+}
+
 func isSupposedToShowUp(catName string) bool {
 	result := catName == "utility" && notEmpty(listUtility) ||
 		catName == "development" && notEmpty(listDevelopment) ||
@@ -218,10 +276,6 @@ func setUpBackButton() *gtk.Box {
 		searchEntry.SetText("")
 	})
 	hBox.PackEnd(button, false, true, 0)
-
-	/*sep, _ := gtk.SeparatorNew(gtk.ORIENTATION_HORIZONTAL)
-	sep.SetCanFocus(false)
-	vBox.Add(sep)*/
 
 	return vBox
 }
@@ -343,6 +397,57 @@ func setUpCategorySearchResult(searchPhrase string) *gtk.ListBox {
 	resultWindow.Add(listBox)
 	resultWindow.ShowAll()
 	return listBox
+}
+
+func setUpAppsFlowBox(categoryList []string, searchPhrase string) *gtk.FlowBox {
+	if appFlowBox != nil {
+		appFlowBox.Destroy()
+	}
+	flowBox, _ := gtk.FlowBoxNew()
+	flowBox.SetMinChildrenPerLine(6)
+	flowBox.SetColumnSpacing(20)
+	flowBox.SetRowSpacing(20)
+	for _, entry := range desktopEntries {
+		if categoryList != nil {
+			if !entry.NoDisplay && isIn(categoryList, entry.DesktopID) {
+				button, _ := gtk.ButtonNew()
+				button.SetAlwaysShowImage(true)
+
+				pixbuf, _ := createPixbuf(entry.Icon, *iconSizeLarge)
+				img, _ := gtk.ImageNewFromPixbuf(pixbuf)
+				button.SetImage(img)
+				button.SetImagePosition(gtk.POS_TOP)
+				name := entry.NameLoc
+				if len(name) > 20 {
+					name = fmt.Sprintf("%s...", name[:17])
+				}
+				button.SetLabel(name)
+
+				flowBox.Add(button)
+			}
+		} else {
+			if !entry.NoDisplay {
+				button, _ := gtk.ButtonNew()
+				button.SetAlwaysShowImage(true)
+
+				pixbuf, _ := createPixbuf(entry.Icon, *iconSizeLarge)
+				img, _ := gtk.ImageNewFromPixbuf(pixbuf)
+				button.SetImage(img)
+				button.SetImagePosition(gtk.POS_TOP)
+				name := entry.NameLoc
+				if len(name) > 20 {
+					name = fmt.Sprintf("%s...", name[:17])
+				}
+				button.SetLabel(name)
+
+				flowBox.Add(button)
+			}
+		}
+	}
+	appFlowBoxWrapper.PackStart(flowBox, false, false, 0)
+	resultWindow.ShowAll()
+
+	return flowBox
 }
 
 func setUpFileSearchResult() *gtk.ListBox {
