@@ -82,6 +82,69 @@ func setUpPinnedListBoxRow(desktopID string) *gtk.ListBoxRow {
 	return row
 }
 
+func setUpPinnedFlowBox() *gtk.FlowBox {
+	if pinnedFlowBox != nil {
+		pinnedFlowBox.Destroy()
+	}
+	flowBox, _ := gtk.FlowBoxNew()
+	flowBox.SetMaxChildrenPerLine(6)
+	flowBox.SetColumnSpacing(20)
+	flowBox.SetHomogeneous(true)
+	flowBox.SetRowSpacing(20)
+
+	if len(pinned) > 0 {
+		for _, desktopID := range pinned {
+			entry := id2entry[desktopID]
+
+			btn, _ := gtk.ButtonNew()
+			pixbuf, _ := createPixbuf(entry.Icon, *iconSizeLarge)
+			img, err := gtk.ImageNewFromPixbuf(pixbuf)
+			if err != nil {
+				println(err, entry.Icon)
+			}
+			btn.SetImage(img)
+			btn.SetAlwaysShowImage(true)
+			btn.SetImagePosition(gtk.POS_TOP)
+
+			name := ""
+			if entry.NameLoc != "" {
+				name = entry.NameLoc
+			} else {
+				name = entry.Name
+			}
+			if len(name) > 20 {
+				name = fmt.Sprintf("%s...", name[:17])
+			}
+			btn.SetLabel(name)
+
+			btn.Connect("button-release-event", func(row *gtk.Button, e *gdk.Event) bool {
+				btnEvent := gdk.EventButtonNewFromEvent(e)
+				if btnEvent.Button() == 1 {
+					launch(entry.Exec, entry.Terminal)
+					return true
+				} else if btnEvent.Button() == 3 {
+					unpinItem(entry.DesktopID)
+					pinnedFlowBox = setUpPinnedFlowBox()
+					return true
+				}
+				return false
+			})
+
+			flowBox.Add(btn)
+		}
+	}
+
+	flowBox.Connect("enter-notify-event", func() {
+		cancelClose()
+		restoreButtonBox()
+	})
+
+	pinnedFlowBoxWrapper.PackStart(flowBox, true, true, 0)
+	flowBox.ShowAll()
+
+	return flowBox
+}
+
 func setUpCategoriesListBox() *gtk.ListBox {
 	listBox, _ := gtk.ListBoxNew()
 	for _, cat := range categories {
@@ -410,36 +473,12 @@ func setUpAppsFlowBox(categoryList []string, searchPhrase string) *gtk.FlowBox {
 	for _, entry := range desktopEntries {
 		if categoryList != nil {
 			if !entry.NoDisplay && isIn(categoryList, entry.DesktopID) {
-				button, _ := gtk.ButtonNew()
-				button.SetAlwaysShowImage(true)
-
-				pixbuf, _ := createPixbuf(entry.Icon, *iconSizeLarge)
-				img, _ := gtk.ImageNewFromPixbuf(pixbuf)
-				button.SetImage(img)
-				button.SetImagePosition(gtk.POS_TOP)
-				name := entry.NameLoc
-				if len(name) > 20 {
-					name = fmt.Sprintf("%s...", name[:17])
-				}
-				button.SetLabel(name)
-
+				button := flowBoxButton(entry)
 				flowBox.Add(button)
 			}
 		} else {
 			if !entry.NoDisplay {
-				button, _ := gtk.ButtonNew()
-				button.SetAlwaysShowImage(true)
-
-				pixbuf, _ := createPixbuf(entry.Icon, *iconSizeLarge)
-				img, _ := gtk.ImageNewFromPixbuf(pixbuf)
-				button.SetImage(img)
-				button.SetImagePosition(gtk.POS_TOP)
-				name := entry.NameLoc
-				if len(name) > 20 {
-					name = fmt.Sprintf("%s...", name[:17])
-				}
-				button.SetLabel(name)
-
+				button := flowBoxButton(entry)
 				flowBox.Add(button)
 			}
 		}
@@ -448,6 +487,37 @@ func setUpAppsFlowBox(categoryList []string, searchPhrase string) *gtk.FlowBox {
 	resultWindow.ShowAll()
 
 	return flowBox
+}
+
+func flowBoxButton(entry desktopEntry) *gtk.Button {
+	button, _ := gtk.ButtonNew()
+	button.SetAlwaysShowImage(true)
+
+	pixbuf, _ := createPixbuf(entry.Icon, *iconSizeLarge)
+	img, _ := gtk.ImageNewFromPixbuf(pixbuf)
+	button.SetImage(img)
+	button.SetImagePosition(gtk.POS_TOP)
+	name := entry.NameLoc
+	if len(name) > 20 {
+		name = fmt.Sprintf("%s...", name[:17])
+	}
+	button.SetLabel(name)
+
+	ID := entry.DesktopID
+	exec := entry.Exec
+	terminal := entry.Terminal
+	button.Connect("button-release-event", func(row *gtk.Button, e *gdk.Event) bool {
+		btnEvent := gdk.EventButtonNewFromEvent(e)
+		if btnEvent.Button() == 1 {
+			launch(exec, terminal)
+			return true
+		} else if btnEvent.Button() == 3 {
+			pinItem(ID)
+			pinnedFlowBox = setUpPinnedFlowBox()
+		}
+		return false
+	})
+	return button
 }
 
 func setUpFileSearchResult() *gtk.ListBox {

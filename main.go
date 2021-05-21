@@ -102,6 +102,8 @@ var (
 	userDirsMap             map[string]string
 	appFlowBox              *gtk.FlowBox
 	appFlowBoxWrapper       *gtk.Box
+	pinnedFlowBox           *gtk.FlowBox
+	pinnedFlowBoxWrapper    *gtk.Box
 	catButtons              []*gtk.Button
 )
 
@@ -109,14 +111,13 @@ var (
 var cssFileName = flag.String("s", "drawer.css", "Styling: css file name")
 var targetOutput = flag.String("o", "", "name of the Output to display the menu on")
 var displayVersion = flag.Bool("v", false, "display Version information")
-var autohide = flag.Bool("d", false, "auto-hiDe: close window when left")
 var valign = flag.String("va", "bottom", "Vertical Alignment: \"bottom\" or \"top\"")
 var halign = flag.String("ha", "left", "Horizontal Alignment: \"left\" or \"right\"")
 var marginTop = flag.Int("mt", 0, "Margin Top")
 var marginLeft = flag.Int("ml", 0, "Margin Left")
 var marginRight = flag.Int("mr", 0, "Margin Right")
 var marginBottom = flag.Int("mb", 0, "Margin Bottom")
-var iconSizeLarge = flag.Int("isl", 32, "Icon Size Large")
+var iconSizeLarge = flag.Int("isl", 48, "Icon Size Large")
 var iconSizeSmall = flag.Int("iss", 16, "Icon Size Small")
 var itemPadding = flag.Uint("padding", 2, "vertical item padding")
 var lang = flag.String("lang", "", "force lang, e.g. \"en\", \"pl\"")
@@ -159,12 +160,6 @@ func main() {
 		if err == nil {
 			i, err := strconv.Atoi(pid)
 			if err == nil {
-				/*if !*autohide {
-					println("Running instance found, sending SIGTERM and exiting...")
-					syscall.Kill(i, syscall.SIGTERM)
-				} else {
-					println("Already running")
-				}*/
 				println("Running instance found, sending SIGTERM and exiting...")
 				syscall.Kill(i, syscall.SIGTERM)
 			}
@@ -282,12 +277,10 @@ func main() {
 
 	// Close the window on leave, but not immediately, to avoid accidental closes
 	win.Connect("leave-notify-event", func() {
-		if *autohide {
-			src, err = glib.TimeoutAdd(uint(1000), func() bool {
-				gtk.MainQuit()
-				return false
-			})
-		}
+		src, err = glib.TimeoutAdd(uint(500), func() bool {
+			gtk.MainQuit()
+			return false
+		})
 	})
 
 	win.Connect("enter-notify-event", func() {
@@ -298,7 +291,6 @@ func main() {
 	win.Add(outerBox)
 
 	alignmentBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
-	//alignmentBox.SetHomogeneous(true)
 	outerBox.PackStart(alignmentBox, true, true, 0)
 
 	leftBox, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
@@ -336,6 +328,12 @@ func main() {
 	rightColumn.PackStart(wrapper, false, false, 10)
 
 	wrapper, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	pinnedFlowBoxWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
+	pinnedFlowBox = setUpPinnedFlowBox()
+	wrapper.PackStart(pinnedFlowBoxWrapper, true, false, 0)
+	rightColumn.PackStart(wrapper, false, false, 10)
+
+	wrapper, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	categoriesMenuBar := setUpCategoriesButtonBox()
 	wrapper.PackStart(categoriesMenuBar, true, false, 0)
 	rightColumn.PackStart(wrapper, false, false, 10)
@@ -356,6 +354,10 @@ func main() {
 		restoreButtonBox()
 	})
 	resultWrapper.PackStart(resultWindow, true, true, 0)
+
+	/*pinnedFlowBoxWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
+	resultWindow.Add(pinnedFlowBoxWrapper)
+	pinnedFlowBox = setUpPinnedFlowBox()*/
 
 	appFlowBoxWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
 	resultWindow.Add(appFlowBoxWrapper)
