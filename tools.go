@@ -525,10 +525,6 @@ func pinItem(itemID string) {
 	pinned = append(pinned, itemID)
 	savePinned()
 	println(itemID, "pinned")
-
-	row := setUpPinnedListBoxRow(itemID)
-	pinnedListBox.Add(row)
-	pinnedListBox.ShowAll()
 }
 
 func unpinItem(itemID string) {

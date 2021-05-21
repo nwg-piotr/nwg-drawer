@@ -26,7 +26,6 @@ var (
 	configDirectory           string
 	pinnedFile                string
 	pinned                    []string
-	leftBox                   *gtk.Box
 	rightBox                  *gtk.Box
 	src                       glib.SourceHandle
 	imgSizeScaled             int
@@ -293,27 +292,6 @@ func main() {
 	alignmentBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	outerBox.PackStart(alignmentBox, true, true, 0)
 
-	leftBox, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
-	alignmentBox.PackStart(leftBox, false, false, 10)
-
-	leftColumn, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
-	leftBox.PackStart(leftColumn, false, false, 0)
-
-	pinnedListBox = setUpPinnedListBox()
-	leftColumn.PackStart(pinnedListBox, false, false, 10)
-
-	categoriesListBox = setUpCategoriesListBox()
-	leftColumn.PackStart(categoriesListBox, false, false, 10)
-
-	userDirsListBox = setUpUserDirsList()
-	leftColumn.PackStart(userDirsListBox, false, true, 10)
-
-	buttonsWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
-
-	buttonBox = setUpButtonBox()
-	buttonsWrapper.PackStart(buttonBox, false, false, 10)
-	leftColumn.PackEnd(buttonsWrapper, false, true, 0)
-
 	rightBox, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	alignmentBox.PackStart(rightBox, true, true, 10)
 
@@ -351,13 +329,8 @@ func main() {
 	resultWindow.SetPolicy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
 	resultWindow.Connect("enter-notify-event", func() {
 		cancelClose()
-		restoreButtonBox()
 	})
 	resultWrapper.PackStart(resultWindow, true, true, 0)
-
-	/*pinnedFlowBoxWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
-	resultWindow.Add(pinnedFlowBoxWrapper)
-	pinnedFlowBox = setUpPinnedFlowBox()*/
 
 	appFlowBoxWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
 	resultWindow.Add(appFlowBoxWrapper)
