@@ -344,6 +344,6 @@ func main() {
 	categoriesListBox.UnselectAll()
 	searchEntry.GrabFocus()
 	t := time.Now()
-	println(fmt.Sprintf("UI created in %v ms. Thanks for watching.", t.Sub(timeStart).Milliseconds()))
+	println(fmt.Sprintf("UI created in %v ms. Thank you for your patience.", t.Sub(timeStart).Milliseconds()))
 	gtk.Main()
 }
