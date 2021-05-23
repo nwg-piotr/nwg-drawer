@@ -90,10 +90,8 @@ var (
 	resultWindow            *gtk.ScrolledWindow
 	fileSearchResults       map[string]string
 	fileSearchResultWindow  *gtk.ScrolledWindow
-	backButton              *gtk.Box
 	searchEntry             *gtk.SearchEntry
 	phrase                  string
-	resultListBox           *gtk.ListBox
 	fileSearchResultListBox *gtk.ListBox
 	buttonsWrapper          *gtk.Box
 	buttonBox               *gtk.EventBox
@@ -316,9 +314,6 @@ func main() {
 	wrapper.PackStart(categoriesMenuBar, true, false, 0)
 	rightColumn.PackStart(wrapper, false, false, 10)
 
-	backButton = setUpBackButton()
-	/*wrapper.PackEnd(backButton, false, false, 10)*/
-
 	wrapper, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	resultWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
 	wrapper.PackStart(resultWrapper, true, false, 0)
@@ -337,8 +332,6 @@ func main() {
 	appFlowBox = setUpAppsFlowBox(nil, "")
 
 	win.ShowAll()
-
-	backButton.Hide()
 
 	pinnedListBox.UnselectAll()
 	categoriesListBox.UnselectAll()

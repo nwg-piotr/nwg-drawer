@@ -41,7 +41,7 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 				name = entry.Name
 			}
 			if len(name) > 20 {
-				name = fmt.Sprintf("%s...", name[:17])
+				name = fmt.Sprintf("%s ...", name[:17])
 			}
 			btn.SetLabel(name)
 
@@ -157,147 +157,6 @@ func notEmpty(listCategory []string) bool {
 	return false
 }
 
-func setUpBackButton() *gtk.Box {
-	vBox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
-	hBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 10)
-	vBox.PackStart(hBox, false, false, 0)
-	button, _ := gtk.ButtonNew()
-	button.SetCanFocus(false)
-	pixbuf, _ := createPixbuf("arrow-left", *iconSizeLarge)
-	image, _ := gtk.ImageNewFromPixbuf(pixbuf)
-	button.SetImage(image)
-	button.SetAlwaysShowImage(true)
-	button.Connect("enter-notify-event", func() {
-		cancelClose()
-	})
-	button.Connect("clicked", func(btn *gtk.Button) {
-		clearSearchResult()
-		searchEntry.GrabFocus()
-		searchEntry.SetText("")
-	})
-	hBox.PackEnd(button, false, true, 0)
-
-	return vBox
-}
-
-func setUpCategoryListBox(listCategory []string) *gtk.ListBox {
-	listBox, _ := gtk.ListBoxNew()
-
-	for _, desktopID := range listCategory {
-		entry := id2entry[desktopID]
-		name := entry.NameLoc
-		if name == "" {
-			name = entry.Name
-		}
-		if len(name) > 30 {
-			name = fmt.Sprintf("%s...", name[:27])
-		}
-		if !entry.NoDisplay {
-			row, _ := gtk.ListBoxRowNew()
-			row.SetSelectable(false)
-			vBox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 10)
-			eventBox, _ := gtk.EventBoxNew()
-			hBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 6)
-			eventBox.Add(hBox)
-			vBox.PackStart(eventBox, false, false, *itemPadding)
-
-			ID := entry.DesktopID
-			eventBox.Connect("button-release-event", func(row *gtk.ListBoxRow, e *gdk.Event) bool {
-				btnEvent := gdk.EventButtonNewFromEvent(e)
-				if btnEvent.Button() == 1 {
-					launch(entry.Exec, entry.Terminal)
-					return true
-				} else if btnEvent.Button() == 3 {
-					pinItem(ID)
-				}
-				return false
-			})
-
-			pixbuf, _ := createPixbuf(entry.Icon, *iconSizeLarge)
-			img, _ := gtk.ImageNewFromPixbuf(pixbuf)
-			hBox.PackStart(img, false, false, 0)
-
-			lbl, _ := gtk.LabelNew(name)
-			hBox.PackStart(lbl, false, false, 0)
-
-			row.Add(vBox)
-			listBox.Add(row)
-		}
-	}
-	backButton.Show()
-	return listBox
-}
-
-func setUpCategorySearchResult(searchPhrase string) *gtk.ListBox {
-	listBox, _ := gtk.ListBoxNew()
-
-	resultWindow, _ = gtk.ScrolledWindowNew(nil, nil)
-	resultWindow.SetPolicy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
-	resultWindow.Connect("enter-notify-event", func() {
-		cancelClose()
-	})
-	resultWrapper.PackStart(resultWindow, true, true, 0)
-
-	counter := 0
-	for _, entry := range desktopEntries {
-		if len(searchPhrase) == 1 && counter > 9 {
-			break
-		} else if len(searchPhrase) == 2 && counter > 14 {
-			break
-		}
-		if !entry.NoDisplay && (strings.Contains(strings.ToLower(entry.NameLoc), strings.ToLower(searchPhrase)) ||
-			strings.Contains(strings.ToLower(entry.CommentLoc), strings.ToLower(searchPhrase)) ||
-			strings.Contains(strings.ToLower(entry.Comment), strings.ToLower(searchPhrase))) {
-
-			counter++
-
-			row, _ := gtk.ListBoxRowNew()
-			row.SetSelectable(false)
-			vBox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 10)
-			eventBox, _ := gtk.EventBoxNew()
-			hBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 6)
-			eventBox.Add(hBox)
-			vBox.PackStart(eventBox, false, false, *itemPadding)
-
-			exec := entry.Exec
-			term := entry.Terminal
-			ID := entry.DesktopID
-			row.Connect("activate", func() {
-				launch(exec, term)
-			})
-			eventBox.Connect("button-release-event", func(row *gtk.EventBox, e *gdk.Event) bool {
-				btnEvent := gdk.EventButtonNewFromEvent(e)
-				if btnEvent.Button() == 1 {
-					launch(exec, term)
-					return true
-				} else if btnEvent.Button() == 3 {
-					pinItem(ID)
-				}
-				return false
-			})
-
-			pixbuf, _ := createPixbuf(entry.Icon, *iconSizeLarge)
-			img, _ := gtk.ImageNewFromPixbuf(pixbuf)
-			hBox.PackStart(img, false, false, 0)
-
-			name := entry.NameLoc
-			if len(name) > 45 {
-				name = fmt.Sprintf("%s...", name[:42])
-			}
-
-			lbl, _ := gtk.LabelNew(name)
-			hBox.PackStart(lbl, false, false, 0)
-
-			row.Add(vBox)
-			listBox.Add(row)
-
-		}
-	}
-	resultWindow.Add(listBox)
-	resultWindow.ShowAll()
-	return listBox
-}
-
 func setUpAppsFlowBox(categoryList []string, searchPhrase string) *gtk.FlowBox {
 	if appFlowBox != nil {
 		appFlowBox.Destroy()
@@ -306,14 +165,25 @@ func setUpAppsFlowBox(categoryList []string, searchPhrase string) *gtk.FlowBox {
 	flowBox.SetMinChildrenPerLine(6)
 	flowBox.SetColumnSpacing(20)
 	flowBox.SetRowSpacing(20)
+	flowBox.SetHomogeneous(true)
 	for _, entry := range desktopEntries {
-		if categoryList != nil {
-			if !entry.NoDisplay && isIn(categoryList, entry.DesktopID) {
-				button := flowBoxButton(entry)
-				flowBox.Add(button)
+		if searchPhrase == "" {
+			if !entry.NoDisplay {
+				if categoryList != nil {
+					if isIn(categoryList, entry.DesktopID) {
+						button := flowBoxButton(entry)
+						flowBox.Add(button)
+					}
+				} else {
+					button := flowBoxButton(entry)
+					flowBox.Add(button)
+				}
 			}
 		} else {
-			if !entry.NoDisplay {
+			if !entry.NoDisplay && (strings.Contains(strings.ToLower(entry.NameLoc), strings.ToLower(searchPhrase)) ||
+				strings.Contains(strings.ToLower(entry.CommentLoc), strings.ToLower(searchPhrase)) ||
+				strings.Contains(strings.ToLower(entry.Comment), strings.ToLower(searchPhrase)) ||
+				strings.Contains(strings.ToLower(entry.Exec), strings.ToLower(searchPhrase))) {
 				button := flowBoxButton(entry)
 				flowBox.Add(button)
 			}
@@ -335,7 +205,7 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	button.SetImagePosition(gtk.POS_TOP)
 	name := entry.NameLoc
 	if len(name) > 20 {
-		name = fmt.Sprintf("%s...", name[:17])
+		name = fmt.Sprintf("%s ...", name[:17])
 	}
 	button.SetLabel(name)
 
@@ -394,18 +264,15 @@ func setUpSearchEntry() *gtk.SearchEntry {
 		cancelClose()
 	})
 	searchEntry.Connect("search-changed", func() {
+		for _, btn := range catButtons {
+			btn.SetImagePosition(gtk.POS_LEFT)
+			btn.SetSizeRequest(0, 0)
+		}
+
 		phrase, _ = searchEntry.GetText()
 		if len(phrase) > 0 {
-			userDirsListBox.Hide()
-			backButton.Show()
 
-			if resultWindow != nil {
-				resultWindow.Destroy()
-			}
-			resultListBox = setUpCategorySearchResult(phrase)
-			if resultListBox.GetChildren().Length() == 0 {
-				resultWindow.Hide()
-			}
+			appFlowBox = setUpAppsFlowBox(nil, phrase)
 
 			if len(phrase) > 2 {
 				if fileSearchResultWindow != nil {
@@ -430,12 +297,10 @@ func setUpSearchEntry() *gtk.SearchEntry {
 					fileSearchResultWindow.Destroy()
 				}
 			}
-
 		} else {
-			clearSearchResult()
-			userDirsListBox.ShowAll()
+			//clearSearchResult()
+			appFlowBox = setUpAppsFlowBox(nil, "")
 		}
-
 	})
 	searchEntry.Connect("focus-in-event", func() {
 		searchEntry.SetText("")
@@ -448,10 +313,6 @@ func searchUserDir(dir string) {
 	fileSearchResults = make(map[string]string)
 	filepath.WalkDir(userDirsMap[dir], walk)
 	if len(fileSearchResults) > 0 {
-		/*row := setUpUserDirsListRow(fmt.Sprintf("folder-%s", dir), "", dir, userDirsMap)
-		fileSearchResultListBox.Add(row)
-		fileSearchResultListBox.ShowAll()*/
-
 		for _, path := range fileSearchResults {
 			row := setUpUserFileSearchResultRow(path, path)
 			fileSearchResultListBox.Add(row)
@@ -470,9 +331,6 @@ func setUpUserFileSearchResultRow(fileName, filePath string) *gtk.ListBoxRow {
 	eventBox.Add(hBox)
 	vBox.PackStart(eventBox, false, false, *itemPadding)
 
-	/*if len(fileName) > 45 {
-		fileName = fmt.Sprintf("%s...", fileName[:42])
-	}*/
 	lbl, _ := gtk.LabelNew(fileName)
 	hBox.PackStart(lbl, false, false, 0)
 	row.Add(vBox)
@@ -489,7 +347,6 @@ func setUpUserFileSearchResultRow(fileName, filePath string) *gtk.ListBoxRow {
 		}
 		return false
 	})
-
 	return row
 }
 
@@ -510,7 +367,4 @@ func clearSearchResult() {
 		}
 		categoriesListBox.UnselectAll()
 	}
-	backButton.Hide()
-	//searchEntry.SetText("")
-	//searchEntry.GrabFocus()
 }
