@@ -324,7 +324,7 @@ func setUpCategories() {
 	categories = append(categories, other)
 }
 
-func parseDesktopFiles(desktopFiles []string) {
+func parseDesktopFiles(desktopFiles []string) string {
 	id2entry = make(map[string]desktopEntry)
 	var added []string
 	skipped := 0
@@ -429,7 +429,9 @@ func parseDesktopFiles(desktopFiles []string) {
 	sort.Slice(desktopEntries, func(i, j int) bool {
 		return desktopEntries[i].NameLoc < desktopEntries[j].NameLoc
 	})
-	println(fmt.Sprintf("Skipped %v duplicates; %v .desktop entries hidden by \"NoDisplay=true\"", skipped, hidden))
+	summary := fmt.Sprintf("%v entries (+%v hidden)", len(desktopEntries)-hidden, hidden)
+	println("Skipped %v duplicates; %v .desktop entries hidden by \"NoDisplay=true\"", skipped, hidden)
+	return summary
 }
 
 // freedesktop Main Categories list consists of 13 entries. Let's contract it to 8+1 ("Other").

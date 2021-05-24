@@ -221,7 +221,8 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	ID := entry.DesktopID
 	exec := entry.Exec
 	terminal := entry.Terminal
-	button.Connect("button-release-event", func(row *gtk.Button, e *gdk.Event) bool {
+	desc := entry.CommentLoc
+	button.Connect("button-release-event", func(btn *gtk.Button, e *gdk.Event) bool {
 		btnEvent := gdk.EventButtonNewFromEvent(e)
 		if btnEvent.Button() == 1 {
 			launch(exec, terminal)
@@ -231,6 +232,12 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 			pinnedFlowBox = setUpPinnedFlowBox()
 		}
 		return false
+	})
+	button.Connect("enter-notify-event", func() {
+		statusLabel.SetText(desc)
+	})
+	button.Connect("leave-notify-event", func() {
+		statusLabel.SetText(status)
 	})
 	return button
 }

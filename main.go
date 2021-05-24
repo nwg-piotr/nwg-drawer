@@ -100,6 +100,8 @@ var (
 	pinnedFlowBox           *gtk.FlowBox
 	pinnedFlowBoxWrapper    *gtk.Box
 	catButtons              []*gtk.Button
+	statusLabel             *gtk.Label
+	status                 string
 )
 
 // Flags
@@ -186,7 +188,7 @@ func main() {
 	desktopFiles := listDesktopFiles()
 	println(fmt.Sprintf("Found %v desktop files", len(desktopFiles)))
 
-	parseDesktopFiles(desktopFiles)
+	status = parseDesktopFiles(desktopFiles)
 
 	// USER INTERFACE
 	gtk.Init(nil)
@@ -299,6 +301,11 @@ func main() {
 	appFlowBoxWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
 	resultWindow.Add(appFlowBoxWrapper)
 	appFlowBox = setUpAppsFlowBox(nil, "")
+
+	statusLineWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	outerVBox.PackStart(statusLineWrapper, false, false, 10)
+	statusLabel, _ = gtk.LabelNew(status)
+	statusLineWrapper.PackStart(statusLabel, true, false, 0)
 
 	/*alignmentBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	outerBox.PackStart(alignmentBox, true, true, 0)
