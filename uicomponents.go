@@ -15,7 +15,13 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 		pinnedFlowBox.Destroy()
 	}
 	flowBox, _ := gtk.FlowBoxNew()
-	flowBox.SetMaxChildrenPerLine(6)
+	if uint(len(pinned)) >= *columnsNumber {
+		flowBox.SetMaxChildrenPerLine(*columnsNumber)
+	} else {
+		flowBox.SetMaxChildrenPerLine(uint(len(pinned)))
+	}
+
+	//flowBox.SetMinChildrenPerLine(9)
 	flowBox.SetColumnSpacing(20)
 	flowBox.SetHomogeneous(true)
 	flowBox.SetRowSpacing(20)
@@ -66,7 +72,7 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 		cancelClose()
 	})
 
-	pinnedFlowBoxWrapper.PackStart(flowBox, true, true, 0)
+	pinnedFlowBoxWrapper.PackStart(flowBox, true, false, 0)
 	flowBox.ShowAll()
 
 	return flowBox
@@ -162,7 +168,8 @@ func setUpAppsFlowBox(categoryList []string, searchPhrase string) *gtk.FlowBox {
 		appFlowBox.Destroy()
 	}
 	flowBox, _ := gtk.FlowBoxNew()
-	flowBox.SetMinChildrenPerLine(6)
+	flowBox.SetMinChildrenPerLine(*columnsNumber)
+	flowBox.SetMaxChildrenPerLine(*columnsNumber)
 	flowBox.SetColumnSpacing(20)
 	flowBox.SetRowSpacing(20)
 	flowBox.SetHomogeneous(true)
@@ -189,7 +196,9 @@ func setUpAppsFlowBox(categoryList []string, searchPhrase string) *gtk.FlowBox {
 			}
 		}
 	}
-	appFlowBoxWrapper.PackStart(flowBox, false, false, 0)
+	hWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	appFlowBoxWrapper.PackStart(hWrapper, false, false, 0)
+	hWrapper.PackStart(flowBox, true, false, 0)
 	resultWindow.ShowAll()
 
 	return flowBox
@@ -227,21 +236,24 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 }
 
 func setUpFileSearchResult() *gtk.ListBox {
-	listBox, _ := gtk.ListBoxNew()
-	if fileSearchResultWindow != nil {
-		fileSearchResultWindow.Destroy()
+	if fileSearchResultListBox != nil {
+		fileSearchResultListBox.Destroy()
 	}
-	fileSearchResultWindow, _ = gtk.ScrolledWindowNew(nil, nil)
+	fileSearchResultListBox, _ := gtk.ListBoxNew()
+	fileSearchResultListBox.Connect("enter-notify-event", func() {
+		cancelClose()
+	})
+	/*fileSearchResultWindow, _ = gtk.ScrolledWindowNew(nil, nil)
 	fileSearchResultWindow.SetPolicy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
 	fileSearchResultWindow.Connect("enter-notify-event", func() {
 		cancelClose()
-	})
-	resultWrapper.PackStart(fileSearchResultWindow, true, true, 0)
+	})*/
+	resultWrapper.PackStart(fileSearchResultListBox, true, true, 0)
 
-	fileSearchResultWindow.Add(listBox)
-	fileSearchResultWindow.ShowAll()
+	//fileSearchResultWindow.Add(listBox)
+	fileSearchResultListBox.ShowAll()
 
-	return listBox
+	return fileSearchResultListBox
 }
 
 func walk(path string, d fs.DirEntry, e error) error {
@@ -359,12 +371,5 @@ func clearSearchResult() {
 	}
 	if userDirsListBox != nil {
 		userDirsListBox.ShowAll()
-	}
-	if categoriesListBox != nil {
-		sr := categoriesListBox.GetSelectedRow()
-		if sr != nil {
-			categoriesListBox.GetSelectedRow().SetSelectable(false)
-		}
-		categoriesListBox.UnselectAll()
 	}
 }

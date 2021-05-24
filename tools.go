@@ -426,6 +426,9 @@ func parseDesktopFiles(desktopFiles []string) {
 			}
 		}
 	}
+	sort.Slice(desktopEntries, func(i, j int) bool {
+		return desktopEntries[i].NameLoc < desktopEntries[j].NameLoc
+	})
 	println(fmt.Sprintf("Skipped %v duplicates; %v .desktop entries hidden by \"NoDisplay=true\"", skipped, hidden))
 }
 

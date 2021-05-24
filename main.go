@@ -83,9 +83,7 @@ var desktopEntries []desktopEntry
 
 // UI elements
 var (
-	categoriesListBox       *gtk.ListBox
 	userDirsListBox         *gtk.ListBox
-	pinnedListBox           *gtk.ListBox
 	resultWrapper           *gtk.Box
 	resultWindow            *gtk.ScrolledWindow
 	fileSearchResults       map[string]string
@@ -108,24 +106,13 @@ var (
 var cssFileName = flag.String("s", "drawer.css", "Styling: css file name")
 var targetOutput = flag.String("o", "", "name of the Output to display the menu on")
 var displayVersion = flag.Bool("v", false, "display Version information")
-var valign = flag.String("va", "bottom", "Vertical Alignment: \"bottom\" or \"top\"")
-var halign = flag.String("ha", "left", "Horizontal Alignment: \"left\" or \"right\"")
-var marginTop = flag.Int("mt", 0, "Margin Top")
-var marginLeft = flag.Int("ml", 0, "Margin Left")
-var marginRight = flag.Int("mr", 0, "Margin Right")
-var marginBottom = flag.Int("mb", 0, "Margin Bottom")
-var iconSizeLarge = flag.Int("isl", 48, "Icon Size Large")
+var iconSizeLarge = flag.Int("isl", 64, "Icon Size Large")
 var iconSizeSmall = flag.Int("iss", 16, "Icon Size Small")
+var columnsNumber = flag.Uint("c", 6, "number of Columns")
 var itemPadding = flag.Uint("padding", 2, "vertical item padding")
 var lang = flag.String("lang", "", "force lang, e.g. \"en\", \"pl\"")
 var fileManager = flag.String("fm", "thunar", "File Manager")
 var term = flag.String("term", "alacritty", "Terminal emulator")
-var windowWidth = flag.Int("width", 0, "window width")
-var windowHeigth = flag.Int("height", 0, "window height")
-var cmdLock = flag.String("cmd-lock", "swaylock -f -c 000000", "screen lock command")
-var cmdLogout = flag.String("cmd-logout", "swaymsg exit", "logout command")
-var cmdRestart = flag.String("cmd-restart", "systemctl reboot", "reboot command")
-var cmdShutdown = flag.String("cmd-shutdown", "systemctl -i poweroff", "shutdown command")
 
 func main() {
 	timeStart := time.Now()
@@ -243,11 +230,6 @@ func main() {
 
 	layershell.SetLayer(win, layershell.LAYER_SHELL_LAYER_TOP)
 
-	layershell.SetMargin(win, layershell.LAYER_SHELL_EDGE_TOP, *marginTop)
-	layershell.SetMargin(win, layershell.LAYER_SHELL_EDGE_LEFT, *marginLeft)
-	layershell.SetMargin(win, layershell.LAYER_SHELL_EDGE_RIGHT, *marginRight)
-	layershell.SetMargin(win, layershell.LAYER_SHELL_EDGE_BOTTOM, *marginBottom)
-
 	layershell.SetKeyboardMode(win, layershell.LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE)
 
 	win.Connect("destroy", func() {
@@ -284,29 +266,57 @@ func main() {
 		cancelClose()
 	})
 
-	outerBox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
-	win.Add(outerBox)
+	outerVBox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
+	win.Add(outerVBox)
 
-	alignmentBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	searchBoxWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	outerVBox.PackStart(searchBoxWrapper, false, false, 10)
+
+	searchEntry = setUpSearchEntry()
+	searchEntry.SetMaxWidthChars(30)
+	searchBoxWrapper.PackStart(searchEntry, true, false, 0)
+	outerVBox.PackStart(searchBoxWrapper, false, false, 10)
+
+	pinnedWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	outerVBox.PackStart(pinnedWrapper, false, false, 0)
+
+	pinnedFlowBoxWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	outerVBox.PackStart(pinnedFlowBoxWrapper, false, false, 0)
+	pinnedFlowBox = setUpPinnedFlowBox()
+
+	categoriesWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	categoriesButtonBox := setUpCategoriesButtonBox()
+	categoriesWrapper.PackStart(categoriesButtonBox, true, false, 0)
+	outerVBox.PackStart(categoriesWrapper, false, false, 10)
+
+	resultWindow, _ = gtk.ScrolledWindowNew(nil, nil)
+	resultWindow.SetPolicy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+	resultWindow.Connect("enter-notify-event", func() {
+		cancelClose()
+	})
+	outerVBox.PackStart(resultWindow, true, true, 10)
+
+	appFlowBoxWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
+	resultWindow.Add(appFlowBoxWrapper)
+	appFlowBox = setUpAppsFlowBox(nil, "")
+
+	/*alignmentBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	outerBox.PackStart(alignmentBox, true, true, 0)
-
-	rightBox, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
-	alignmentBox.PackStart(rightBox, true, true, 10)
 
 	rightColumn, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
 
-	rightBox.PackStart(rightColumn, true, true, 0)
+	alignmentBox.PackStart(rightColumn, true, true, 0)
 
 	wrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	searchEntry = setUpSearchEntry()
 	searchEntry.SetMaxWidthChars(30)
-	wrapper.PackEnd(searchEntry, true, false, 0)
+	wrapper.PackStart(searchEntry, true, false, 0)
 	rightColumn.PackStart(wrapper, false, false, 10)
 
 	wrapper, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	pinnedFlowBoxWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
 	pinnedFlowBox = setUpPinnedFlowBox()
-	wrapper.PackStart(pinnedFlowBoxWrapper, true, false, 0)
+	wrapper.PackStart(pinnedFlowBoxWrapper, true, true, 0)
 	rightColumn.PackStart(wrapper, false, false, 10)
 
 	wrapper, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
@@ -325,17 +335,17 @@ func main() {
 	resultWindow.Connect("enter-notify-event", func() {
 		cancelClose()
 	})
-	resultWrapper.PackStart(resultWindow, true, true, 0)
+	rightColumn.PackStart(resultWindow, true, true, 0)
+	resultWindow.Add(wrapper)
+	//resultWrapper.PackStart(resultWindow, true, true, 0)
 
 	appFlowBoxWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
 	resultWindow.Add(appFlowBoxWrapper)
-	appFlowBox = setUpAppsFlowBox(nil, "")
+	appFlowBox = setUpAppsFlowBox(nil, "")*/
 
 	win.ShowAll()
 
-	pinnedListBox.UnselectAll()
-	categoriesListBox.UnselectAll()
-	searchEntry.GrabFocus()
+	//searchEntry.GrabFocus()
 	t := time.Now()
 	println(fmt.Sprintf("UI created in %v ms. Thank you for your patience.", t.Sub(timeStart).Milliseconds()))
 	gtk.Main()
