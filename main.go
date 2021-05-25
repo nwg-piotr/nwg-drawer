@@ -84,7 +84,6 @@ var desktopEntries []desktopEntry
 // UI elements
 var (
 	userDirsListBox         *gtk.ListBox
-	resultWrapper           *gtk.Box
 	resultWindow            *gtk.ScrolledWindow
 	fileSearchResults       map[string]string
 	fileSearchResultWindow  *gtk.ScrolledWindow
@@ -96,12 +95,13 @@ var (
 	confirmationBox         *gtk.Box
 	userDirsMap             map[string]string
 	appFlowBox              *gtk.FlowBox
-	appFlowBoxWrapper       *gtk.Box
+	appSearchResultWrapper  *gtk.Box
+	fileSearchResultWrapper *gtk.Box
 	pinnedFlowBox           *gtk.FlowBox
 	pinnedFlowBoxWrapper    *gtk.Box
 	catButtons              []*gtk.Button
 	statusLabel             *gtk.Label
-	status                 string
+	status                  string
 )
 
 // Flags
@@ -277,7 +277,6 @@ func main() {
 	searchEntry = setUpSearchEntry()
 	searchEntry.SetMaxWidthChars(30)
 	searchBoxWrapper.PackStart(searchEntry, true, false, 0)
-	outerVBox.PackStart(searchBoxWrapper, false, false, 10)
 
 	pinnedWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	outerVBox.PackStart(pinnedWrapper, false, false, 0)
@@ -298,9 +297,20 @@ func main() {
 	})
 	outerVBox.PackStart(resultWindow, true, true, 10)
 
-	appFlowBoxWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
-	resultWindow.Add(appFlowBoxWrapper)
+	resultsWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
+	resultWindow.Add(resultsWrapper)
+
+	appSearchResultWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
+	resultsWrapper.PackStart(appSearchResultWrapper, false, false, 0)
 	appFlowBox = setUpAppsFlowBox(nil, "")
+
+	userDirsMap = mapXdgUserDirs()
+
+	placeholder, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
+	resultsWrapper.PackStart(placeholder, true, true, 0)
+
+	fileSearchResultWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	resultsWrapper.PackEnd(fileSearchResultWrapper, false, false, 10)
 
 	statusLineWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	outerVBox.PackStart(statusLineWrapper, false, false, 10)
