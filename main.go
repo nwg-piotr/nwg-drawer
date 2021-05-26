@@ -274,17 +274,17 @@ func main() {
 	searchEntry.SetMaxWidthChars(30)
 	searchBoxWrapper.PackStart(searchEntry, true, false, 0)
 
+	categoriesWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	categoriesButtonBox := setUpCategoriesButtonBox()
+	categoriesWrapper.PackStart(categoriesButtonBox, true, false, 0)
+	outerVBox.PackStart(categoriesWrapper, false, false, 10)
+
 	pinnedWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	outerVBox.PackStart(pinnedWrapper, false, false, 0)
 
 	pinnedFlowBoxWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	outerVBox.PackStart(pinnedFlowBoxWrapper, false, false, 0)
 	pinnedFlowBox = setUpPinnedFlowBox()
-
-	categoriesWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
-	categoriesButtonBox := setUpCategoriesButtonBox()
-	categoriesWrapper.PackStart(categoriesButtonBox, true, false, 0)
-	outerVBox.PackStart(categoriesWrapper, false, false, 10)
 
 	resultWindow, _ = gtk.ScrolledWindowNew(nil, nil)
 	resultWindow.SetPolicy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
@@ -318,6 +318,7 @@ func main() {
 
 	win.ShowAll()
 	fileSearchResultWrapper.SetSizeRequest(appFlowBox.GetAllocatedWidth(), 1)
+	categoriesWrapper.SetSizeRequest(1, categoriesWrapper.GetAllocatedHeight()*2)
 
 	//searchEntry.GrabFocus()
 	t := time.Now()
