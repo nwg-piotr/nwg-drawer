@@ -99,7 +99,6 @@ func setUpCategoriesButtonBox() *gtk.EventBox {
 	eventBox.Add(hBox)
 	button, _ := gtk.ButtonNewWithLabel("All")
 	button.Connect("clicked", func(item *gtk.Button) {
-		//clearSearchResult()
 		searchEntry.GrabFocus()
 		searchEntry.SetText("")
 		appFlowBox = setUpAppsFlowBox(nil, "")
@@ -119,7 +118,6 @@ func setUpCategoriesButtonBox() *gtk.EventBox {
 			name := cat.Name
 			b := *button
 			button.Connect("clicked", func(item *gtk.Button) {
-				//clearSearchResult()
 				searchEntry.GrabFocus()
 				searchEntry.SetText("")
 				// !!! since gotk3 FlowBox type does not implement set_filter_func, we need to rebuild appFlowBox
@@ -250,14 +248,7 @@ func setUpFileSearchResult() *gtk.ListBox {
 	listBox.Connect("enter-notify-event", func() {
 		cancelClose()
 	})
-	/*fileSearchResultWindow, _ = gtk.ScrolledWindowNew(nil, nil)
-	fileSearchResultWindow.SetPolicy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
-	fileSearchResultWindow.Connect("enter-notify-event", func() {
-		cancelClose()
-	})*/
-	fileSearchResultWrapper.PackStart(listBox, true, false, 10)
-
-	//fileSearchResultWindow.Add(listBox)
+	fileSearchResultWrapper.PackStart(listBox, false, false, 10)
 	listBox.ShowAll()
 
 	return listBox
@@ -267,13 +258,13 @@ func walk(path string, d fs.DirEntry, e error) error {
 	if e != nil {
 		return e
 	}
-	if !d.IsDir() {
-		parts := strings.Split(path, "/")
-		fileName := parts[len(parts)-1]
-		if strings.Contains(strings.ToLower(fileName), strings.ToLower(phrase)) {
-			fileSearchResults[fileName] = path
-		}
+	//if !d.IsDir() {
+	parts := strings.Split(path, "/")
+	fileName := parts[len(parts)-1]
+	if strings.Contains(strings.ToLower(fileName), strings.ToLower(phrase)) {
+		fileSearchResults = append(fileSearchResults, path)
 	}
+	//}
 	return nil
 }
 
@@ -300,7 +291,7 @@ func setUpSearchEntry() *gtk.SearchEntry {
 				fileSearchResultListBox = setUpFileSearchResult()
 				for key := range userDirsMap {
 					if key != "home" {
-						fileSearchResults = make(map[string]string)
+						fileSearchResults = nil
 						if len(fileSearchResults) == 0 {
 							fileSearchResultListBox.Show()
 						}
@@ -317,7 +308,9 @@ func setUpSearchEntry() *gtk.SearchEntry {
 				}
 			}
 		} else {
-			//clearSearchResult()
+			if fileSearchResultListBox != nil {
+				fileSearchResultListBox.Destroy()
+			}
 			appFlowBox = setUpAppsFlowBox(nil, "")
 		}
 	})
@@ -329,16 +322,63 @@ func setUpSearchEntry() *gtk.SearchEntry {
 }
 
 func searchUserDir(dir string) {
-	fileSearchResults = make(map[string]string)
+	fileSearchResults = nil
 	filepath.WalkDir(userDirsMap[dir], walk)
-	if len(fileSearchResults) > 0 {
+	if fileSearchResults != nil && len(fileSearchResults) > 0 {
+		row := setUpUserDirsListRow(fmt.Sprintf("folder-%s", dir), "", dir, userDirsMap)
+		fileSearchResultListBox.Add(row)
+		fileSearchResultListBox.ShowAll()
+
 		for _, path := range fileSearchResults {
-			row := setUpUserFileSearchResultRow(path, path)
-			fileSearchResultListBox.Add(row)
+			partOfPathToShow := strings.Split(path, userDirsMap[dir])[1]
+			if partOfPathToShow != "" {
+				row := setUpUserFileSearchResultRow(partOfPathToShow, path)
+				fileSearchResultListBox.Add(row)
+			}
 		}
 		fileSearchResultListBox.ShowAll()
-		statusLabel.SetText(fmt.Sprintf("%v files", fileSearchResultListBox.GetChildren().Length()))
+		statusLabel.SetText(fmt.Sprintf("%v results", fileSearchResultListBox.GetChildren().Length()))
 	}
+}
+
+func setUpUserDirsListRow(iconName, displayName, entryName string, userDirsMap map[string]string) *gtk.ListBoxRow {
+	if displayName == "" {
+		parts := strings.Split(userDirsMap[entryName], "/")
+		displayName = parts[(len(parts) - 1)]
+	}
+	row, _ := gtk.ListBoxRowNew()
+	//row.SetCanFocus(false)
+	row.SetSelectable(false)
+	vBox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
+	eventBox, _ := gtk.EventBoxNew()
+	hBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 6)
+	eventBox.Add(hBox)
+	vBox.PackStart(eventBox, false, false, *itemPadding*3)
+
+	img, _ := gtk.ImageNewFromIconName(iconName, gtk.ICON_SIZE_DND)
+	hBox.PackStart(img, false, false, 0)
+
+	if len(displayName) > 45 {
+		displayName = fmt.Sprintf("%s...", displayName[:42])
+	}
+	lbl, _ := gtk.LabelNew(displayName)
+	hBox.PackStart(lbl, false, false, 0)
+	row.Add(vBox)
+
+	row.Connect("activate", func() {
+		launch(fmt.Sprintf("%s %s", *fileManager, userDirsMap[entryName]), false)
+	})
+
+	eventBox.Connect("button-release-event", func(row *gtk.ListBoxRow, e *gdk.Event) bool {
+		btnEvent := gdk.EventButtonNewFromEvent(e)
+		if btnEvent.Button() == 1 {
+			launch(fmt.Sprintf("%s %s", *fileManager, userDirsMap[entryName]), false)
+			return true
+		}
+		return false
+	})
+
+	return row
 }
 
 func setUpUserFileSearchResultRow(fileName, filePath string) *gtk.ListBoxRow {
@@ -370,16 +410,4 @@ func setUpUserFileSearchResultRow(fileName, filePath string) *gtk.ListBoxRow {
 		return false
 	})
 	return row
-}
-
-func clearSearchResult() {
-	if resultWindow != nil {
-		resultWindow.Destroy()
-	}
-	if fileSearchResultWindow != nil {
-		fileSearchResultWindow.Destroy()
-	}
-	if userDirsListBox != nil {
-		userDirsListBox.ShowAll()
-	}
 }

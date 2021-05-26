@@ -83,10 +83,9 @@ var desktopEntries []desktopEntry
 
 // UI elements
 var (
-	userDirsListBox         *gtk.ListBox
-	resultWindow            *gtk.ScrolledWindow
-	fileSearchResults       map[string]string
-	fileSearchResultWindow  *gtk.ScrolledWindow
+	resultWindow *gtk.ScrolledWindow
+	//fileSearchResults       map[string]string
+	fileSearchResults       []string
 	searchEntry             *gtk.SearchEntry
 	phrase                  string
 	fileSearchResultListBox *gtk.ListBox
@@ -102,6 +101,7 @@ var (
 	catButtons              []*gtk.Button
 	statusLabel             *gtk.Label
 	status                  string
+	mainColumnWidth         int
 )
 
 // Flags
@@ -243,15 +243,10 @@ func main() {
 		if key.KeyVal() == gdk.KEY_Escape {
 			s, _ := searchEntry.GetText()
 			if s != "" {
-				clearSearchResult()
 				searchEntry.GrabFocus()
 				searchEntry.SetText("")
 			} else {
-				if resultWindow == nil || !resultWindow.GetVisible() {
-					gtk.MainQuit()
-				} else {
-					clearSearchResult()
-				}
+				gtk.MainQuit()
 			}
 		}
 	})
@@ -268,6 +263,7 @@ func main() {
 		cancelClose()
 	})
 
+	// Set up UI
 	outerVBox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
 	win.Add(outerVBox)
 
@@ -305,62 +301,23 @@ func main() {
 	appFlowBox = setUpAppsFlowBox(nil, "")
 
 	userDirsMap = mapXdgUserDirs()
+	fmt.Println(userDirsMap)
 
 	placeholder, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
 	resultsWrapper.PackStart(placeholder, true, true, 0)
 
+	wrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	fileSearchResultWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
-	resultsWrapper.PackEnd(fileSearchResultWrapper, false, false, 10)
+	wrapper.PackStart(fileSearchResultWrapper, true, false, 0)
+	resultsWrapper.PackEnd(wrapper, false, false, 10)
 
 	statusLineWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	outerVBox.PackStart(statusLineWrapper, false, false, 10)
 	statusLabel, _ = gtk.LabelNew(status)
 	statusLineWrapper.PackStart(statusLabel, true, false, 0)
 
-	/*alignmentBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
-	outerBox.PackStart(alignmentBox, true, true, 0)
-
-	rightColumn, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
-
-	alignmentBox.PackStart(rightColumn, true, true, 0)
-
-	wrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
-	searchEntry = setUpSearchEntry()
-	searchEntry.SetMaxWidthChars(30)
-	wrapper.PackStart(searchEntry, true, false, 0)
-	rightColumn.PackStart(wrapper, false, false, 10)
-
-	wrapper, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
-	pinnedFlowBoxWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
-	pinnedFlowBox = setUpPinnedFlowBox()
-	wrapper.PackStart(pinnedFlowBoxWrapper, true, true, 0)
-	rightColumn.PackStart(wrapper, false, false, 10)
-
-	wrapper, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
-	categoriesMenuBar := setUpCategoriesButtonBox()
-	wrapper.PackStart(categoriesMenuBar, true, false, 0)
-	rightColumn.PackStart(wrapper, false, false, 10)
-
-	wrapper, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
-	resultWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
-	wrapper.PackStart(resultWrapper, true, false, 0)
-
-	rightColumn.PackStart(wrapper, true, true, 0)
-
-	resultWindow, _ = gtk.ScrolledWindowNew(nil, nil)
-	resultWindow.SetPolicy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
-	resultWindow.Connect("enter-notify-event", func() {
-		cancelClose()
-	})
-	rightColumn.PackStart(resultWindow, true, true, 0)
-	resultWindow.Add(wrapper)
-	//resultWrapper.PackStart(resultWindow, true, true, 0)
-
-	appFlowBoxWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
-	resultWindow.Add(appFlowBoxWrapper)
-	appFlowBox = setUpAppsFlowBox(nil, "")*/
-
 	win.ShowAll()
+	fileSearchResultWrapper.SetSizeRequest(appFlowBox.GetAllocatedWidth(), 1)
 
 	//searchEntry.GrabFocus()
 	t := time.Now()
