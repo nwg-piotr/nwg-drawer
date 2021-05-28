@@ -275,7 +275,8 @@ func walk(path string, d fs.DirEntry, e error) error {
 	}
 	//if !d.IsDir() {
 	parts := strings.Split(path, "/")
-	fileName := parts[len(parts)-1]
+	//fileName := parts[len(parts)-1]
+	fileName := strings.Join(parts[4:], "/")
 	if strings.Contains(strings.ToLower(fileName), strings.ToLower(phrase)) {
 		fileSearchResults = append(fileSearchResults, path)
 	}
