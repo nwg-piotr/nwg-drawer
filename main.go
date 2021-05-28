@@ -103,6 +103,7 @@ var (
 	statusLabel             *gtk.Label
 	status                  string
 	mainColumnWidth         int
+	ignore                  string
 )
 
 // Flags
@@ -315,7 +316,6 @@ func main() {
 	appFlowBox = setUpAppsFlowBox(nil, "")
 
 	userDirsMap = mapXdgUserDirs()
-	fmt.Println(userDirsMap)
 
 	placeholder, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
 	resultsWrapper.PackStart(placeholder, true, true, 0)

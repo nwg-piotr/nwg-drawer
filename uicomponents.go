@@ -274,12 +274,17 @@ func walk(path string, d fs.DirEntry, e error) error {
 		return e
 	}
 	//if !d.IsDir() {
-	parts := strings.Split(path, "/")
-	//fileName := parts[len(parts)-1]
-	fileName := strings.Join(parts[4:], "/")
-	if strings.Contains(strings.ToLower(fileName), strings.ToLower(phrase)) {
-		fileSearchResults = append(fileSearchResults, path)
+	// don't search leading part of the path, as e.g. '/home/user/Pictures'
+	toSearch := strings.Split(path, ignore)[1]
+	if strings.Contains(strings.ToLower(toSearch), strings.ToLower(phrase)) {
+		// mark directories
+		if d.IsDir() {
+			fileSearchResults = append(fileSearchResults, fmt.Sprintf("#is_dir#%s", path))
+		} else {
+			fileSearchResults = append(fileSearchResults, path)
+		}
 	}
+
 	//}
 	return nil
 }
@@ -339,9 +344,10 @@ func setUpSearchEntry() *gtk.SearchEntry {
 
 func searchUserDir(dir string) {
 	fileSearchResults = nil
+	ignore = userDirsMap[dir]
 	filepath.WalkDir(userDirsMap[dir], walk)
 
-	if fileSearchResults != nil && len(fileSearchResults) > 2 {
+	if fileSearchResults != nil && len(fileSearchResults) > 0 {
 		btn := setUpUserDirButton(fmt.Sprintf("folder-%s", dir), "", dir, userDirsMap)
 		fileSearchResultFlowBox.Add(btn)
 
@@ -392,6 +398,13 @@ func setUpUserDirButton(iconName, displayName, entryName string, userDirsMap map
 func setUpUserFileSearchResultButton(fileName, filePath string) *gtk.Box {
 	box, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	button, _ := gtk.ButtonNew()
+
+	// in the walk function we've marked directories with the '#is_dir#' prefix
+	if strings.HasPrefix(filePath, "#is_dir#") {
+		filePath = filePath[8:]
+		img, _ := gtk.ImageNewFromIconName("folder", gtk.ICON_SIZE_MENU)
+		button.SetImage(img)
+	}
 
 	tooltipText := ""
 	if len(fileName) > *nameLimit {
