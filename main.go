@@ -116,7 +116,7 @@ var itemPadding = flag.Uint("padding", 2, "vertical item padding")
 var lang = flag.String("lang", "", "force lang, e.g. \"en\", \"pl\"")
 var fileManager = flag.String("fm", "thunar", "File Manager")
 var term = flag.String("term", "alacritty", "Terminal emulator")
-var nameLimit = flag.Int("l", 90, "file name length Limit")
+var nameLimit = flag.Int("l", 80, "file name length Limit")
 
 func main() {
 	timeStart := time.Now()
@@ -240,9 +240,10 @@ func main() {
 		gtk.MainQuit()
 	})
 
-	win.Connect("key-release-event", func(window *gtk.Window, event *gdk.Event) bool {
+	win.Connect("key-press-event", func(window *gtk.Window, event *gdk.Event) bool {
 		key := &gdk.EventKey{Event: event}
-		if key.KeyVal() == gdk.KEY_Escape {
+		switch key.KeyVal() {
+		case gdk.KEY_Escape:
 			s, _ := searchEntry.GetText()
 			if s != "" {
 				searchEntry.GrabFocus()
@@ -250,10 +251,18 @@ func main() {
 			} else {
 				gtk.MainQuit()
 			}
-		} else {
+			return false
+		case gdk.KEY_downarrow, gdk.KEY_Up, gdk.KEY_Down, gdk.KEY_Left, gdk.KEY_Right, gdk.KEY_Tab,
+			gdk.KEY_Return, gdk.KEY_Page_Up, gdk.KEY_Page_Down, gdk.KEY_Home, gdk.KEY_End:
+			//searchEntry.SetText("")
+			return false
+
+		default:
+			if !searchEntry.IsFocus() {
+				searchEntry.GrabFocus()
+			}
 			return false
 		}
-		return false
 	})
 
 	// Close the window on leave, but not immediately, to avoid accidental closes
