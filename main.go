@@ -88,7 +88,8 @@ var (
 	fileSearchResults       []string
 	searchEntry             *gtk.SearchEntry
 	phrase                  string
-	fileSearchResultListBox *gtk.ListBox
+	fileSearchResultListBox *gtk.ListBox // tbd
+	fileSearchResultFlowBox *gtk.FlowBox
 	buttonsWrapper          *gtk.Box
 	buttonBox               *gtk.EventBox
 	confirmationBox         *gtk.Box
@@ -115,6 +116,7 @@ var itemPadding = flag.Uint("padding", 2, "vertical item padding")
 var lang = flag.String("lang", "", "force lang, e.g. \"en\", \"pl\"")
 var fileManager = flag.String("fm", "thunar", "File Manager")
 var term = flag.String("term", "alacritty", "Terminal emulator")
+var nameLimit = flag.Int("l", 90, "file name length Limit")
 
 func main() {
 	timeStart := time.Now()
@@ -238,7 +240,7 @@ func main() {
 		gtk.MainQuit()
 	})
 
-	win.Connect("key-release-event", func(window *gtk.Window, event *gdk.Event) {
+	win.Connect("key-release-event", func(window *gtk.Window, event *gdk.Event) bool {
 		key := &gdk.EventKey{Event: event}
 		if key.KeyVal() == gdk.KEY_Escape {
 			s, _ := searchEntry.GetText()
@@ -248,7 +250,10 @@ func main() {
 			} else {
 				gtk.MainQuit()
 			}
+		} else {
+			return false
 		}
+		return false
 	})
 
 	// Close the window on leave, but not immediately, to avoid accidental closes
@@ -277,7 +282,7 @@ func main() {
 	categoriesWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	categoriesButtonBox := setUpCategoriesButtonBox()
 	categoriesWrapper.PackStart(categoriesButtonBox, true, false, 0)
-	outerVBox.PackStart(categoriesWrapper, false, false, 10)
+	outerVBox.PackStart(categoriesWrapper, false, false, 0)
 
 	pinnedWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	outerVBox.PackStart(pinnedWrapper, false, false, 0)
@@ -287,7 +292,7 @@ func main() {
 	pinnedFlowBox = setUpPinnedFlowBox()
 
 	resultWindow, _ = gtk.ScrolledWindowNew(nil, nil)
-	resultWindow.SetPolicy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+	resultWindow.SetPolicy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 	resultWindow.Connect("enter-notify-event", func() {
 		cancelClose()
 	})
