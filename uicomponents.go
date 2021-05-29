@@ -21,9 +21,9 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 		flowBox.SetMaxChildrenPerLine(uint(len(pinned)))
 	}
 
-	flowBox.SetColumnSpacing(20)
+	flowBox.SetColumnSpacing(*itemSpacing)
+	flowBox.SetRowSpacing(*itemSpacing)
 	flowBox.SetHomogeneous(true)
-	flowBox.SetRowSpacing(20)
 	flowBox.SetProperty("name", "pinned-box")
 	flowBox.SetSelectionMode(gtk.SELECTION_NONE)
 
@@ -49,7 +49,7 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 			}
 			if len(name) > 20 {
 				r := []rune(name)
-				name = string(r[:20])
+				name = string(r[:17])
 				name = fmt.Sprintf("%s…", name)
 			}
 			btn.SetLabel(name)
@@ -175,8 +175,8 @@ func setUpAppsFlowBox(categoryList []string, searchPhrase string) *gtk.FlowBox {
 	flowBox, _ := gtk.FlowBoxNew()
 	flowBox.SetMinChildrenPerLine(*columnsNumber)
 	flowBox.SetMaxChildrenPerLine(*columnsNumber)
-	flowBox.SetColumnSpacing(20)
-	flowBox.SetRowSpacing(20)
+	flowBox.SetColumnSpacing(*itemSpacing)
+	flowBox.SetRowSpacing(*itemSpacing)
 	flowBox.SetHomogeneous(true)
 	flowBox.SetSelectionMode(gtk.SELECTION_NONE)
 
@@ -226,7 +226,7 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	name := entry.NameLoc
 	if len(name) > 20 {
 		r := []rune(name)
-		name = string(r[:20])
+		name = string(r[:17])
 		name = fmt.Sprintf("%s…", name)
 	}
 	button.SetLabel(name)
@@ -277,7 +277,6 @@ func walk(path string, d fs.DirEntry, e error) error {
 	if e != nil {
 		return e
 	}
-	//if !d.IsDir() {
 	// don't search leading part of the path, as e.g. '/home/user/Pictures'
 	toSearch := strings.Split(path, ignore)[1]
 	if strings.Contains(strings.ToLower(toSearch), strings.ToLower(phrase)) {
@@ -288,8 +287,6 @@ func walk(path string, d fs.DirEntry, e error) error {
 			fileSearchResults = append(fileSearchResults, path)
 		}
 	}
-
-	//}
 	return nil
 }
 
