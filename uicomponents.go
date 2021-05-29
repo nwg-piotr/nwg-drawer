@@ -257,7 +257,7 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	return button
 }
 
-func setUpFileSearchResult() *gtk.FlowBox {
+func setUpFileSearchResultContainer() *gtk.FlowBox {
 	if fileSearchResultFlowBox != nil {
 		fileSearchResultFlowBox.Destroy()
 	}
@@ -309,7 +309,7 @@ func setUpSearchEntry() *gtk.SearchEntry {
 				if fileSearchResultFlowBox != nil {
 					fileSearchResultFlowBox.Destroy()
 				}
-				fileSearchResultFlowBox = setUpFileSearchResult()
+				fileSearchResultFlowBox = setUpFileSearchResultContainer()
 				for key := range userDirsMap {
 					if key != "home" {
 						fileSearchResults = nil
@@ -321,11 +321,13 @@ func setUpSearchEntry() *gtk.SearchEntry {
 				}
 				if fileSearchResultFlowBox.GetChildren().Length() == 0 {
 					fileSearchResultFlowBox.Hide()
+					statusLabel.SetText("0 results")
 				}
 			} else {
 				if fileSearchResultFlowBox != nil {
 					fileSearchResultFlowBox.Destroy()
 				}
+				fileSearchResultWrapper.Hide()
 			}
 		} else {
 			if fileSearchResultFlowBox != nil {

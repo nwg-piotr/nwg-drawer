@@ -323,9 +323,11 @@ func main() {
 
 	placeholder, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
 	resultsWrapper.PackStart(placeholder, true, true, 0)
+	placeholder.SetSizeRequest(20, 20)
 
 	wrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	fileSearchResultWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	fileSearchResultWrapper.SetProperty("name", "files-box")
 	wrapper.PackStart(fileSearchResultWrapper, true, false, 0)
 	resultsWrapper.PackEnd(wrapper, false, false, 10)
 
@@ -337,6 +339,7 @@ func main() {
 	win.ShowAll()
 	fileSearchResultWrapper.SetSizeRequest(appFlowBox.GetAllocatedWidth(), 1)
 	categoriesWrapper.SetSizeRequest(1, categoriesWrapper.GetAllocatedHeight()*2)
+	fileSearchResultWrapper.Hide()
 
 	t := time.Now()
 	println(fmt.Sprintf("UI created in %v ms. Thank you for your patience.", t.Sub(timeStart).Milliseconds()))
