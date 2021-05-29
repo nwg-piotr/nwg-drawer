@@ -83,8 +83,7 @@ var desktopEntries []desktopEntry
 
 // UI elements
 var (
-	resultWindow *gtk.ScrolledWindow
-	//fileSearchResults       map[string]string
+	resultWindow            *gtk.ScrolledWindow
 	fileSearchResults       []string
 	searchEntry             *gtk.SearchEntry
 	phrase                  string
@@ -92,7 +91,6 @@ var (
 	fileSearchResultFlowBox *gtk.FlowBox
 	buttonsWrapper          *gtk.Box
 	buttonBox               *gtk.EventBox
-	confirmationBox         *gtk.Box
 	userDirsMap             map[string]string
 	appFlowBox              *gtk.FlowBox
 	appSearchResultWrapper  *gtk.Box
@@ -334,7 +332,6 @@ func main() {
 	fileSearchResultWrapper.SetSizeRequest(appFlowBox.GetAllocatedWidth(), 1)
 	categoriesWrapper.SetSizeRequest(1, categoriesWrapper.GetAllocatedHeight()*2)
 
-	//searchEntry.GrabFocus()
 	t := time.Now()
 	println(fmt.Sprintf("UI created in %v ms. Thank you for your patience.", t.Sub(timeStart).Milliseconds()))
 	gtk.Main()

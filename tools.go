@@ -667,18 +667,3 @@ func mapOutputs() (map[string]*gdk.Monitor, error) {
 	}
 	return result, nil
 }
-
-func listMonitors() ([]gdk.Monitor, error) {
-	var monitors []gdk.Monitor
-	display, err := gdk.DisplayGetDefault()
-	if err != nil {
-		return nil, err
-	}
-
-	num := display.GetNMonitors()
-	for i := 0; i < num; i++ {
-		monitor, _ := display.GetMonitor(i)
-		monitors = append(monitors, *monitor)
-	}
-	return monitors, nil
-}

@@ -48,7 +48,9 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 				name = entry.Name
 			}
 			if len(name) > 20 {
-				name = fmt.Sprintf("%s ...", name[:17])
+				r := []rune(name)
+				name = string(r[:20])
+				name = fmt.Sprintf("%s…", name)
 			}
 			btn.SetLabel(name)
 
@@ -223,7 +225,9 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	button.SetImagePosition(gtk.POS_TOP)
 	name := entry.NameLoc
 	if len(name) > 20 {
-		name = fmt.Sprintf("%s ...", name[:17])
+		r := []rune(name)
+		name = string(r[:20])
+		name = fmt.Sprintf("%s…", name)
 	}
 	button.SetLabel(name)
 
@@ -383,7 +387,7 @@ func setUpUserDirButton(iconName, displayName, entryName string, userDirsMap map
 	button.SetImage(img)
 
 	if len(displayName) > *nameLimit {
-		displayName = fmt.Sprintf("%s...", displayName[:*nameLimit-3])
+		displayName = fmt.Sprintf("%s…", displayName[:*nameLimit-3])
 	}
 	button.SetLabel(displayName)
 
@@ -409,7 +413,7 @@ func setUpUserFileSearchResultButton(fileName, filePath string) *gtk.Box {
 	tooltipText := ""
 	if len(fileName) > *nameLimit {
 		tooltipText = fileName
-		fileName = fmt.Sprintf("%s...", fileName[:*nameLimit-3])
+		fileName = fmt.Sprintf("%s…", fileName[:*nameLimit-3])
 	}
 	button.SetLabel(fileName)
 	if tooltipText != "" {
