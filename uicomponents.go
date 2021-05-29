@@ -32,7 +32,7 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 			entry := id2entry[desktopID]
 
 			btn, _ := gtk.ButtonNew()
-			pixbuf, _ := createPixbuf(entry.Icon, *iconSizeLarge)
+			pixbuf, _ := createPixbuf(entry.Icon, *iconSize)
 			img, err := gtk.ImageNewFromPixbuf(pixbuf)
 			if err != nil {
 				println(err, entry.Icon)
@@ -219,7 +219,7 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	button, _ := gtk.ButtonNew()
 	button.SetAlwaysShowImage(true)
 
-	pixbuf, _ := createPixbuf(entry.Icon, *iconSizeLarge)
+	pixbuf, _ := createPixbuf(entry.Icon, *iconSize)
 	img, _ := gtk.ImageNewFromPixbuf(pixbuf)
 	button.SetImage(img)
 	button.SetImagePosition(gtk.POS_TOP)
@@ -268,7 +268,6 @@ func setUpFileSearchResult() *gtk.FlowBox {
 		cancelClose()
 	})
 	fileSearchResultWrapper.PackStart(flowBox, false, false, 10)
-	flowBox.ShowAll() // TODO: check if necessary here
 
 	return flowBox
 }
@@ -362,7 +361,7 @@ func searchUserDir(dir string) {
 		fileSearchResultFlowBox.Hide()
 
 		statusLabel.SetText(fmt.Sprintf("%v results", fileSearchResultFlowBox.GetChildren().Length()))
-		num := uint(fileSearchResultFlowBox.GetChildren().Length() / 3)
+		num := uint(fileSearchResultFlowBox.GetChildren().Length() / *fsColumns)
 		fileSearchResultFlowBox.SetMinChildrenPerLine(num + 1)
 		fileSearchResultFlowBox.SetMaxChildrenPerLine(num + 1)
 		//While moving focus with arrow keys we want buttons to get focus directly
