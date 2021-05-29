@@ -108,6 +108,7 @@ var (
 var cssFileName = flag.String("s", "drawer.css", "Styling: css file name")
 var targetOutput = flag.String("o", "", "name of the Output to display the menu on")
 var displayVersion = flag.Bool("v", false, "display Version information")
+var overlay = flag.Bool("ovl", false, "use OVerLay layer")
 var iconSize = flag.Int("is", 64, "Icon Size")
 var fsColumns = flag.Uint("fscol", 2, "File Search result COLumns")
 var columnsNumber = flag.Uint("c", 6, "number of Columns")
@@ -231,7 +232,12 @@ func main() {
 	layershell.SetAnchor(win, layershell.LAYER_SHELL_EDGE_LEFT, true)
 	layershell.SetAnchor(win, layershell.LAYER_SHELL_EDGE_RIGHT, true)
 
-	layershell.SetLayer(win, layershell.LAYER_SHELL_LAYER_TOP)
+	if *overlay {
+		layershell.SetLayer(win, layershell.LAYER_SHELL_LAYER_OVERLAY)
+		layershell.SetExclusiveZone(win, -1)
+	} else {
+		layershell.SetLayer(win, layershell.LAYER_SHELL_LAYER_TOP)
+	}
 
 	layershell.SetKeyboardMode(win, layershell.LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE)
 
