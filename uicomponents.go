@@ -69,11 +69,12 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 			btn.Connect("activate", func() {
 				launch(entry.Exec, entry.Terminal)
 			})
-
+			btn.Connect("enter-notify-event", func() {
+				statusLabel.SetText(entry.CommentLoc)
+			})
 			flowBox.Add(btn)
 		}
 	}
-
 	flowBox.Connect("enter-notify-event", func() {
 		cancelClose()
 	})
@@ -83,6 +84,7 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 	flowBox.GetChildren().Foreach(func(item interface{}) {
 		item.(*gtk.Widget).SetCanFocus(false)
 	})
+	flowBox.ShowAll()
 
 	return flowBox
 }
@@ -251,9 +253,6 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	})
 	button.Connect("enter-notify-event", func() {
 		statusLabel.SetText(desc)
-	})
-	button.Connect("leave-notify-event", func() {
-		statusLabel.SetText(status)
 	})
 	return button
 }
