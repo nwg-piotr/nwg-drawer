@@ -106,7 +106,7 @@ var (
 
 // Flags
 var cssFileName = flag.String("s", "drawer.css", "Styling: css file name")
-var targetOutput = flag.String("o", "", "name of the Output to display the menu on")
+var targetOutput = flag.String("o", "", "name of the Output to display the menu on (sway only)")
 var displayVersion = flag.Bool("v", false, "display Version information")
 var overlay = flag.Bool("ovl", false, "use OVerLay layer")
 var iconSize = flag.Int("is", 64, "Icon Size")
