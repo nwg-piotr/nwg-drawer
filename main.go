@@ -115,7 +115,7 @@ var itemSpacing = flag.Uint("spacing", 20, "icon spacing")
 var lang = flag.String("lang", "", "force lang, e.g. \"en\", \"pl\"")
 var fileManager = flag.String("fm", "thunar", "File Manager")
 var term = flag.String("term", "alacritty", "Terminal emulator")
-var nameLimit = flag.Int("l", 80, "file name length Limit")
+var nameLimit = flag.Int("fslen", 80, "File Search name length Limit")
 
 func main() {
 	timeStart := time.Now()
