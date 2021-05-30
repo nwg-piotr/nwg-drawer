@@ -1,5 +1,7 @@
 # nwg-drawer
 
+This application is a part of the [nwg-shell](https://github.com/nwg-piotr/nwg-shell) project.
+
 Application drawer for sway Wayland compositor, and a golang replacement to the `nwggrid` command (a part of
 [nwg-launchers](https://github.com/nwg-piotr/nwg-launchers)).
 
