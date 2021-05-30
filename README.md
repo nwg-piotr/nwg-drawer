@@ -5,6 +5,7 @@ This application is a part of the [nwg-shell](https://github.com/nwg-piotr/nwg-s
 Nwg-drawer is a golang replacement to the `nwggrid` command
 (a part of [nwg-launchers](https://github.com/nwg-piotr/nwg-launchers)). It's being developed with
 [sway](https://github.com/swaywm/sway) in mind, but should also work with other wlroots-based Wayland compositors.
+X Window System is not supported.
 
 Old features: application grid, pinned apps, search entry. New features: gtk-layer-shell support, filtering by categories, searching files in XDG user directories.
 
