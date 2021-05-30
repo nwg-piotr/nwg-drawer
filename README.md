@@ -16,7 +16,7 @@ and `nwggrid`.
 
 ![screenshot-01.png](https://scrot.cloud/images/2021/05/30/screenshot-01.png)
 
-[more screenshots](https://scrot.cloud/album/nwg-drawer.Bogd)
+[more screenshots](https://scrot.cloud/album/nwg-drawer.Bogd) | [see on YouTube](https://youtu.be/iIgxJQhCQf0)
 
 ## Installation
 
