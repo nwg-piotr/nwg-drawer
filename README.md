@@ -11,7 +11,8 @@ The `nwg-drawer` command displays the application grid. The search entry allows 
 and for files in XDG user directories. The grid view may also be filtered by categories.
 
 You may pin applications by right-clicking them. Pinned items will appear above the application grid. Right-click
-a pinned item to unpin it. The pinned items cache is shared with `nwg-menu` and `nwggrid`.
+a pinned item to unpin it. The pinned items cache is shared with [nwg-menu](https://github.com/nwg-piotr/nwg-menu)
+and `nwggrid`.
 
 ![screenshot-01.png](https://scrot.cloud/images/2021/05/30/screenshot-01.png)
 
