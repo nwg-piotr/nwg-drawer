@@ -314,14 +314,11 @@ func setUpSearchEntry() *gtk.SearchEntry {
 				for key := range userDirsMap {
 					if key != "home" {
 						fileSearchResults = nil
-						if len(fileSearchResults) == 0 {
-							fileSearchResultFlowBox.Show()
-						}
 						searchUserDir(key)
 					}
 				}
 				if fileSearchResultFlowBox.GetChildren().Length() == 0 {
-					fileSearchResultFlowBox.Hide()
+					fileSearchResultWrapper.Hide()
 					statusLabel.SetText("0 results")
 				}
 			} else {
@@ -335,6 +332,7 @@ func setUpSearchEntry() *gtk.SearchEntry {
 				fileSearchResultFlowBox.Destroy()
 			}
 			appFlowBox = setUpAppsFlowBox(nil, "")
+			fileSearchResultWrapper.Hide()
 		}
 	})
 	searchEntry.Connect("focus-in-event", func() {
