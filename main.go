@@ -19,19 +19,15 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-const version = "0.0.2"
+const version = "0.0.3"
 
 var (
-	appDirs                   []string
-	configDirectory           string
-	pinnedFile                string
-	pinned                    []string
-	rightBox                  *gtk.Box
-	src                       glib.SourceHandle
-	imgSizeScaled             int
-	currentWsNum, targetWsNum int64
-	win                       *gtk.Window
-	id2entry                  map[string]desktopEntry
+	appDirs         []string
+	configDirectory string
+	pinnedFile      string
+	pinned          []string
+	src             glib.SourceHandle
+	id2entry        map[string]desktopEntry
 )
 
 var categoryNames = [...]string{
@@ -87,10 +83,7 @@ var (
 	fileSearchResults       []string
 	searchEntry             *gtk.SearchEntry
 	phrase                  string
-	fileSearchResultListBox *gtk.ListBox // tbd
 	fileSearchResultFlowBox *gtk.FlowBox
-	buttonsWrapper          *gtk.Box
-	buttonBox               *gtk.EventBox
 	userDirsMap             map[string]string
 	appFlowBox              *gtk.FlowBox
 	appSearchResultWrapper  *gtk.Box
@@ -100,7 +93,6 @@ var (
 	catButtons              []*gtk.Button
 	statusLabel             *gtk.Label
 	status                  string
-	mainColumnWidth         int
 	ignore                  string
 )
 
@@ -272,7 +264,7 @@ func main() {
 
 	// Close the window on leave, but not immediately, to avoid accidental closes
 	win.Connect("leave-notify-event", func() {
-		src, err = glib.TimeoutAdd(uint(500), func() bool {
+		src = glib.TimeoutAdd(uint(500), func() bool {
 			gtk.MainQuit()
 			return false
 		})

@@ -164,7 +164,7 @@ func notEmpty(listCategory []string) bool {
 	}
 	for _, desktopID := range listCategory {
 		entry := id2entry[desktopID]
-		if entry.NoDisplay == false {
+		if !entry.NoDisplay {
 			return true
 		}
 	}
@@ -347,7 +347,7 @@ func searchUserDir(dir string) {
 	ignore = userDirsMap[dir]
 	filepath.WalkDir(userDirsMap[dir], walk)
 
-	if fileSearchResults != nil && len(fileSearchResults) > 0 {
+	if len(fileSearchResults) > 0 {
 		btn := setUpUserDirButton(fmt.Sprintf("folder-%s", dir), "", dir, userDirsMap)
 		fileSearchResultFlowBox.Add(btn)
 

@@ -33,15 +33,6 @@ func cancelClose() {
 	}
 }
 
-func inPinned(taskID string) bool {
-	for _, id := range pinned {
-		if strings.TrimSpace(taskID) == strings.TrimSpace(id) {
-			return true
-		}
-	}
-	return false
-}
-
 func createPixbuf(icon string, size int) (*gdk.Pixbuf, error) {
 	iconTheme, err := gtk.IconThemeGetDefault()
 	if err != nil {
@@ -373,9 +364,7 @@ func parseDesktopFiles(desktopFiles []string) string {
 					exec = strings.Split(l, "Exec=")[1]
 					disallowed := [2]string{"\"", "'"}
 					for _, char := range disallowed {
-						if strings.Contains(exec, char) {
-							exec = strings.Replace(exec, char, "", -1)
-						}
+						exec = strings.Replace(exec, char, "", -1)
 					}
 					continue
 				}
@@ -606,9 +595,7 @@ func launch(command string, terminal bool) {
 	// set env variables
 	if len(envVars) > 0 {
 		cmd.Env = os.Environ()
-		for _, envVar := range envVars {
-			cmd.Env = append(cmd.Env, envVar)
-		}
+		cmd.Env = append(cmd.Env, envVars...)
 	}
 
 	msg := fmt.Sprintf("env vars: %s; command: '%s'; args: %s\n", envVars, elements[cmdIdx], elements[1+cmdIdx:])
