@@ -314,11 +314,13 @@ func main() {
 	// Focus 1st pinned item if any, otherwise focus 1st found app icon
 	var button gtk.IWidget
 	if pinnedFlowBox.GetChildren().Length() > 0 {
-		button, _ = pinnedFlowBox.GetChildAtIndex(0).GetChild()
+		button, err = pinnedFlowBox.GetChildAtIndex(0).GetChild()
 	} else {
-		button, _ = appFlowBox.GetChildAtIndex(0).GetChild()
+		button, err = appFlowBox.GetChildAtIndex(0).GetChild()
 	}
-	button.ToWidget().GrabFocus()
+	if err == nil {
+		button.ToWidget().GrabFocus()
+	}
 
 	userDirsMap = mapXdgUserDirs()
 
