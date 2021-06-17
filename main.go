@@ -311,6 +311,15 @@ func main() {
 	resultsWrapper.PackStart(appSearchResultWrapper, false, false, 0)
 	appFlowBox = setUpAppsFlowBox(nil, "")
 
+	// Focus 1st pinned item if any, otherwise focus 1st found app icon
+	var button gtk.IWidget
+	if pinnedFlowBox.GetChildren().Length() > 0 {
+		button, _ = pinnedFlowBox.GetChildAtIndex(0).GetChild()
+	} else {
+		button, _ = appFlowBox.GetChildAtIndex(0).GetChild()
+	}
+	button.ToWidget().GrabFocus()
+
 	userDirsMap = mapXdgUserDirs()
 
 	placeholder, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
