@@ -21,9 +21,9 @@ import (
 )
 
 /*
-Window on-leave-notify event hides the window with glib Timeout 1000 ms.
+Window leave-notify-event event quits the program with glib Timeout 500 ms.
 We might have left the window by accident, so let's clear the timeout if window re-entered.
-Furthermore - hovering a widget triggers window on-leave-notify event, and the timeout
+Furthermore - hovering a widget triggers window leave-notify-event event, and the timeout
 needs to be cleared as well.
 */
 func cancelClose() {
@@ -48,7 +48,7 @@ func createPixbuf(icon string, size int) (*gdk.Pixbuf, error) {
 		return pixbuf, nil
 
 	} else if strings.HasSuffix(icon, ".svg") || strings.HasSuffix(icon, ".png") || strings.HasSuffix(icon, ".xpm") {
-		// for enties like "Icon=netflix-desktop.svg"
+		// for entries like "Icon=netflix-desktop.svg"
 		icon = strings.Split(icon, ".")[0]
 	}
 
