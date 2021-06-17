@@ -158,7 +158,7 @@ func main() {
 	configDirectory = configDir()
 
 	if !pathExists(filepath.Join(configDirectory, "drawer.css")) {
-		copyFile("/usr/share/nwg-drawer/drawer.css", filepath.Join(configDirectory, "drawer.css"))
+		copyFile(filepath.Join(getDataHome(), "nwg-drawer/drawer.css"), filepath.Join(configDirectory, "drawer.css"))
 	}
 
 	cacheDirectory := cacheDir()

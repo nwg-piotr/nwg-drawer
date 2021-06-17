@@ -202,12 +202,19 @@ func copyFile(src, dst string) error {
 	return os.Chmod(dst, srcinfo.Mode())
 }
 
+func getDataHome() string {
+	if os.Getenv("XDG_DATA_HOME") != "" {
+		return os.Getenv("XDG_DATA_HOME")
+	}
+	return "/usr/share/"
+}
+
 func getAppDirs() []string {
 	var dirs []string
 	xdgDataDirs := ""
 
 	home := os.Getenv("HOME")
-	xdgDataHome := os.Getenv("XDG_DATA_HOME")
+	xdgDataHome := getDataHome()
 	if os.Getenv("XDG_DATA_DIRS") != "" {
 		xdgDataDirs = os.Getenv("XDG_DATA_DIRS")
 	} else {
@@ -257,7 +264,7 @@ func listDesktopFiles() []string {
 }
 
 func setUpCategories() {
-	path := "/usr/share/nwg-menu/desktop-directories"
+	path := filepath.Join(getDataHome(), "nwg-menu/desktop-directories")
 	var other category
 
 	for _, cName := range categoryNames {
