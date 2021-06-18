@@ -258,8 +258,13 @@ func main() {
 			}
 			return false
 		case gdk.KEY_downarrow, gdk.KEY_Up, gdk.KEY_Down, gdk.KEY_Left, gdk.KEY_Right, gdk.KEY_Tab,
-			gdk.KEY_Return, gdk.KEY_Page_Up, gdk.KEY_Page_Down, gdk.KEY_Home, gdk.KEY_End:
+			gdk.KEY_Page_Up, gdk.KEY_Page_Down, gdk.KEY_Home, gdk.KEY_End:
 			//searchEntry.SetText("")
+			return false
+
+		case gdk.KEY_Return:
+			var button, _ = appFlowBox.GetChildAtIndex(0).GetChild()
+			button.ToWidget().Activate()
 			return false
 
 		default:
