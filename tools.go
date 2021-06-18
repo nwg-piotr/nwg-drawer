@@ -21,9 +21,9 @@ import (
 )
 
 /*
-Window on-leave-notify event hides the window with glib Timeout 1000 ms.
+Window leave-notify-event event quits the program with glib Timeout 500 ms.
 We might have left the window by accident, so let's clear the timeout if window re-entered.
-Furthermore - hovering a widget triggers window on-leave-notify event, and the timeout
+Furthermore - hovering a widget triggers window leave-notify-event event, and the timeout
 needs to be cleared as well.
 */
 func cancelClose() {
@@ -31,15 +31,6 @@ func cancelClose() {
 		glib.SourceRemove(src)
 		src = 0
 	}
-}
-
-func inPinned(taskID string) bool {
-	for _, id := range pinned {
-		if strings.TrimSpace(taskID) == strings.TrimSpace(id) {
-			return true
-		}
-	}
-	return false
 }
 
 func createPixbuf(icon string, size int) (*gdk.Pixbuf, error) {
@@ -57,7 +48,7 @@ func createPixbuf(icon string, size int) (*gdk.Pixbuf, error) {
 		return pixbuf, nil
 
 	} else if strings.HasSuffix(icon, ".svg") || strings.HasSuffix(icon, ".png") || strings.HasSuffix(icon, ".xpm") {
-		// for enties like "Icon=netflix-desktop.svg"
+		// for entries like "Icon=netflix-desktop.svg"
 		icon = strings.Split(icon, ".")[0]
 	}
 
@@ -211,6 +202,13 @@ func copyFile(src, dst string) error {
 	return os.Chmod(dst, srcinfo.Mode())
 }
 
+func getDataHome() string {
+	if os.Getenv("XDG_DATA_HOME") != "" {
+		return os.Getenv("XDG_DATA_HOME")
+	}
+	return "/usr/share/"
+}
+
 func getAppDirs() []string {
 	var dirs []string
 	xdgDataDirs := ""
@@ -266,7 +264,7 @@ func listDesktopFiles() []string {
 }
 
 func setUpCategories() {
-	path := "/usr/share/nwg-menu/desktop-directories"
+	path := filepath.Join(getDataHome(), "nwg-menu/desktop-directories")
 	var other category
 
 	for _, cName := range categoryNames {
@@ -373,9 +371,7 @@ func parseDesktopFiles(desktopFiles []string) string {
 					exec = strings.Split(l, "Exec=")[1]
 					disallowed := [2]string{"\"", "'"}
 					for _, char := range disallowed {
-						if strings.Contains(exec, char) {
-							exec = strings.Replace(exec, char, "", -1)
-						}
+						exec = strings.Replace(exec, char, "", -1)
 					}
 					continue
 				}
@@ -606,9 +602,7 @@ func launch(command string, terminal bool) {
 	// set env variables
 	if len(envVars) > 0 {
 		cmd.Env = os.Environ()
-		for _, envVar := range envVars {
-			cmd.Env = append(cmd.Env, envVar)
-		}
+		cmd.Env = append(cmd.Env, envVars...)
 	}
 
 	msg := fmt.Sprintf("env vars: %s; command: '%s'; args: %s\n", envVars, elements[cmdIdx], elements[1+cmdIdx:])

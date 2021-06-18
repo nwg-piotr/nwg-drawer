@@ -19,19 +19,15 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-const version = "0.0.2"
+const version = "0.1.0"
 
 var (
-	appDirs                   []string
-	configDirectory           string
-	pinnedFile                string
-	pinned                    []string
-	rightBox                  *gtk.Box
-	src                       glib.SourceHandle
-	imgSizeScaled             int
-	currentWsNum, targetWsNum int64
-	win                       *gtk.Window
-	id2entry                  map[string]desktopEntry
+	appDirs         []string
+	configDirectory string
+	pinnedFile      string
+	pinned          []string
+	src             glib.SourceHandle
+	id2entry        map[string]desktopEntry
 )
 
 var categoryNames = [...]string{
@@ -87,10 +83,7 @@ var (
 	fileSearchResults       []string
 	searchEntry             *gtk.SearchEntry
 	phrase                  string
-	fileSearchResultListBox *gtk.ListBox // tbd
 	fileSearchResultFlowBox *gtk.FlowBox
-	buttonsWrapper          *gtk.Box
-	buttonBox               *gtk.EventBox
 	userDirsMap             map[string]string
 	appFlowBox              *gtk.FlowBox
 	appSearchResultWrapper  *gtk.Box
@@ -100,7 +93,6 @@ var (
 	catButtons              []*gtk.Button
 	statusLabel             *gtk.Label
 	status                  string
-	mainColumnWidth         int
 	ignore                  string
 )
 
@@ -166,7 +158,7 @@ func main() {
 	configDirectory = configDir()
 
 	if !pathExists(filepath.Join(configDirectory, "drawer.css")) {
-		copyFile("/usr/share/nwg-drawer/drawer.css", filepath.Join(configDirectory, "drawer.css"))
+		copyFile(filepath.Join(getDataHome(), "nwg-drawer/drawer.css"), filepath.Join(configDirectory, "drawer.css"))
 	}
 
 	cacheDirectory := cacheDir()
@@ -272,7 +264,7 @@ func main() {
 
 	// Close the window on leave, but not immediately, to avoid accidental closes
 	win.Connect("leave-notify-event", func() {
-		src, err = glib.TimeoutAdd(uint(500), func() bool {
+		src = glib.TimeoutAdd(uint(500), func() bool {
 			gtk.MainQuit()
 			return false
 		})
@@ -318,6 +310,17 @@ func main() {
 	appSearchResultWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
 	resultsWrapper.PackStart(appSearchResultWrapper, false, false, 0)
 	appFlowBox = setUpAppsFlowBox(nil, "")
+
+	// Focus 1st pinned item if any, otherwise focus 1st found app icon
+	var button gtk.IWidget
+	if pinnedFlowBox.GetChildren().Length() > 0 {
+		button, err = pinnedFlowBox.GetChildAtIndex(0).GetChild()
+	} else {
+		button, err = appFlowBox.GetChildAtIndex(0).GetChild()
+	}
+	if err == nil {
+		button.ToWidget().GrabFocus()
+	}
 
 	userDirsMap = mapXdgUserDirs()
 
