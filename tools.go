@@ -214,7 +214,7 @@ func getAppDirs() []string {
 	xdgDataDirs := ""
 
 	home := os.Getenv("HOME")
-	xdgDataHome := getDataHome()
+	xdgDataHome := os.Getenv("XDG_DATA_HOME")
 	if os.Getenv("XDG_DATA_DIRS") != "" {
 		xdgDataDirs = os.Getenv("XDG_DATA_DIRS")
 	} else {
