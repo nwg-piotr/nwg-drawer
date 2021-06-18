@@ -32,11 +32,15 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 			entry := id2entry[desktopID]
 
 			btn, _ := gtk.ButtonNew()
-			pixbuf, _ := createPixbuf(entry.Icon, *iconSize)
-			img, err := gtk.ImageNewFromPixbuf(pixbuf)
-			if err != nil {
-				println(err, entry.Icon)
+
+			var img *gtk.Image
+			if entry.Icon != "" {
+				pixbuf, _ := createPixbuf(entry.Icon, *iconSize)
+				img, _ = gtk.ImageNewFromPixbuf(pixbuf)
+			} else {
+				img, _ = gtk.ImageNewFromIconName("image-missing", gtk.ICON_SIZE_INVALID)
 			}
+
 			btn.SetImage(img)
 			btn.SetAlwaysShowImage(true)
 			btn.SetImagePosition(gtk.POS_TOP)
@@ -222,8 +226,14 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	button, _ := gtk.ButtonNew()
 	button.SetAlwaysShowImage(true)
 
-	pixbuf, _ := createPixbuf(entry.Icon, *iconSize)
-	img, _ := gtk.ImageNewFromPixbuf(pixbuf)
+	var img *gtk.Image
+	if entry.Icon != "" {
+		pixbuf, _ := createPixbuf(entry.Icon, *iconSize)
+		img, _ = gtk.ImageNewFromPixbuf(pixbuf)
+	} else {
+		img, _ = gtk.ImageNewFromIconName("image-missing", gtk.ICON_SIZE_INVALID)
+	}
+
 	button.SetImage(img)
 	button.SetImagePosition(gtk.POS_TOP)
 	name := entry.NameLoc
