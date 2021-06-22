@@ -18,6 +18,8 @@ and `nwggrid`.
 
 [more screenshots](https://scrot.cloud/album/nwg-drawer.Bogd) | [see on YouTube](https://youtu.be/iIgxJQhCQf0)
 
+[![Packaging status](https://repology.org/badge/vertical-allrepos/nwg-drawer.svg)](https://repology.org/project/nwg-drawer/versions)
+
 ## Installation
 
 ### Dependencies
