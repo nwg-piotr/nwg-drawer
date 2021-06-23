@@ -16,6 +16,7 @@ install:
 	cp bin/nwg-drawer /usr/bin
 
 uninstall:
+	rm -r /usr/share/nwg-drawer
 	rm /usr/bin/nwg-drawer
 
 run:
