@@ -204,34 +204,36 @@ func main() {
 		log.Fatal("Unable to create window:", err)
 	}
 
-	layershell.InitForWindow(win)
+	if wayland() {
+		layershell.InitForWindow(win)
 
-	var output2mon map[string]*gdk.Monitor
-	if *targetOutput != "" {
-		// We want to assign layershell to a monitor, but we only know the output name!
-		output2mon, err = mapOutputs()
-		if err == nil {
-			monitor := output2mon[*targetOutput]
-			layershell.SetMonitor(win, monitor)
+		var output2mon map[string]*gdk.Monitor
+		if *targetOutput != "" {
+			// We want to assign layershell to a monitor, but we only know the output name!
+			output2mon, err = mapOutputs()
+			if err == nil {
+				monitor := output2mon[*targetOutput]
+				layershell.SetMonitor(win, monitor)
 
-		} else {
-			println(err)
+			} else {
+				println(err)
+			}
 		}
+
+		layershell.SetAnchor(win, layershell.LAYER_SHELL_EDGE_BOTTOM, true)
+		layershell.SetAnchor(win, layershell.LAYER_SHELL_EDGE_TOP, true)
+		layershell.SetAnchor(win, layershell.LAYER_SHELL_EDGE_LEFT, true)
+		layershell.SetAnchor(win, layershell.LAYER_SHELL_EDGE_RIGHT, true)
+
+		if *overlay {
+			layershell.SetLayer(win, layershell.LAYER_SHELL_LAYER_OVERLAY)
+			layershell.SetExclusiveZone(win, -1)
+		} else {
+			layershell.SetLayer(win, layershell.LAYER_SHELL_LAYER_TOP)
+		}
+
+		layershell.SetKeyboardMode(win, layershell.LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE)
 	}
-
-	layershell.SetAnchor(win, layershell.LAYER_SHELL_EDGE_BOTTOM, true)
-	layershell.SetAnchor(win, layershell.LAYER_SHELL_EDGE_TOP, true)
-	layershell.SetAnchor(win, layershell.LAYER_SHELL_EDGE_LEFT, true)
-	layershell.SetAnchor(win, layershell.LAYER_SHELL_EDGE_RIGHT, true)
-
-	if *overlay {
-		layershell.SetLayer(win, layershell.LAYER_SHELL_LAYER_OVERLAY)
-		layershell.SetExclusiveZone(win, -1)
-	} else {
-		layershell.SetLayer(win, layershell.LAYER_SHELL_LAYER_TOP)
-	}
-
-	layershell.SetKeyboardMode(win, layershell.LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE)
 
 	win.Connect("destroy", func() {
 		gtk.MainQuit()
@@ -273,6 +275,17 @@ func main() {
 	win.Connect("enter-notify-event", func() {
 		cancelClose()
 	})
+
+	/*
+		In case someone REALLY needed to use X11 - for some stupid Zoom meeting or something, this allows
+		the drawer to behave properly on Openbox, and possibly somewhere else. For sure not on i3.
+		This feature is not really supported and will stay undocumented.
+	*/
+	if !wayland() {
+		println("Not Wayland, oh really?")
+		win.SetDecorated(false)
+		win.Maximize()
+	}
 
 	// Set up UI
 	outerVBox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)

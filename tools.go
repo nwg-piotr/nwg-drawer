@@ -20,6 +20,10 @@ import (
 	"github.com/joshuarubin/go-sway"
 )
 
+func wayland() bool {
+	return os.Getenv("WAYLAND_DISPLAY") != "" || os.Getenv("XDG_SESSION_TYPE") == "wayland"
+}
+
 /*
 Window leave-notify-event event quits the program with glib Timeout 500 ms.
 We might have left the window by accident, so let's clear the timeout if window re-entered.
