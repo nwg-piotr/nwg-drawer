@@ -268,7 +268,7 @@ func listDesktopFiles() []string {
 }
 
 func setUpCategories() {
-	path := filepath.Join(getDataHome(), "nwg-menu/desktop-directories")
+	path := filepath.Join(getDataHome(), "nwg-drawer/desktop-directories")
 	var other category
 
 	for _, cName := range categoryNames {

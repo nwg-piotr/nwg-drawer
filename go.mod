@@ -1,4 +1,4 @@
-module github.com/nwg-piotr/nwg-menu
+module github.com/nwg-piotr/nwg-drawer
 
 go 1.16
 

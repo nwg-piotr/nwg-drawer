@@ -64,7 +64,7 @@ Usage of nwg-drawer:
   -lang string
     	force lang, e.g. "en", "pl"
   -o string
-    	name of the Output to display the menu on (sway only)
+    	name of the Output to display the drawer on (sway only)
   -ovl
     	use OVerLay layer
   -s string
