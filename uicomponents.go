@@ -113,6 +113,7 @@ func setUpCategoriesButtonBox() *gtk.EventBox {
 	hBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	eventBox.Add(hBox)
 	button, _ := gtk.ButtonNewWithLabel("All")
+	button.SetProperty("name", "category-button")
 	button.Connect("clicked", func(item *gtk.Button) {
 		searchEntry.SetText("")
 		appFlowBox = setUpAppsFlowBox(nil, "")
@@ -126,6 +127,7 @@ func setUpCategoriesButtonBox() *gtk.EventBox {
 	for _, cat := range categories {
 		if isSupposedToShowUp(cat.Name) {
 			button, _ = gtk.ButtonNewFromIconName(cat.Icon, gtk.ICON_SIZE_MENU)
+			button.SetProperty("name", "category-button")
 			catButtons = append(catButtons, button)
 			button.SetLabel(cat.DisplayName)
 			hBox.PackStart(button, false, false, 0)
