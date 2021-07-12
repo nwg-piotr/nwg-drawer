@@ -17,7 +17,7 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 	flowBox, _ := gtk.FlowBoxNew()
 	if uint(len(pinned)) >= *columnsNumber {
 		flowBox.SetMaxChildrenPerLine(*columnsNumber)
-	} else {
+	} else if len(pinned) > 0 {
 		flowBox.SetMaxChildrenPerLine(uint(len(pinned)))
 	}
 
@@ -78,16 +78,17 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 			})
 			flowBox.Add(btn)
 		}
+		pinnedFlowBoxWrapper.PackStart(flowBox, true, false, 0)
+
+		//While moving focus with arrow keys we want buttons to get focus directly
+		flowBox.GetChildren().Foreach(func(item interface{}) {
+			item.(*gtk.Widget).SetCanFocus(false)
+		})
 	}
 	flowBox.Connect("enter-notify-event", func() {
 		cancelClose()
 	})
 
-	pinnedFlowBoxWrapper.PackStart(flowBox, true, false, 0)
-	//While moving focus with arrow keys we want buttons to get focus directly
-	flowBox.GetChildren().Foreach(func(item interface{}) {
-		item.(*gtk.Widget).SetCanFocus(false)
-	})
 	flowBox.ShowAll()
 
 	return flowBox

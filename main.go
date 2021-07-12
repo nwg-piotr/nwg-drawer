@@ -172,6 +172,7 @@ func main() {
 	if err != nil {
 		pinned = nil
 	}
+	println(fmt.Sprintf("Found %v pinned items", len(pinned)))
 
 	cssFile := filepath.Join(configDirectory, *cssFileName)
 
