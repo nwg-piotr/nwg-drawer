@@ -131,6 +131,7 @@ func setUpCategoriesButtonBox() *gtk.EventBox {
 			button.SetProperty("name", "category-button")
 			catButtons = append(catButtons, button)
 			button.SetLabel(cat.DisplayName)
+			// fix #8
 			button.SetAlwaysShowImage(true)
 			hBox.PackStart(button, false, false, 0)
 			name := cat.Name
