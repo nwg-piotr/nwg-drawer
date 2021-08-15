@@ -583,17 +583,19 @@ func launch(command string, terminal bool) {
 	envVarsNum := strings.Count(command, "=")
 	var envVars []string
 
-	cmdIdx := 0
-	lastEnvVarIdx := 0
+	cmdIdx := -1
 
 	if envVarsNum > 0 {
 		for idx, item := range elements {
 			if strings.Contains(item, "=") {
-				lastEnvVarIdx = idx
 				envVars = append(envVars, item)
+			} else if !strings.HasPrefix(item, "-") && cmdIdx == -1 {
+				cmdIdx = idx
 			}
 		}
-		cmdIdx = lastEnvVarIdx + 1
+	}
+	if cmdIdx == -1 {
+		cmdIdx = 0
 	}
 
 	cmd := exec.Command(elements[cmdIdx], elements[1+cmdIdx:]...)
