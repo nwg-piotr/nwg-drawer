@@ -319,13 +319,17 @@ func setUpSearchEntry() *gtk.SearchEntry {
 		phrase, _ = searchEntry.GetText()
 		if len(phrase) > 0 {
 
+			// search apps
 			appFlowBox = setUpAppsFlowBox(nil, phrase)
 
-			if len(phrase) > 2 {
+			// search files
+			if !*noFS && len(phrase) > 2 {
 				if fileSearchResultFlowBox != nil {
 					fileSearchResultFlowBox.Destroy()
 				}
+
 				fileSearchResultFlowBox = setUpFileSearchResultContainer()
+
 				for key := range userDirsMap {
 					if key != "home" {
 						fileSearchResults = nil
@@ -337,17 +341,25 @@ func setUpSearchEntry() *gtk.SearchEntry {
 					statusLabel.SetText("0 results")
 				}
 			} else {
+				// search phrase too short
 				if fileSearchResultFlowBox != nil {
 					fileSearchResultFlowBox.Destroy()
 				}
-				fileSearchResultWrapper.Hide()
+				if fileSearchResultWrapper != nil {
+					fileSearchResultWrapper.Hide()
+				}
 			}
 		} else {
+			// clear search results
+			appFlowBox = setUpAppsFlowBox(nil, "")
+
 			if fileSearchResultFlowBox != nil {
 				fileSearchResultFlowBox.Destroy()
 			}
-			appFlowBox = setUpAppsFlowBox(nil, "")
-			fileSearchResultWrapper.Hide()
+
+			if fileSearchResultWrapper != nil {
+				fileSearchResultWrapper.Hide()
+			}
 		}
 	})
 	searchEntry.Connect("focus-in-event", func() {

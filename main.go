@@ -111,6 +111,7 @@ var fileManager = flag.String("fm", "thunar", "File Manager")
 var term = flag.String("term", "alacritty", "Terminal emulator")
 var nameLimit = flag.Int("fslen", 80, "File Search name length Limit")
 var noCats = flag.Bool("nocats", false, "Disable filtering by category")
+var noFS = flag.Bool("nofs", false, "Disable file search")
 
 func main() {
 	timeStart := time.Now()
@@ -256,7 +257,6 @@ func main() {
 			return false
 		case gdk.KEY_downarrow, gdk.KEY_Up, gdk.KEY_Down, gdk.KEY_Left, gdk.KEY_Right, gdk.KEY_Tab,
 			gdk.KEY_Return, gdk.KEY_Page_Up, gdk.KEY_Page_Down, gdk.KEY_Home, gdk.KEY_End:
-			//searchEntry.SetText("")
 			return false
 
 		default:
@@ -346,11 +346,13 @@ func main() {
 	resultsWrapper.PackStart(placeholder, true, true, 0)
 	placeholder.SetSizeRequest(20, 20)
 
-	wrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
-	fileSearchResultWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
-	fileSearchResultWrapper.SetProperty("name", "files-box")
-	wrapper.PackStart(fileSearchResultWrapper, true, false, 0)
-	resultsWrapper.PackEnd(wrapper, false, false, 10)
+	if !*noFS {
+		wrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+		fileSearchResultWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+		fileSearchResultWrapper.SetProperty("name", "files-box")
+		wrapper.PackStart(fileSearchResultWrapper, true, false, 0)
+		resultsWrapper.PackEnd(wrapper, false, false, 10)
+	}
 
 	statusLineWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	outerVBox.PackStart(statusLineWrapper, false, false, 10)
@@ -358,11 +360,13 @@ func main() {
 	statusLineWrapper.PackStart(statusLabel, true, false, 0)
 
 	win.ShowAll()
-	fileSearchResultWrapper.SetSizeRequest(appFlowBox.GetAllocatedWidth(), 1)
+	if !*noFS {
+		fileSearchResultWrapper.SetSizeRequest(appFlowBox.GetAllocatedWidth(), 1)
+		fileSearchResultWrapper.Hide()
+	}
 	if !*noCats {
 		categoriesWrapper.SetSizeRequest(1, categoriesWrapper.GetAllocatedHeight()*2)
 	}
-	fileSearchResultWrapper.Hide()
 
 	t := time.Now()
 	println(fmt.Sprintf("UI created in %v ms. Thank you for your patience.", t.Sub(timeStart).Milliseconds()))
