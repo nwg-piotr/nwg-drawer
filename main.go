@@ -90,6 +90,7 @@ var (
 	fileSearchResultWrapper *gtk.Box
 	pinnedFlowBox           *gtk.FlowBox
 	pinnedFlowBoxWrapper    *gtk.Box
+	categoriesWrapper       *gtk.Box
 	catButtons              []*gtk.Button
 	statusLabel             *gtk.Label
 	status                  string
@@ -109,6 +110,7 @@ var lang = flag.String("lang", "", "force lang, e.g. \"en\", \"pl\"")
 var fileManager = flag.String("fm", "thunar", "File Manager")
 var term = flag.String("term", "alacritty", "Terminal emulator")
 var nameLimit = flag.Int("fslen", 80, "File Search name length Limit")
+var noCats = flag.Bool("nocats", false, "Disable filtering by category")
 
 func main() {
 	timeStart := time.Now()
@@ -299,10 +301,12 @@ func main() {
 	searchEntry.SetMaxWidthChars(30)
 	searchBoxWrapper.PackStart(searchEntry, true, false, 0)
 
-	categoriesWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
-	categoriesButtonBox := setUpCategoriesButtonBox()
-	categoriesWrapper.PackStart(categoriesButtonBox, true, false, 0)
-	outerVBox.PackStart(categoriesWrapper, false, false, 0)
+	if !*noCats {
+		categoriesWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+		categoriesButtonBox := setUpCategoriesButtonBox()
+		categoriesWrapper.PackStart(categoriesButtonBox, true, false, 0)
+		outerVBox.PackStart(categoriesWrapper, false, false, 0)
+	}
 
 	pinnedWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	outerVBox.PackStart(pinnedWrapper, false, false, 0)
@@ -355,7 +359,9 @@ func main() {
 
 	win.ShowAll()
 	fileSearchResultWrapper.SetSizeRequest(appFlowBox.GetAllocatedWidth(), 1)
-	categoriesWrapper.SetSizeRequest(1, categoriesWrapper.GetAllocatedHeight()*2)
+	if !*noCats {
+		categoriesWrapper.SetSizeRequest(1, categoriesWrapper.GetAllocatedHeight()*2)
+	}
 	fileSearchResultWrapper.Hide()
 
 	t := time.Now()
