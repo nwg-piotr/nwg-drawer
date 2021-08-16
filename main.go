@@ -243,6 +243,15 @@ func main() {
 		gtk.MainQuit()
 	})
 
+	win.Connect("button-release-event", func(sw *gtk.Window, e *gdk.Event) bool {
+		btnEvent := gdk.EventButtonNewFromEvent(e)
+		if btnEvent.Button() == 1 || btnEvent.Button() == 3 {
+			gtk.MainQuit()
+			return true
+		}
+		return false
+	})
+
 	win.Connect("key-press-event", func(window *gtk.Window, event *gdk.Event) bool {
 		key := &gdk.EventKey{Event: event}
 		switch key.KeyVal() {
@@ -316,9 +325,18 @@ func main() {
 	pinnedFlowBox = setUpPinnedFlowBox()
 
 	resultWindow, _ = gtk.ScrolledWindowNew(nil, nil)
+	resultWindow.SetEvents(int(gdk.ALL_EVENTS_MASK))
 	resultWindow.SetPolicy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 	resultWindow.Connect("enter-notify-event", func() {
 		cancelClose()
+	})
+	resultWindow.Connect("button-release-event", func(sw *gtk.ScrolledWindow, e *gdk.Event) bool {
+		btnEvent := gdk.EventButtonNewFromEvent(e)
+		if btnEvent.Button() == 1 || btnEvent.Button() == 3 {
+			gtk.MainQuit()
+			return true
+		}
+		return false
 	})
 	outerVBox.PackStart(resultWindow, true, true, 10)
 
