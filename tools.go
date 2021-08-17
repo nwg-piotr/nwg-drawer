@@ -624,7 +624,7 @@ func launch(command string, terminal bool) {
 
 func open(filePath string) {
 	cmd := exec.Command(*fileManager, filePath)
-	go cmd.Run()
+	cmd.Start()
 
 	glib.TimeoutAdd(uint(150), func() bool {
 		gtk.MainQuit()
