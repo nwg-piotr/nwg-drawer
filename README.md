@@ -5,7 +5,8 @@ This application is a part of the [nwg-shell](https://github.com/nwg-piotr/nwg-s
 Nwg-drawer is a golang replacement to the `nwggrid` command
 (a part of [nwg-launchers](https://github.com/nwg-piotr/nwg-launchers)). It's being developed with
 [sway](https://github.com/swaywm/sway) in mind, but should also work with other wlroots-based Wayland compositors.
-X Window System is not supported.
+X Window System is not officially supported, but you should be able to use the drawer on some floating
+window managers (tested on OpenBox).
 
 The `nwg-drawer` command displays the application grid. The search entry allows to look for installed applications,
 and for files in XDG user directories. The grid view may also be filtered by categories.
@@ -63,6 +64,10 @@ Usage of nwg-drawer:
     	Icon Size (default 64)
   -lang string
     	force lang, e.g. "en", "pl"
+  -nocats
+    	Disable filtering by category
+  -nofs
+    	Disable file search
   -o string
     	name of the Output to display the drawer on (sway only)
   -ovl
