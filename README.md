@@ -36,7 +36,7 @@ Optional (recommended):
 - alacritty
 
 You may use another file manager and terminal emulator (see command line arguments), but mentioned above have been
-confirmed to work well with the program. Also see [Files](https://github.com/nwg-piotr/nwg-drawer/tree/files#files).
+confirmed to work well with the program. Also see **Files** below.
 
 ### Steps
 
