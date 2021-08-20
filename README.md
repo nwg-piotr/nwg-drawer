@@ -91,10 +91,10 @@ When the search phrase is at least 3 characters long, your XDG user directories 
 
 ![screenshot-03.png](https://scrot.cloud/images/2021/05/30/screenshot-03.png)
 
-Use the **left mouse button** to open a file with the `xdg-open` command. As configuring file associations for it is PITA,
-you may override them, by defining your own definitions in the `~/.config/nwg-panel/preferred-apps.json` file.
+Use the **left mouse button** to open a file with the `xdg-open` command. As configuring file associations for it is
+PITA, you may override them, by creating the `~/.config/nwg-panel/preferred-apps.json` file with your own definitions.
 
-### Sample ~/.config/nwg-panel/preferred-apps.json file content
+### Sample file content
 
 ```json
 {
