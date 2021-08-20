@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -10,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -241,6 +244,25 @@ func getAppDirs() []string {
 		}
 	}
 	return dirs
+}
+
+func loadPreferredApps(path string) (map[string]interface{}, error) {
+	jsonFile, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer jsonFile.Close()
+
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+
+	var result map[string]interface{}
+	json.Unmarshal([]byte(byteValue), &result)
+
+	if len(result) == 0 {
+		return nil, errors.New("json invalid or empty")
+	}
+
+	return result, nil
 }
 
 func listFiles(dir string) ([]fs.FileInfo, error) {
@@ -622,14 +644,25 @@ func launch(command string, terminal bool) {
 	})
 }
 
-func open(filePath string) {
-	cmd := exec.Command(*fileManager, filePath)
+func open(filePath string, xdgOpen bool) {
+	var cmd *exec.Cmd
+	if xdgOpen {
+		cmd = exec.Command("xdg-open", filePath)
+		// Look for possible custom file association
+		for key, element := range preferredApps {
+			r, err := regexp.Compile(key)
+			if err == nil && r.MatchString(filePath) {
+				cmd = exec.Command(fmt.Sprintf("%v", element), filePath)
+				break
+			}
+		}
+	} else {
+		cmd = exec.Command(*fileManager, filePath)
+	}
+	fmt.Printf("Executing: %s", cmd)
 	cmd.Start()
 
-	glib.TimeoutAdd(uint(150), func() bool {
-		gtk.MainQuit()
-		return false
-	})
+	gtk.MainQuit()
 }
 
 // Returns map output name -> gdk.Monitor

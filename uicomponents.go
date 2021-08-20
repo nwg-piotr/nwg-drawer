@@ -387,7 +387,8 @@ func searchUserDir(dir string) {
 		}
 		fileSearchResultFlowBox.Hide()
 
-		statusLabel.SetText(fmt.Sprintf("%v results", fileSearchResultFlowBox.GetChildren().Length()))
+		statusLabel.SetText(fmt.Sprintf("%v results | LMB: xdg-open | RMB: file manager",
+			fileSearchResultFlowBox.GetChildren().Length()))
 		num := uint(fileSearchResultFlowBox.GetChildren().Length() / *fsColumns)
 		fileSearchResultFlowBox.SetMinChildrenPerLine(num + 1)
 		fileSearchResultFlowBox.SetMaxChildrenPerLine(num + 1)
@@ -414,8 +415,16 @@ func setUpUserDirButton(iconName, displayName, entryName string, userDirsMap map
 	}
 	button.SetLabel(displayName)
 
-	button.Connect("clicked", func() {
-		launch(fmt.Sprintf("%s %s", *fileManager, userDirsMap[entryName]), false)
+	button.Connect("button-release-event", func(btn *gtk.Button, e *gdk.Event) bool {
+		btnEvent := gdk.EventButtonNewFromEvent(e)
+		if btnEvent.Button() == 1 {
+			open(userDirsMap[entryName], true)
+			return true
+		} else if btnEvent.Button() == 3 {
+			open(userDirsMap[entryName], false)
+			return true
+		}
+		return false
 	})
 
 	box.PackStart(button, false, true, 0)
@@ -443,8 +452,16 @@ func setUpUserFileSearchResultButton(fileName, filePath string) *gtk.Box {
 		button.SetTooltipText(tooltipText)
 	}
 
-	button.Connect("clicked", func() {
-		open(filePath)
+	button.Connect("button-release-event", func(btn *gtk.Button, e *gdk.Event) bool {
+		btnEvent := gdk.EventButtonNewFromEvent(e)
+		if btnEvent.Button() == 1 {
+			open(filePath, true)
+			return true
+		} else if btnEvent.Button() == 3 {
+			open(filePath, false)
+			return true
+		}
+		return false
 	})
 
 	box.PackStart(button, false, true, 0)
