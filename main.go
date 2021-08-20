@@ -255,15 +255,6 @@ func main() {
 		gtk.MainQuit()
 	})
 
-	win.Connect("button-release-event", func(sw *gtk.Window, e *gdk.Event) bool {
-		btnEvent := gdk.EventButtonNewFromEvent(e)
-		if btnEvent.Button() == 1 || btnEvent.Button() == 3 {
-			gtk.MainQuit()
-			return true
-		}
-		return false
-	})
-
 	win.Connect("key-press-event", func(window *gtk.Window, event *gdk.Event) bool {
 		key := &gdk.EventKey{Event: event}
 		switch key.KeyVal() {
