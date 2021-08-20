@@ -107,11 +107,11 @@ PITA, you may override them, by creating the `~/.config/nwg-panel/preferred-apps
 }
 ```
 
-Use the **right mouse button** open the file with your file manager (see `-fm` argument). The result depends on the
+Use the **right mouse button** to open the file with your file manager (see `-fm` argument). The result depends on the
 file manager you use.
 
 - thunar will open the file location
-- pcmanfm will open the file in its associated program
+- pcmanfm will open the file with its associated program
 - caja won't open anything, except for directories
 
 I've noy yet tried other file managers.
