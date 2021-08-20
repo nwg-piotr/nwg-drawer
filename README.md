@@ -25,7 +25,7 @@ and `nwggrid`.
 
 ### Dependencies
 
-- go 1.16 (just to build)
+- go >=1.16 (just to build)
 - gtk3
 - gtk-layer-shell
 - xdg-utils
