@@ -650,8 +650,8 @@ func open(filePath string, xdgOpen bool) {
 		cmd = exec.Command("xdg-open", filePath)
 		// Look for possible custom file association
 		for key, element := range preferredApps {
-			r, _ := regexp.Compile(key)
-			if r.MatchString(filePath) {
+			r, err := regexp.Compile(key)
+			if err == nil && r.MatchString(filePath) {
 				cmd = exec.Command(fmt.Sprintf("%v", element), filePath)
 				break
 			}
@@ -659,7 +659,7 @@ func open(filePath string, xdgOpen bool) {
 	} else {
 		cmd = exec.Command(*fileManager, filePath)
 	}
-	fmt.Println(cmd)
+	fmt.Printf("Executing: %s", cmd)
 	cmd.Start()
 
 	gtk.MainQuit()
