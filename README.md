@@ -28,14 +28,15 @@ and `nwggrid`.
 - go 1.16 (just to build)
 - gtk3
 - gtk-layer-shell
+- xdg-utils
 
 Optional (recommended):
 
 - thunar
 - alacritty
 
-You may use another file manager and terminal emulator (see command line arguments), but for now the program has
- only been tested with the two mentioned above.
+You may use another file manager and terminal emulator (see command line arguments), but mentioned above have been
+confirmed to work well with the program. Also see [Files](https://github.com/nwg-piotr/nwg-drawer/tree/files#files).
 
 ### Steps
 
