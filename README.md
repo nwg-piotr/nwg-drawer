@@ -85,6 +85,37 @@ Usage of nwg-drawer:
 
 Edit `~/.config/nwg-panel/drawer.css` to your taste.
 
+## Files
+
+When the search phrase is at least 3 characters long, your XDG user directories are being searched.
+
+![screenshot-03.png](https://scrot.cloud/images/2021/05/30/screenshot-03.png)
+
+Use the **left mouse button** to open a file with the `xdg-open` command. As configuring file associations for it is PITA,
+you may override them, by defining your own definitions in the `~/.config/nwg-panel/preferred-apps.json` file.
+
+### Sample ~/.config/nwg-panel/preferred-apps.json file content
+
+```json
+{
+  "\\.pdf$": "atril",
+  "\\.svg$": "inkscape",
+  "\\.(jpg|png|tiff|gif)$": "feh",
+  "\\.(mp3|ogg|flac|wav|wma)$": "audacious",
+  "\\.(avi|mp4|mkv|mov|wav)$": "mpv",
+  "\\.(doc|docx|xls|xlsx)$": "libreoffice"
+}
+```
+
+Use the **right mouse button** open the file with your file manager (see `-fm` argument). The result depends on the
+file manager you use.
+
+- thunar will open the file location
+- pcmanfm will open the file in its associated program
+- caja won't open anything, except for directories
+
+I've noy yet tried other file managers.
+
 ## Credits
 
 This program uses some great libraries:
