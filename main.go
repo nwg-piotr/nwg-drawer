@@ -19,7 +19,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-const version = "0.1.6"
+const version = "0.1.7"
 
 var (
 	appDirs         []string
@@ -28,6 +28,7 @@ var (
 	pinned          []string
 	src             glib.SourceHandle
 	id2entry        map[string]desktopEntry
+	preferredApps   map[string]interface{}
 )
 
 var categoryNames = [...]string{
@@ -187,6 +188,17 @@ func main() {
 	println(fmt.Sprintf("Found %v desktop files", len(desktopFiles)))
 
 	status = parseDesktopFiles(desktopFiles)
+
+	// For opening files we use xdg-open. As its configuration is PITA, we may override some associations
+	// in the ~/.config/nwg-panel/preferred-apps.json file.
+	paFile := filepath.Join(configDirectory, "preferred-apps.json")
+	preferredApps, err = loadPreferredApps(paFile)
+	if err != nil {
+		println(fmt.Sprintf("Custom associations file %s not found or invalid", paFile))
+	} else {
+		println(fmt.Sprintf("Found %v associations in %s", len(preferredApps), paFile))
+		fmt.Println(preferredApps)
+	}
 
 	// USER INTERFACE
 	gtk.Init(nil)
