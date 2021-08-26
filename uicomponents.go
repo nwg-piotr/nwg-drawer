@@ -146,7 +146,9 @@ func setUpCategoriesButtonBox() *gtk.EventBox {
 				w := b.GetAllocatedWidth()
 				b.SetImagePosition(gtk.POS_TOP)
 				b.SetSizeRequest(w, 0)
-				fileSearchResultWrapper.Hide()
+				if fileSearchResultWrapper != nil {
+					fileSearchResultWrapper.Hide()
+				}
 			})
 		}
 	}
