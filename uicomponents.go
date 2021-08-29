@@ -351,6 +351,29 @@ func setUpSearchEntry() *gtk.SearchEntry {
 					fileSearchResultWrapper.Hide()
 				}
 			}
+			// focus 1st search result #17
+			var w *gtk.Widget
+			if appFlowBox != nil {
+				b := appFlowBox.GetChildAtIndex(0)
+				if b != nil {
+					button, err := b.GetChild()
+					if err == nil {
+						button.ToWidget().GrabFocus()
+						w = button.ToWidget()
+					}
+				}
+			}
+			if w == nil && fileSearchResultFlowBox != nil {
+				f := fileSearchResultFlowBox.GetChildAtIndex(0)
+				if f != nil {
+					//f.SetCanFocus(false)
+					button, err := f.GetChild()
+					if err == nil {
+						button.ToWidget().SetCanFocus(true)
+						button.ToWidget().GrabFocus()
+					}
+				}
+			}
 		} else {
 			// clear search results
 			appFlowBox = setUpAppsFlowBox(nil, "")
@@ -364,9 +387,9 @@ func setUpSearchEntry() *gtk.SearchEntry {
 			}
 		}
 	})
-	searchEntry.Connect("focus-in-event", func() {
+	/*searchEntry.Connect("focus-in-event", func() {
 		searchEntry.SetText("")
-	})
+	})*/
 
 	return searchEntry
 }
@@ -409,6 +432,7 @@ func setUpUserDirButton(iconName, displayName, entryName string, userDirsMap map
 	}
 	box, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	button, _ := gtk.ButtonNew()
+	button.SetAlwaysShowImage(true)
 	img, _ := gtk.ImageNewFromIconName(iconName, gtk.ICON_SIZE_MENU)
 	button.SetImage(img)
 
@@ -441,6 +465,7 @@ func setUpUserFileSearchResultButton(fileName, filePath string) *gtk.Box {
 	if strings.HasPrefix(filePath, "#is_dir#") {
 		filePath = filePath[8:]
 		img, _ := gtk.ImageNewFromIconName("folder", gtk.ICON_SIZE_MENU)
+		button.SetAlwaysShowImage(true)
 		button.SetImage(img)
 	}
 
@@ -464,6 +489,10 @@ func setUpUserFileSearchResultButton(fileName, filePath string) *gtk.Box {
 			return true
 		}
 		return false
+	})
+
+	button.Connect("activate", func() {
+		open(filePath, true)
 	})
 
 	box.PackStart(button, false, true, 0)
