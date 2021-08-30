@@ -19,7 +19,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-const version = "0.1.8"
+const version = "0.1.9"
 
 var (
 	appDirs         []string
@@ -197,7 +197,6 @@ func main() {
 		println(fmt.Sprintf("Custom associations file %s not found or invalid", paFile))
 	} else {
 		println(fmt.Sprintf("Found %v associations in %s", len(preferredApps), paFile))
-		fmt.Println(preferredApps)
 	}
 
 	// USER INTERFACE
@@ -273,7 +272,7 @@ func main() {
 
 		default:
 			if !searchEntry.IsFocus() {
-				searchEntry.GrabFocus()
+				searchEntry.GrabFocusWithoutSelecting()
 			}
 			return false
 		}
