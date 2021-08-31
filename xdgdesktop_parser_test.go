@@ -7,14 +7,6 @@ import (
 
 var result desktopEntry
 
-func BenchmarkDesktopEntryParserOld(b *testing.B) {
-	var entry desktopEntry
-	for n := 0; n < b.N; n++ {
-		entry, _ = parseDesktopEntryFileDeprecated("id", "./desktop-directories/game.directory")
-	}
-	result = entry
-}
-
 func BenchmarkDesktopEntryParser(b *testing.B) {
 	var entry desktopEntry
 	for n := 0; n < b.N; n++ {
@@ -41,7 +33,6 @@ func TestWhitespaceHandling(t *testing.T) {
 	Type = Application
 	Version = 1.0`
 
-	// entry, err := parseDesktopEntryDeprecated("id", strings.Split(whitespace, "\n"))
 	*lang = "pt"
 	entry, err := parseDesktopEntry("id", strings.NewReader(whitespace))
 	if err != nil {
