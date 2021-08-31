@@ -59,6 +59,7 @@ type desktopEntry struct {
 	CommentLoc string
 	Icon       string
 	Exec       string
+	Category   string
 	Terminal   bool
 	NoDisplay  bool
 }

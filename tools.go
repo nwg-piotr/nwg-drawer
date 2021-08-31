@@ -350,103 +350,28 @@ func setUpCategories() {
 
 func parseDesktopFiles(desktopFiles []string) string {
 	id2entry = make(map[string]desktopEntry)
-	var added []string
 	skipped := 0
 	hidden := 0
 	for _, file := range desktopFiles {
-		lines, err := loadTextFile(file)
-		if err == nil {
-			parts := strings.Split(file, "/")
-			desktopID := parts[len(parts)-1]
-			name := ""
-			nameLoc := ""
-			comment := ""
-			commentLoc := ""
-			icon := ""
-			exec := ""
-			terminal := false
-			noDisplay := false
-
-			categories := ""
-
-			for _, l := range lines {
-				if strings.HasPrefix(l, "[") && l != "[Desktop Entry]" {
-					break
-				}
-				if strings.HasPrefix(l, "Name=") {
-					name = strings.Split(l, "=")[1]
-					continue
-				}
-				if strings.HasPrefix(l, fmt.Sprintf("Name[%s]=", strings.Split(*lang, "_")[0])) {
-					nameLoc = strings.Split(l, "=")[1]
-					continue
-				}
-				if strings.HasPrefix(l, "Comment=") {
-					comment = strings.Split(l, "=")[1]
-					continue
-				}
-				if strings.HasPrefix(l, fmt.Sprintf("Comment[%s]=", strings.Split(*lang, "_")[0])) {
-					commentLoc = strings.Split(l, "=")[1]
-					continue
-				}
-				if strings.HasPrefix(l, "Icon=") {
-					icon = strings.Split(l, "=")[1]
-					continue
-				}
-				if strings.HasPrefix(l, "Exec=") {
-					exec = strings.Split(l, "Exec=")[1]
-					disallowed := [2]string{"\"", "'"}
-					for _, char := range disallowed {
-						exec = strings.Replace(exec, char, "", -1)
-					}
-					continue
-				}
-				if strings.HasPrefix(l, "Categories=") {
-					categories = strings.Split(l, "Categories=")[1]
-					continue
-				}
-				if l == "Terminal=true" {
-					terminal = true
-					continue
-				}
-				if l == "NoDisplay=true" {
-					noDisplay = true
-					hidden++
-					continue
-				}
-			}
-
-			// if name[ln] not found, let's try to find name[ln_LN]
-			if nameLoc == "" {
-				nameLoc = name
-			}
-			if commentLoc == "" {
-				commentLoc = comment
-			}
-
-			if !isIn(added, desktopID) {
-				added = append(added, desktopID)
-
-				var entry desktopEntry
-				entry.DesktopID = desktopID
-				entry.Name = name
-				entry.NameLoc = nameLoc
-				entry.Comment = comment
-				entry.CommentLoc = commentLoc
-				entry.Icon = icon
-				entry.Exec = exec
-				entry.Terminal = terminal
-				entry.NoDisplay = noDisplay
-				desktopEntries = append(desktopEntries, entry)
-
-				id2entry[entry.DesktopID] = entry
-
-				assignToLists(entry.DesktopID, categories)
-
-			} else {
-				skipped++
-			}
+		id := filepath.Base(file)
+		if _, ok := id2entry[id]; ok {
+			skipped++
+			continue
 		}
+
+		entry, err := parseDesktopEntryFile(id, file)
+		if err != nil {
+			continue
+		}
+
+		if entry.NoDisplay {
+			hidden++
+			continue
+		}
+
+		id2entry[entry.DesktopID] = entry
+		desktopEntries = append(desktopEntries, entry)
+		assignToLists(entry.DesktopID, entry.Category)
 	}
 	sort.Slice(desktopEntries, func(i, j int) bool {
 		return desktopEntries[i].NameLoc < desktopEntries[j].NameLoc
