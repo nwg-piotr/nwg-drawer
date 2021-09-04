@@ -82,6 +82,8 @@ Usage of nwg-drawer:
   -v	display Version information
   ```
 
+  *NOTE: the `TERM` environment variable overrides the `-term` argument if defined.*
+
 ## Styling
 
 Edit `~/.config/nwg-panel/drawer.css` to your taste.
