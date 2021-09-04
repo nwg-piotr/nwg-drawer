@@ -216,7 +216,7 @@ func main() {
 	err = cssProvider.LoadFromPath(cssFile)
 	if err != nil {
 		println(fmt.Sprintf("ERROR: %s css file not found or erroneous. Using GTK styling.", cssFile))
-		println(fmt.Sprintf(">>> %s", err))
+		println(fmt.Sprintf("%s", err))
 	} else {
 		println(fmt.Sprintf("Using style from %s", cssFile))
 		screen, _ := gdk.ScreenGetDefault()
@@ -240,7 +240,7 @@ func main() {
 				layershell.SetMonitor(win, monitor)
 
 			} else {
-				println(err)
+				println(fmt.Sprintf("%s", err))
 			}
 		}
 

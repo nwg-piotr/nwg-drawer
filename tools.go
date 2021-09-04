@@ -49,7 +49,7 @@ func createPixbuf(icon string, size int) (*gdk.Pixbuf, error) {
 	if strings.Contains(icon, "/") {
 		pixbuf, err := gdk.PixbufNewFromFileAtSize(icon, size, size)
 		if err != nil {
-			println(err)
+			println(fmt.Sprintf("%s", err))
 			return nil, err
 		}
 		return pixbuf, nil
