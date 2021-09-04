@@ -99,6 +99,14 @@ var (
 	ignore                  string
 )
 
+func defaultStringIfBlank(s, fallback string) string {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return fallback
+	}
+	return s
+}
+
 // Flags
 var cssFileName = flag.String("s", "drawer.css", "Styling: css file name")
 var targetOutput = flag.String("o", "", "name of the Output to display the drawer on (sway only)")
@@ -110,7 +118,7 @@ var columnsNumber = flag.Uint("c", 6, "number of Columns")
 var itemSpacing = flag.Uint("spacing", 20, "icon spacing")
 var lang = flag.String("lang", "", "force lang, e.g. \"en\", \"pl\"")
 var fileManager = flag.String("fm", "thunar", "File Manager")
-var term = flag.String("term", "alacritty", "Terminal emulator")
+var term = flag.String("term", defaultStringIfBlank(os.Getenv("TERM"), "alacritty"), "Terminal emulator")
 var nameLimit = flag.Int("fslen", 80, "File Search name length Limit")
 var noCats = flag.Bool("nocats", false, "Disable filtering by category")
 var noFS = flag.Bool("nofs", false, "Disable file search")
