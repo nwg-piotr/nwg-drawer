@@ -82,7 +82,7 @@ Usage of nwg-drawer:
   -v	display Version information
   ```
 
-  *NOTE: the `TERM` environment variable overrides the `-term` argument if defined.*
+  *NOTE: the `$TERM` environment variable overrides the `-term` argument if defined.*
 
 ## Styling
 
