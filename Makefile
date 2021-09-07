@@ -20,4 +20,5 @@ uninstall:
 	rm /usr/bin/nwg-drawer
 
 run:
-	go run *.go
+	go build -o bin/nwg-drawer *.go
+	bin/nwg-drawer
