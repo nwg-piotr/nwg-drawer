@@ -367,7 +367,7 @@ func parseDesktopFiles(desktopFiles []string) string {
 		if entry.NoDisplay {
 			hidden++
 			// We still need hidden entries, so `continue` is disallowed here
-			// Fixes #22 introduced in #19
+			// Fixes introduced in #19
 		}
 
 		id2entry[entry.DesktopID] = entry

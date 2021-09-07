@@ -101,7 +101,9 @@ var (
 
 func defaultStringIfBlank(s, fallback string) string {
 	s = strings.TrimSpace(s)
-	if s == "" {
+	// os.Getenv("TERM") returns "linux" instead of empty string, if program has been started
+	// from a key binding defined in the config file. See #23.
+	if s == "" || s == "linux" {
 		return fallback
 	}
 	return s
