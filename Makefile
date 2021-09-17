@@ -5,6 +5,7 @@ get:
 	go get github.com/dlasky/gotk3-layershell/layershell
 	go get github.com/joshuarubin/go-sway
 	go get github.com/allan-simon/go-singleinstance
+	go get "github.com/sirupsen/logrus"
 
 build:
 	go build -o bin/nwg-drawer *.go

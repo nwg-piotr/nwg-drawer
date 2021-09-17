@@ -8,7 +8,6 @@ import (
 	"io"
 	"io/fs"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -16,6 +15,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/glib"
@@ -49,7 +50,7 @@ func createPixbuf(icon string, size int) (*gdk.Pixbuf, error) {
 	if strings.Contains(icon, "/") {
 		pixbuf, err := gdk.PixbufNewFromFileAtSize(icon, size, size)
 		if err != nil {
-			println(fmt.Sprintf("%s", err))
+			log.Errorf("%s", err)
 			return nil, err
 		}
 		return pixbuf, nil
@@ -92,7 +93,7 @@ func mapXdgUserDirs() map[string]string {
 
 	userDirsFile := filepath.Join(home, ".config/user-dirs.dirs")
 	if pathExists(userDirsFile) {
-		println(fmt.Sprintf("Using XDG user dirs from %s", userDirsFile))
+		log.Info(fmt.Sprintf("Using XDG user dirs from %s", userDirsFile))
 		lines, _ := loadTextFile(userDirsFile)
 		for _, l := range lines {
 			if strings.HasPrefix(l, "XDG_DOCUMENTS_DIR") {
@@ -116,7 +117,7 @@ func mapXdgUserDirs() map[string]string {
 			}
 		}
 	} else {
-		println(fmt.Sprintf("%s file not found, using defaults", userDirsFile))
+		log.Warnf("%s file not found, using defaults", userDirsFile)
 	}
 
 	return result
@@ -177,13 +178,13 @@ func createDir(dir string) {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		err := os.MkdirAll(dir, os.ModePerm)
 		if err == nil {
-			fmt.Println("Creating dir:", dir)
+			log.Infof("Creating dir: %s", dir)
 		}
 	}
 }
 
 func copyFile(src, dst string) error {
-	fmt.Println("Copying file:", dst)
+	log.Infof("Copying file: %s", dst)
 
 	var err error
 	var srcfd *os.File
@@ -378,7 +379,7 @@ func parseDesktopFiles(desktopFiles []string) string {
 		return desktopEntries[i].NameLoc < desktopEntries[j].NameLoc
 	})
 	summary := fmt.Sprintf("%v entries (+%v hidden)", len(desktopEntries)-hidden, hidden)
-	println(fmt.Sprintf("Skipped %v duplicates; %v .desktop entries hidden by \"NoDisplay=true\"", skipped, hidden))
+	log.Infof("Skipped %v duplicates; %v .desktop entries hidden by \"NoDisplay=true\"", skipped, hidden)
 	return summary
 }
 
@@ -471,20 +472,20 @@ func loadTextFile(path string) ([]string, error) {
 func pinItem(itemID string) {
 	for _, item := range pinned {
 		if item == itemID {
-			println(item, "already pinned")
+			log.Warn(item, "already pinned")
 			return
 		}
 	}
 	pinned = append(pinned, itemID)
 	savePinned()
-	println(itemID, "pinned")
+	log.Infof("%s pinned", itemID)
 }
 
 func unpinItem(itemID string) {
 	if isIn(pinned, itemID) {
 		pinned = remove(pinned, itemID)
 		savePinned()
-		println(itemID, "unpinned")
+		log.Infof("%s unpinned", itemID)
 	}
 }
 
@@ -510,7 +511,7 @@ func savePinned() {
 			_, err := f.WriteString(line + "\n")
 
 			if err != nil {
-				println("Error saving pinned", err)
+				log.Errorf("Error saving pinned", err)
 			}
 		}
 	}
@@ -560,7 +561,7 @@ func launch(command string, terminal bool) {
 	}
 
 	msg := fmt.Sprintf("env vars: %s; command: '%s'; args: %s\n", envVars, elements[cmdIdx], elements[1+cmdIdx:])
-	println(msg)
+	log.Info(msg)
 
 	go cmd.Run()
 

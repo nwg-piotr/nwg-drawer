@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -11,6 +10,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/allan-simon/go-singleinstance"
 	"github.com/dlasky/gotk3-layershell/layershell"
@@ -141,7 +142,7 @@ func main() {
 		for {
 			s := <-signalChan
 			if s == syscall.SIGTERM {
-				println("SIGTERM received, bye bye!")
+				log.Info("SIGTERM received, bye bye!")
 				gtk.MainQuit()
 			}
 		}
@@ -155,7 +156,7 @@ func main() {
 		if err == nil {
 			i, err := strconv.Atoi(pid)
 			if err == nil {
-				println("Running instance found, sending SIGTERM and exiting...")
+				log.Info("Running instance found, sending SIGTERM and exiting...")
 				syscall.Kill(i, syscall.SIGTERM)
 			}
 		}
@@ -167,7 +168,7 @@ func main() {
 	if *lang == "" && os.Getenv("LANG") != "" {
 		*lang = strings.Split(os.Getenv("LANG"), ".")[0]
 	}
-	println(fmt.Sprintf("lang: %s", *lang))
+	log.Info(fmt.Sprintf("lang: %s", *lang))
 
 	// ENVIRONMENT
 	configDirectory = configDir()
@@ -187,7 +188,7 @@ func main() {
 	if err != nil {
 		pinned = nil
 	}
-	println(fmt.Sprintf("Found %v pinned items", len(pinned)))
+	log.Info(fmt.Sprintf("Found %v pinned items", len(pinned)))
 
 	cssFile := filepath.Join(configDirectory, *cssFileName)
 
@@ -196,7 +197,7 @@ func main() {
 	setUpCategories()
 
 	desktopFiles := listDesktopFiles()
-	println(fmt.Sprintf("Found %v desktop files", len(desktopFiles)))
+	log.Info(fmt.Sprintf("Found %v desktop files", len(desktopFiles)))
 
 	status = parseDesktopFiles(desktopFiles)
 
@@ -205,9 +206,9 @@ func main() {
 	paFile := filepath.Join(configDirectory, "preferred-apps.json")
 	preferredApps, err = loadPreferredApps(paFile)
 	if err != nil {
-		println(fmt.Sprintf("Custom associations file %s not found or invalid", paFile))
+		log.Error(fmt.Sprintf("Custom associations file %s not found or invalid", paFile))
 	} else {
-		println(fmt.Sprintf("Found %v associations in %s", len(preferredApps), paFile))
+		log.Info(fmt.Sprintf("Found %v associations in %s", len(preferredApps), paFile))
 	}
 
 	// USER INTERFACE
@@ -217,10 +218,10 @@ func main() {
 
 	err = cssProvider.LoadFromPath(cssFile)
 	if err != nil {
-		println(fmt.Sprintf("ERROR: %s css file not found or erroneous. Using GTK styling.", cssFile))
-		println(fmt.Sprintf("%s", err))
+		log.Errorf("ERROR: %s css file not found or erroneous. Using GTK styling.", cssFile)
+		log.Errorf("%s", err)
 	} else {
-		println(fmt.Sprintf("Using style from %s", cssFile))
+		log.Info(fmt.Sprintf("Using style from %s", cssFile))
 		screen, _ := gdk.ScreenGetDefault()
 		gtk.AddProviderForScreen(screen, cssProvider, gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 	}
@@ -242,7 +243,7 @@ func main() {
 				layershell.SetMonitor(win, monitor)
 
 			} else {
-				println(fmt.Sprintf("%s", err))
+				log.Errorf("%s", err)
 			}
 		}
 
@@ -307,7 +308,7 @@ func main() {
 		This feature is not really supported and will stay undocumented.
 	*/
 	if !wayland() {
-		println("Not Wayland, oh really?")
+		log.Info("Not Wayland, oh really?")
 		win.SetDecorated(false)
 		win.Maximize()
 	}
@@ -400,6 +401,6 @@ func main() {
 	}
 
 	t := time.Now()
-	println(fmt.Sprintf("UI created in %v ms. Thank you for your patience.", t.Sub(timeStart).Milliseconds()))
+	log.Info(fmt.Sprintf("UI created in %v ms. Thank you for your patience.", t.Sub(timeStart).Milliseconds()))
 	gtk.Main()
 }
