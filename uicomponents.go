@@ -263,6 +263,7 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 		} else if btnEvent.Button() == 3 {
 			pinItem(ID)
 			pinnedFlowBox = setUpPinnedFlowBox()
+			return true
 		}
 		return false
 	})

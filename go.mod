@@ -7,4 +7,5 @@ require (
 	github.com/dlasky/gotk3-layershell v0.0.0-20210331230524-5cca0b819261
 	github.com/gotk3/gotk3 v0.6.0
 	github.com/joshuarubin/go-sway v0.0.4
+	github.com/sirupsen/logrus v1.8.1
 )
