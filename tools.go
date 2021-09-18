@@ -472,7 +472,7 @@ func loadTextFile(path string) ([]string, error) {
 func pinItem(itemID string) {
 	for _, item := range pinned {
 		if item == itemID {
-			log.Warn(item, "already pinned")
+			log.Warnf("%s already pinned", itemID)
 			return
 		}
 	}
