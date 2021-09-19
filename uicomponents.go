@@ -89,7 +89,7 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 		cancelClose()
 	})
 
-	flowBox.ShowAll()
+	//flowBox.ShowAll()
 
 	return flowBox
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -82,6 +83,7 @@ var desktopEntries []desktopEntry
 
 // UI elements
 var (
+	win                     *gtk.Window
 	resultWindow            *gtk.ScrolledWindow
 	fileSearchResults       []string
 	searchEntry             *gtk.SearchEntry
@@ -125,6 +127,7 @@ var term = flag.String("term", defaultStringIfBlank(os.Getenv("TERM"), "alacritt
 var nameLimit = flag.Int("fslen", 80, "File Search name length Limit")
 var noCats = flag.Bool("nocats", false, "Disable filtering by category")
 var noFS = flag.Bool("nofs", false, "Disable file search")
+var resident = flag.Bool("r", false, "Leave the program resident in memory")
 
 func main() {
 	timeStart := time.Now()
@@ -136,31 +139,53 @@ func main() {
 	}
 
 	// Gentle SIGTERM handler thanks to reiki4040 https://gist.github.com/reiki4040/be3705f307d3cd136e85
+	// v0.2: we also need to support SIGUSR from now on
 	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, syscall.SIGTERM)
+	signal.Notify(signalChan, syscall.SIGTERM, syscall.SIGUSR1)
 	go func() {
 		for {
 			s := <-signalChan
-			if s == syscall.SIGTERM {
+			switch s {
+			case syscall.SIGTERM:
 				log.Info("SIGTERM received, bye bye!")
 				gtk.MainQuit()
+			case syscall.SIGUSR1:
+				if *resident {
+					log.Info("SIGUSR1 received, showing window!")
+					if win != nil {
+						win.ShowAll()
+					}
+				} else {
+					log.Info("SIGUSR1 received, and I'm not resident, bye bye!")
+					gtk.MainQuit()
+				}
+			default:
+				log.Info("Unknown signal")
 			}
 		}
 	}()
 
-	// We want the same key/mouse binding to turn the dock off: kill the running instance and exit.
-	lockFilePath := fmt.Sprintf("%s/nwg-drawer.lock", tempDir())
+	// If running instance found and running residently, we want it to refresh and show the window.
+	// Otherwise we want the same command to terminate the drawer: kill the running instance and exit.
+	//lockFilePath := fmt.Sprintf("%s/nwg-drawer.lock", tempDir())
+	lockFilePath := path.Join(tempDir(), "nwg-drawer.lock")
 	lockFile, err := singleinstance.CreateLockFile(lockFilePath)
 	if err != nil {
 		pid, err := readTextFile(lockFilePath)
 		if err == nil {
 			i, err := strconv.Atoi(pid)
 			if err == nil {
-				log.Info("Running instance found, sending SIGTERM and exiting...")
-				syscall.Kill(i, syscall.SIGTERM)
+				if *resident {
+					log.Warn("Resident instance already running, terminating...")
+				} else {
+					log.Infof("Running instance found, PID: %v - sending SIGUSR1", i)
+					syscall.Kill(i, syscall.SIGUSR1)
+				}
 			}
 		}
 		os.Exit(0)
+	} else {
+		log.Info("Starting a non-resident instance")
 	}
 	defer lockFile.Close()
 
@@ -226,7 +251,7 @@ func main() {
 		gtk.AddProviderForScreen(screen, cssProvider, gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 	}
 
-	win, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
+	win, err = gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
 	if err != nil {
 		log.Fatal("Unable to create window:", err)
 	}
@@ -275,7 +300,11 @@ func main() {
 				searchEntry.GrabFocus()
 				searchEntry.SetText("")
 			} else {
-				gtk.MainQuit()
+				if !*resident {
+					gtk.MainQuit()
+				} else {
+					win.Hide()
+				}
 			}
 			return false
 		case gdk.KEY_downarrow, gdk.KEY_Up, gdk.KEY_Down, gdk.KEY_Left, gdk.KEY_Right, gdk.KEY_Tab,
@@ -391,7 +420,9 @@ func main() {
 	statusLabel, _ = gtk.LabelNew(status)
 	statusLineWrapper.PackStart(statusLabel, true, false, 0)
 
-	win.ShowAll()
+	if !*resident {
+		win.ShowAll()
+	}
 	if !*noFS {
 		fileSearchResultWrapper.SetSizeRequest(appFlowBox.GetAllocatedWidth(), 1)
 		fileSearchResultWrapper.Hide()
