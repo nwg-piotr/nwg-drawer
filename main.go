@@ -151,8 +151,8 @@ func main() {
 				gtk.MainQuit()
 			case syscall.SIGUSR1:
 				if *resident {
-					log.Info("SIGUSR1 received, showing window!")
-					if win != nil {
+					if win != nil && !win.IsVisible() {
+						log.Info("SIGUSR1 received, showing window!")
 						win.ShowAll()
 					}
 				} else {
