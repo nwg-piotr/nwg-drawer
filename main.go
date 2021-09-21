@@ -183,9 +183,9 @@ func main() {
 			i, err := strconv.Atoi(pid)
 			if err == nil {
 				if *resident {
-					log.Warn("Resident instance already running")
+					log.Warnf("Resident instance already running (PID %v)", i)
 				} else {
-					log.Debugf("Resident instance found, PID: %v, sending SIGUSR1", i)
+					log.Infof("Showing resident instance (PID %v)", i)
 					syscall.Kill(i, syscall.SIGUSR1)
 				}
 			}
