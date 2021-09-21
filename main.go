@@ -28,9 +28,9 @@ var (
 	configDirectory string
 	pinnedFile      string
 	pinned          []string
-	src             glib.SourceHandle
-	id2entry        map[string]desktopEntry
-	preferredApps   map[string]interface{}
+	//src             glib.SourceHandle
+	id2entry      map[string]desktopEntry
+	preferredApps map[string]interface{}
 )
 
 var categoryNames = [...]string{
@@ -100,6 +100,7 @@ var (
 	statusLabel             *gtk.Label
 	status                  string
 	ignore                  string
+	showWindowTrigger       bool
 )
 
 func defaultStringIfBlank(s, fallback string) string {
@@ -128,10 +129,15 @@ var nameLimit = flag.Int("fslen", 80, "File Search name length Limit")
 var noCats = flag.Bool("nocats", false, "Disable filtering by category")
 var noFS = flag.Bool("nofs", false, "Disable file search")
 var resident = flag.Bool("r", false, "Leave the program resident in memory")
+var debug = flag.Bool("d", false, "Turn on debug messages")
 
 func main() {
 	timeStart := time.Now()
 	flag.Parse()
+
+	if *debug {
+		log.SetLevel(log.DebugLevel)
+	}
 
 	if *displayVersion {
 		fmt.Printf("nwg-drawer version %s\n", version)
@@ -142,21 +148,22 @@ func main() {
 	// v0.2: we also need to support SIGUSR from now on
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, syscall.SIGTERM, syscall.SIGUSR1)
+
 	go func() {
 		for {
 			s := <-signalChan
 			switch s {
 			case syscall.SIGTERM:
-				log.Info("SIGTERM received, bye bye!")
+				log.Debug("SIGTERM received, bye bye")
 				gtk.MainQuit()
 			case syscall.SIGUSR1:
 				if *resident {
-					if win != nil && !win.IsVisible() {
-						log.Info("SIGUSR1 received, showing window!")
-						win.ShowAll()
-					}
+					// As win.Show() called from inside a goroutine randomly crashes GTK,
+					// let's just set e helper variable here. We'll be checking it with glib.TimeoutAdd.
+					log.Debug("SIGUSR1 received, showing the window")
+					showWindowTrigger = true
 				} else {
-					log.Info("SIGUSR1 received, and I'm not resident, bye bye!")
+					log.Debug("SIGUSR1 received, and I'm not resident, bye bye")
 					gtk.MainQuit()
 				}
 			default:
@@ -176,18 +183,18 @@ func main() {
 			i, err := strconv.Atoi(pid)
 			if err == nil {
 				if *resident {
-					log.Warn("Resident instance already running, terminating...")
+					log.Warn("Resident instance already running")
 				} else {
-					log.Infof("Running instance found, PID: %v - sending SIGUSR1", i)
+					log.Debugf("Resident instance found, PID: %v, sending SIGUSR1", i)
 					syscall.Kill(i, syscall.SIGUSR1)
 				}
 			}
 		}
 		os.Exit(0)
-	} else {
-		log.Info("Starting a non-resident instance")
 	}
 	defer lockFile.Close()
+
+	log.Infof("term: %s", *term)
 
 	// LANGUAGE
 	if *lang == "" && os.Getenv("LANG") != "" {
@@ -320,7 +327,7 @@ func main() {
 	})
 
 	// Close the window on leave, but not immediately, to avoid accidental closes
-	win.Connect("leave-notify-event", func() {
+	/*win.Connect("leave-notify-event", func() {
 		src = glib.TimeoutAdd(uint(500), func() bool {
 			gtk.MainQuit()
 			return false
@@ -329,7 +336,7 @@ func main() {
 
 	win.Connect("enter-notify-event", func() {
 		cancelClose()
-	})
+	})*/
 
 	/*
 		In case someone REALLY needed to use X11 - for some stupid Zoom meeting or something, this allows
@@ -370,9 +377,9 @@ func main() {
 	resultWindow, _ = gtk.ScrolledWindowNew(nil, nil)
 	resultWindow.SetEvents(int(gdk.ALL_EVENTS_MASK))
 	resultWindow.SetPolicy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-	resultWindow.Connect("enter-notify-event", func() {
+	/*resultWindow.Connect("enter-notify-event", func() {
 		cancelClose()
-	})
+	})*/
 	resultWindow.Connect("button-release-event", func(sw *gtk.ScrolledWindow, e *gdk.Event) bool {
 		btnEvent := gdk.EventButtonNewFromEvent(e)
 		if btnEvent.Button() == 1 || btnEvent.Button() == 3 {
@@ -420,9 +427,8 @@ func main() {
 	statusLabel, _ = gtk.LabelNew(status)
 	statusLineWrapper.PackStart(statusLabel, true, false, 0)
 
-	if !*resident {
-		win.ShowAll()
-	}
+	win.ShowAll()
+
 	if !*noFS {
 		fileSearchResultWrapper.SetSizeRequest(appFlowBox.GetAllocatedWidth(), 1)
 		fileSearchResultWrapper.Hide()
@@ -430,8 +436,21 @@ func main() {
 	if !*noCats {
 		categoriesWrapper.SetSizeRequest(1, categoriesWrapper.GetAllocatedHeight()*2)
 	}
+	if *resident {
+		win.Hide()
+	}
 
 	t := time.Now()
 	log.Info(fmt.Sprintf("UI created in %v ms. Thank you for your patience.", t.Sub(timeStart).Milliseconds()))
+
+	// Check if showing the window has been requested (SIGUSR1)
+	glib.TimeoutAdd(uint(1), func() bool {
+		if showWindowTrigger && win != nil && !win.IsVisible() {
+			win.Show()
+		}
+		showWindowTrigger = false
+		return true
+	})
+
 	gtk.Main()
 }

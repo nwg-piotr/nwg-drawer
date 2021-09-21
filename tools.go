@@ -19,7 +19,6 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/gotk3/gotk3/gdk"
-	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 	"github.com/joshuarubin/go-sway"
 )
@@ -34,12 +33,12 @@ We might have left the window by accident, so let's clear the timeout if window 
 Furthermore - hovering a widget triggers window leave-notify-event event, and the timeout
 needs to be cleared as well.
 */
-func cancelClose() {
+/*func cancelClose() {
 	if src > 0 {
 		glib.SourceRemove(src)
 		src = 0
 	}
-}
+}*/
 
 func createPixbuf(icon string, size int) (*gdk.Pixbuf, error) {
 	iconTheme, err := gtk.IconThemeGetDefault()
@@ -563,12 +562,20 @@ func launch(command string, terminal bool) {
 	msg := fmt.Sprintf("env vars: %s; command: '%s'; args: %s\n", envVars, elements[cmdIdx], elements[1+cmdIdx:])
 	log.Info(msg)
 
-	go cmd.Run()
+	cmd.Start()
+
+	if *resident {
+		win.Hide()
+	} else {
+		gtk.MainQuit()
+	}
+
+	/*go cmd.Run()
 
 	glib.TimeoutAdd(uint(150), func() bool {
 		gtk.MainQuit()
 		return false
-	})
+	})*/
 }
 
 func open(filePath string, xdgOpen bool) {
@@ -586,10 +593,15 @@ func open(filePath string, xdgOpen bool) {
 	} else {
 		cmd = exec.Command(*fileManager, filePath)
 	}
-	fmt.Printf("Executing: %s", cmd)
+	log.Infof("Executing: %s", cmd)
+
 	cmd.Start()
 
-	gtk.MainQuit()
+	if *resident {
+		win.Hide()
+	} else {
+		gtk.MainQuit()
+	}
 }
 
 // Returns map output name -> gdk.Monitor
