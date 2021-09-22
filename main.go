@@ -365,9 +365,7 @@ func main() {
 	resultWindow, _ = gtk.ScrolledWindowNew(nil, nil)
 	resultWindow.SetEvents(int(gdk.ALL_EVENTS_MASK))
 	resultWindow.SetPolicy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-	/*resultWindow.Connect("enter-notify-event", func() {
-		cancelClose()
-	})*/
+
 	resultWindow.Connect("button-release-event", func(sw *gtk.ScrolledWindow, e *gdk.Event) bool {
 		btnEvent := gdk.EventButtonNewFromEvent(e)
 		if btnEvent.Button() == 1 || btnEvent.Button() == 3 {
@@ -459,17 +457,17 @@ func restoreStateAndHide() {
 	timeStart1 := time.Now()
 	win.Hide()
 
-	// 1. clear search
+	// clear search
 	searchEntry.SetText("")
 
-	// 2. clear category filter (in gotk3 it means: rebuild, as we have no filtering here)
+	// clear category filter (in gotk3 it means: rebuild, as we have no filtering here)
 	appFlowBox = setUpAppsFlowBox(nil, "")
 	for _, btn := range catButtons {
 		btn.SetImagePosition(gtk.POS_LEFT)
 		btn.SetSizeRequest(0, 0)
 	}
 
-	// 3. scroll to the top
+	// scroll to the top
 	resultWindow.GetVAdjustment().SetValue(0)
 
 	t := time.Now()

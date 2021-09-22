@@ -27,19 +27,6 @@ func wayland() bool {
 	return os.Getenv("WAYLAND_DISPLAY") != "" || os.Getenv("XDG_SESSION_TYPE") == "wayland"
 }
 
-/*
-Window leave-notify-event event quits the program with glib Timeout 500 ms.
-We might have left the window by accident, so let's clear the timeout if window re-entered.
-Furthermore - hovering a widget triggers window leave-notify-event event, and the timeout
-needs to be cleared as well.
-*/
-/*func cancelClose() {
-	if src > 0 {
-		glib.SourceRemove(src)
-		src = 0
-	}
-}*/
-
 func createPixbuf(icon string, size int) (*gdk.Pixbuf, error) {
 	iconTheme, err := gtk.IconThemeGetDefault()
 	if err != nil {
@@ -367,7 +354,7 @@ func parseDesktopFiles(desktopFiles []string) string {
 		if entry.NoDisplay {
 			hidden++
 			// We still need hidden entries, so `continue` is disallowed here
-			// Fixes introduced in #19
+			// Fixes bug introduced in #19
 		}
 
 		id2entry[entry.DesktopID] = entry
@@ -569,13 +556,6 @@ func launch(command string, terminal bool) {
 	} else {
 		gtk.MainQuit()
 	}
-
-	/*go cmd.Run()
-
-	glib.TimeoutAdd(uint(150), func() bool {
-		gtk.MainQuit()
-		return false
-	})*/
 }
 
 func open(filePath string, xdgOpen bool) {

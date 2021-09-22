@@ -87,11 +87,6 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 			item.(*gtk.Widget).SetCanFocus(false)
 		})
 	}
-	/*flowBox.Connect("enter-notify-event", func() {
-		cancelClose()
-	})*/
-
-	//flowBox.ShowAll()
 
 	return flowBox
 }
@@ -110,9 +105,7 @@ func setUpCategoriesButtonBox() *gtk.EventBox {
 	}
 
 	eventBox, _ := gtk.EventBoxNew()
-	/*eventBox.Connect("enter-notify-event", func() {
-		cancelClose()
-	})*/
+
 	hBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	eventBox.Add(hBox)
 	button, _ := gtk.ButtonNewWithLabel("All")
@@ -291,9 +284,6 @@ func setUpFileSearchResultContainer() *gtk.FlowBox {
 	}
 	flowBox, _ := gtk.FlowBoxNew()
 	flowBox.SetProperty("orientation", gtk.ORIENTATION_VERTICAL)
-	/*flowBox.Connect("enter-notify-event", func() {
-		cancelClose()
-	})*/
 	fileSearchResultWrapper.PackStart(flowBox, false, false, 10)
 
 	return flowBox
@@ -396,9 +386,6 @@ func setUpSearchEntry() *gtk.SearchEntry {
 			}
 		}
 	})
-	/*searchEntry.Connect("focus-in-event", func() {
-		searchEntry.SetText("")
-	})*/
 
 	return searchEntry
 }
