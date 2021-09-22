@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
 )
@@ -233,13 +235,20 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	button, _ := gtk.ButtonNew()
 	button.SetAlwaysShowImage(true)
 
+	var pixbuf *gdk.Pixbuf
 	var img *gtk.Image
+	var err error
 	if entry.Icon != "" {
-		pixbuf, _ := createPixbuf(entry.Icon, *iconSize)
-		img, _ = gtk.ImageNewFromPixbuf(pixbuf)
+		pixbuf, err = createPixbuf(entry.Icon, *iconSize)
 	} else {
-		img, _ = gtk.ImageNewFromIconName("image-missing", gtk.ICON_SIZE_INVALID)
+		log.Warnf("Undefined icon for %s", entry.Name)
+		pixbuf, err = createPixbuf("image-missing", *iconSize)
 	}
+	if err != nil {
+		log.Error(err)
+		pixbuf, _ = createPixbuf("unknown", *iconSize)
+	}
+	img, _ = gtk.ImageNewFromPixbuf(pixbuf)
 
 	button.SetImage(img)
 	button.SetImagePosition(gtk.POS_TOP)
