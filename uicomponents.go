@@ -11,20 +11,6 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-func getImageFromIcon(ico string) (img *gtk.Image, err error) {
-	var pixbuf *gdk.Pixbuf
-	if ico != "" {
-		pixbuf, err = createPixbuf(ico, *iconSize)
-	} else {
-		pixbuf, err = createPixbuf("image-missing", *iconSize)
-	}
-	if err != nil {
-		pixbuf, _ = createPixbuf("unknown", *iconSize)
-	}
-	img, _ = gtk.ImageNewFromPixbuf(pixbuf)
-	return
-}
-
 func setUpPinnedFlowBox() *gtk.FlowBox {
 	if pinnedFlowBox != nil {
 		pinnedFlowBox.Destroy()
@@ -48,10 +34,19 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 
 			btn, _ := gtk.ButtonNew()
 
-			img, err := getImageFromIcon(entry.Icon)
+			var pixbuf *gdk.Pixbuf
+			var img *gtk.Image
+			var err error
+			if entry.Icon != "" {
+				pixbuf, err = createPixbuf(entry.Icon, *iconSize)
+			} else {
+				pixbuf, err = createPixbuf("image-missing", *iconSize)
+			}
 			if err != nil {
 				log.Error(err)
+				pixbuf, _ = createPixbuf("unknown", *iconSize)
 			}
+			img, _ = gtk.ImageNewFromPixbuf(pixbuf)
 
 			btn.SetImage(img)
 			btn.SetAlwaysShowImage(true)
@@ -245,10 +240,19 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	button, _ := gtk.ButtonNew()
 	button.SetAlwaysShowImage(true)
 
-	img, err := getImageFromIcon(entry.Icon)
+	var pixbuf *gdk.Pixbuf
+	var img *gtk.Image
+	var err error
+	if entry.Icon != "" {
+		pixbuf, err = createPixbuf(entry.Icon, *iconSize)
+	} else {
+		pixbuf, err = createPixbuf("image-missing", *iconSize)
+	}
 	if err != nil {
 		log.Error(err)
+		pixbuf, _ = createPixbuf("unknown", *iconSize)
 	}
+	img, _ = gtk.ImageNewFromPixbuf(pixbuf)
 
 	button.SetImage(img)
 	button.SetImagePosition(gtk.POS_TOP)
