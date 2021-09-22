@@ -310,7 +310,7 @@ func main() {
 				if !*resident {
 					gtk.MainQuit()
 				} else {
-					win.Hide()
+					restoreStateAndHide()
 				}
 			}
 			return false
@@ -325,18 +325,6 @@ func main() {
 			return false
 		}
 	})
-
-	// Close the window on leave, but not immediately, to avoid accidental closes
-	/*win.Connect("leave-notify-event", func() {
-		src = glib.TimeoutAdd(uint(500), func() bool {
-			gtk.MainQuit()
-			return false
-		})
-	})
-
-	win.Connect("enter-notify-event", func() {
-		cancelClose()
-	})*/
 
 	/*
 		In case someone REALLY needed to use X11 - for some stupid Zoom meeting or something, this allows
@@ -383,7 +371,11 @@ func main() {
 	resultWindow.Connect("button-release-event", func(sw *gtk.ScrolledWindow, e *gdk.Event) bool {
 		btnEvent := gdk.EventButtonNewFromEvent(e)
 		if btnEvent.Button() == 1 || btnEvent.Button() == 3 {
-			gtk.MainQuit()
+			if !*resident {
+				gtk.MainQuit()
+			} else {
+				restoreStateAndHide()
+			}
 			return true
 		}
 		return false
@@ -446,11 +438,40 @@ func main() {
 	// Check if showing the window has been requested (SIGUSR1)
 	glib.TimeoutAdd(uint(1), func() bool {
 		if showWindowTrigger && win != nil && !win.IsVisible() {
-			win.Show()
+			win.ShowAll()
+			// focus 1st element
+			b := appFlowBox.GetChildAtIndex(0)
+			if b != nil {
+				button, err := b.GetChild()
+				if err == nil {
+					button.ToWidget().GrabFocus()
+				}
+			}
 		}
 		showWindowTrigger = false
 		return true
 	})
 
 	gtk.Main()
+}
+
+func restoreStateAndHide() {
+	timeStart1 := time.Now()
+	win.Hide()
+
+	// 1. clear search
+	searchEntry.SetText("")
+
+	// 2. clear category filter (in gotk3 it means: rebuild, as we have no filtering here)
+	appFlowBox = setUpAppsFlowBox(nil, "")
+	for _, btn := range catButtons {
+		btn.SetImagePosition(gtk.POS_LEFT)
+		btn.SetSizeRequest(0, 0)
+	}
+
+	// 3. scroll to the top
+	resultWindow.GetVAdjustment().SetValue(0)
+
+	t := time.Now()
+	log.Debugf(fmt.Sprintf("UI hidden and restored in the backgroud in %v ms", t.Sub(timeStart1).Milliseconds()))
 }

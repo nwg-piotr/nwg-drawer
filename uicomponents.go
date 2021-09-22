@@ -367,7 +367,6 @@ func setUpSearchEntry() *gtk.SearchEntry {
 			if w == nil && fileSearchResultFlowBox != nil {
 				f := fileSearchResultFlowBox.GetChildAtIndex(0)
 				if f != nil {
-					//f.SetCanFocus(false)
 					button, err := f.GetChild()
 					if err == nil {
 						button.ToWidget().SetCanFocus(true)

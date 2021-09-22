@@ -565,7 +565,7 @@ func launch(command string, terminal bool) {
 	cmd.Start()
 
 	if *resident {
-		win.Hide()
+		restoreStateAndHide()
 	} else {
 		gtk.MainQuit()
 	}
@@ -598,7 +598,7 @@ func open(filePath string, xdgOpen bool) {
 	cmd.Start()
 
 	if *resident {
-		win.Hide()
+		restoreStateAndHide()
 	} else {
 		gtk.MainQuit()
 	}
