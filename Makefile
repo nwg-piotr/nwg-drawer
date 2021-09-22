@@ -8,7 +8,7 @@ get:
 	go get "github.com/sirupsen/logrus"
 
 build:
-	go build -o bin/nwg-drawer *.go
+	go build -o bin/nwg-drawer .
 
 install:
 	mkdir -p /usr/share/nwg-drawer
@@ -21,5 +21,4 @@ uninstall:
 	rm /usr/bin/nwg-drawer
 
 run:
-	go build -o bin/nwg-drawer *.go
-	bin/nwg-drawer
+	go run .
