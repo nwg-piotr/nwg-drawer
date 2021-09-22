@@ -6,9 +6,24 @@ import (
 	"path/filepath"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
 )
+
+func getImageFromIcon(ico string) (img *gtk.Image, err error) {
+	var pixbuf *gdk.Pixbuf
+	if ico != "" {
+		pixbuf, err = createPixbuf(ico, *iconSize)
+	} else {
+		pixbuf, err = createPixbuf("image-missing", *iconSize)
+	}
+	if err != nil {
+		pixbuf, _ = createPixbuf("unknown", *iconSize)
+	}
+	img, _ = gtk.ImageNewFromPixbuf(pixbuf)
+	return
+}
 
 func setUpPinnedFlowBox() *gtk.FlowBox {
 	if pinnedFlowBox != nil {
@@ -33,12 +48,9 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 
 			btn, _ := gtk.ButtonNew()
 
-			var img *gtk.Image
-			if entry.Icon != "" {
-				pixbuf, _ := createPixbuf(entry.Icon, *iconSize)
-				img, _ = gtk.ImageNewFromPixbuf(pixbuf)
-			} else {
-				img, _ = gtk.ImageNewFromIconName("image-missing", gtk.ICON_SIZE_INVALID)
+			img, err := getImageFromIcon(entry.Icon)
+			if err != nil {
+				log.Error(err)
 			}
 
 			btn.SetImage(img)
@@ -233,12 +245,9 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	button, _ := gtk.ButtonNew()
 	button.SetAlwaysShowImage(true)
 
-	var img *gtk.Image
-	if entry.Icon != "" {
-		pixbuf, _ := createPixbuf(entry.Icon, *iconSize)
-		img, _ = gtk.ImageNewFromPixbuf(pixbuf)
-	} else {
-		img, _ = gtk.ImageNewFromIconName("image-missing", gtk.ICON_SIZE_INVALID)
+	img, err := getImageFromIcon(entry.Icon)
+	if err != nil {
+		log.Error(err)
 	}
 
 	button.SetImage(img)
