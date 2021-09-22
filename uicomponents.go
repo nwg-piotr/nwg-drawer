@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
 )
@@ -34,19 +35,13 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 
 			btn, _ := gtk.ButtonNew()
 
-			var pixbuf *gdk.Pixbuf
 			var img *gtk.Image
-			var err error
 			if entry.Icon != "" {
-				pixbuf, err = createPixbuf(entry.Icon, *iconSize)
+				pixbuf, _ := createPixbuf(entry.Icon, *iconSize)
+				img, _ = gtk.ImageNewFromPixbuf(pixbuf)
 			} else {
-				pixbuf, err = createPixbuf("image-missing", *iconSize)
+				img, _ = gtk.ImageNewFromIconName("image-missing", gtk.ICON_SIZE_INVALID)
 			}
-			if err != nil {
-				log.Error(err)
-				pixbuf, _ = createPixbuf("unknown", *iconSize)
-			}
-			img, _ = gtk.ImageNewFromPixbuf(pixbuf)
 
 			btn.SetImage(img)
 			btn.SetAlwaysShowImage(true)
@@ -92,11 +87,11 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 			item.(*gtk.Widget).SetCanFocus(false)
 		})
 	}
-	flowBox.Connect("enter-notify-event", func() {
+	/*flowBox.Connect("enter-notify-event", func() {
 		cancelClose()
-	})
+	})*/
 
-	flowBox.ShowAll()
+	//flowBox.ShowAll()
 
 	return flowBox
 }
@@ -115,9 +110,9 @@ func setUpCategoriesButtonBox() *gtk.EventBox {
 	}
 
 	eventBox, _ := gtk.EventBoxNew()
-	eventBox.Connect("enter-notify-event", func() {
+	/*eventBox.Connect("enter-notify-event", func() {
 		cancelClose()
-	})
+	})*/
 	hBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	eventBox.Add(hBox)
 	button, _ := gtk.ButtonNewWithLabel("All")
@@ -246,6 +241,7 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	if entry.Icon != "" {
 		pixbuf, err = createPixbuf(entry.Icon, *iconSize)
 	} else {
+		log.Warnf("Undefined icon for %s", entry.Name)
 		pixbuf, err = createPixbuf("image-missing", *iconSize)
 	}
 	if err != nil {
@@ -295,9 +291,9 @@ func setUpFileSearchResultContainer() *gtk.FlowBox {
 	}
 	flowBox, _ := gtk.FlowBoxNew()
 	flowBox.SetProperty("orientation", gtk.ORIENTATION_VERTICAL)
-	flowBox.Connect("enter-notify-event", func() {
+	/*flowBox.Connect("enter-notify-event", func() {
 		cancelClose()
-	})
+	})*/
 	fileSearchResultWrapper.PackStart(flowBox, false, false, 10)
 
 	return flowBox
@@ -323,9 +319,9 @@ func walk(path string, d fs.DirEntry, e error) error {
 func setUpSearchEntry() *gtk.SearchEntry {
 	searchEntry, _ := gtk.SearchEntryNew()
 	searchEntry.SetPlaceholderText("Type to search")
-	searchEntry.Connect("enter-notify-event", func() {
+	/*searchEntry.Connect("enter-notify-event", func() {
 		cancelClose()
-	})
+	})*/
 	searchEntry.Connect("search-changed", func() {
 		for _, btn := range catButtons {
 			btn.SetImagePosition(gtk.POS_LEFT)
@@ -380,7 +376,6 @@ func setUpSearchEntry() *gtk.SearchEntry {
 			if w == nil && fileSearchResultFlowBox != nil {
 				f := fileSearchResultFlowBox.GetChildAtIndex(0)
 				if f != nil {
-					//f.SetCanFocus(false)
 					button, err := f.GetChild()
 					if err == nil {
 						button.ToWidget().SetCanFocus(true)

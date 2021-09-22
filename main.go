@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -20,16 +21,16 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-const version = "0.1.12"
+const version = "0.2.0"
 
 var (
 	appDirs         []string
 	configDirectory string
 	pinnedFile      string
 	pinned          []string
-	src             glib.SourceHandle
-	id2entry        map[string]desktopEntry
-	preferredApps   map[string]interface{}
+	//src             glib.SourceHandle
+	id2entry      map[string]desktopEntry
+	preferredApps map[string]interface{}
 )
 
 var categoryNames = [...]string{
@@ -82,6 +83,7 @@ var desktopEntries []desktopEntry
 
 // UI elements
 var (
+	win                     *gtk.Window
 	resultWindow            *gtk.ScrolledWindow
 	fileSearchResults       []string
 	searchEntry             *gtk.SearchEntry
@@ -98,6 +100,7 @@ var (
 	statusLabel             *gtk.Label
 	status                  string
 	ignore                  string
+	showWindowTrigger       bool
 )
 
 func defaultStringIfBlank(s, fallback string) string {
@@ -125,10 +128,16 @@ var term = flag.String("term", defaultStringIfBlank(os.Getenv("TERM"), "alacritt
 var nameLimit = flag.Int("fslen", 80, "File Search name length Limit")
 var noCats = flag.Bool("nocats", false, "Disable filtering by category")
 var noFS = flag.Bool("nofs", false, "Disable file search")
+var resident = flag.Bool("r", false, "Leave the program resident in memory")
+var debug = flag.Bool("d", false, "Turn on debug messages")
 
 func main() {
 	timeStart := time.Now()
 	flag.Parse()
+
+	if *debug {
+		log.SetLevel(log.DebugLevel)
+	}
 
 	if *displayVersion {
 		fmt.Printf("nwg-drawer version %s\n", version)
@@ -136,33 +145,56 @@ func main() {
 	}
 
 	// Gentle SIGTERM handler thanks to reiki4040 https://gist.github.com/reiki4040/be3705f307d3cd136e85
+	// v0.2: we also need to support SIGUSR from now on
 	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, syscall.SIGTERM)
+	signal.Notify(signalChan, syscall.SIGTERM, syscall.SIGUSR1)
+
 	go func() {
 		for {
 			s := <-signalChan
-			if s == syscall.SIGTERM {
-				log.Info("SIGTERM received, bye bye!")
+			switch s {
+			case syscall.SIGTERM:
+				log.Debug("SIGTERM received, bye bye")
 				gtk.MainQuit()
+			case syscall.SIGUSR1:
+				if *resident {
+					// As win.Show() called from inside a goroutine randomly crashes GTK,
+					// let's just set e helper variable here. We'll be checking it with glib.TimeoutAdd.
+					log.Debug("SIGUSR1 received, showing the window")
+					showWindowTrigger = true
+				} else {
+					log.Debug("SIGUSR1 received, and I'm not resident, bye bye")
+					gtk.MainQuit()
+				}
+			default:
+				log.Info("Unknown signal")
 			}
 		}
 	}()
 
-	// We want the same key/mouse binding to turn the dock off: kill the running instance and exit.
-	lockFilePath := fmt.Sprintf("%s/nwg-drawer.lock", tempDir())
+	// If running instance found and running residently, we want it to refresh and show the window.
+	// Otherwise we want the same command to terminate the drawer: kill the running instance and exit.
+	//lockFilePath := fmt.Sprintf("%s/nwg-drawer.lock", tempDir())
+	lockFilePath := path.Join(tempDir(), "nwg-drawer.lock")
 	lockFile, err := singleinstance.CreateLockFile(lockFilePath)
 	if err != nil {
 		pid, err := readTextFile(lockFilePath)
 		if err == nil {
 			i, err := strconv.Atoi(pid)
 			if err == nil {
-				log.Info("Running instance found, sending SIGTERM and exiting...")
-				syscall.Kill(i, syscall.SIGTERM)
+				if *resident {
+					log.Warnf("Resident instance already running (PID %v)", i)
+				} else {
+					log.Infof("Showing resident instance (PID %v)", i)
+					syscall.Kill(i, syscall.SIGUSR1)
+				}
 			}
 		}
 		os.Exit(0)
 	}
 	defer lockFile.Close()
+
+	log.Infof("term: %s", *term)
 
 	// LANGUAGE
 	if *lang == "" && os.Getenv("LANG") != "" {
@@ -226,7 +258,7 @@ func main() {
 		gtk.AddProviderForScreen(screen, cssProvider, gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 	}
 
-	win, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
+	win, err = gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
 	if err != nil {
 		log.Fatal("Unable to create window:", err)
 	}
@@ -275,7 +307,11 @@ func main() {
 				searchEntry.GrabFocus()
 				searchEntry.SetText("")
 			} else {
-				gtk.MainQuit()
+				if !*resident {
+					gtk.MainQuit()
+				} else {
+					restoreStateAndHide()
+				}
 			}
 			return false
 		case gdk.KEY_downarrow, gdk.KEY_Up, gdk.KEY_Down, gdk.KEY_Left, gdk.KEY_Right, gdk.KEY_Tab,
@@ -288,18 +324,6 @@ func main() {
 			}
 			return false
 		}
-	})
-
-	// Close the window on leave, but not immediately, to avoid accidental closes
-	win.Connect("leave-notify-event", func() {
-		src = glib.TimeoutAdd(uint(500), func() bool {
-			gtk.MainQuit()
-			return false
-		})
-	})
-
-	win.Connect("enter-notify-event", func() {
-		cancelClose()
 	})
 
 	/*
@@ -341,13 +365,17 @@ func main() {
 	resultWindow, _ = gtk.ScrolledWindowNew(nil, nil)
 	resultWindow.SetEvents(int(gdk.ALL_EVENTS_MASK))
 	resultWindow.SetPolicy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-	resultWindow.Connect("enter-notify-event", func() {
+	/*resultWindow.Connect("enter-notify-event", func() {
 		cancelClose()
-	})
+	})*/
 	resultWindow.Connect("button-release-event", func(sw *gtk.ScrolledWindow, e *gdk.Event) bool {
 		btnEvent := gdk.EventButtonNewFromEvent(e)
 		if btnEvent.Button() == 1 || btnEvent.Button() == 3 {
-			gtk.MainQuit()
+			if !*resident {
+				gtk.MainQuit()
+			} else {
+				restoreStateAndHide()
+			}
 			return true
 		}
 		return false
@@ -392,6 +420,7 @@ func main() {
 	statusLineWrapper.PackStart(statusLabel, true, false, 0)
 
 	win.ShowAll()
+
 	if !*noFS {
 		fileSearchResultWrapper.SetSizeRequest(appFlowBox.GetAllocatedWidth(), 1)
 		fileSearchResultWrapper.Hide()
@@ -399,8 +428,50 @@ func main() {
 	if !*noCats {
 		categoriesWrapper.SetSizeRequest(1, categoriesWrapper.GetAllocatedHeight()*2)
 	}
+	if *resident {
+		win.Hide()
+	}
 
 	t := time.Now()
 	log.Info(fmt.Sprintf("UI created in %v ms. Thank you for your patience.", t.Sub(timeStart).Milliseconds()))
+
+	// Check if showing the window has been requested (SIGUSR1)
+	glib.TimeoutAdd(uint(1), func() bool {
+		if showWindowTrigger && win != nil && !win.IsVisible() {
+			win.ShowAll()
+			// focus 1st element
+			b := appFlowBox.GetChildAtIndex(0)
+			if b != nil {
+				button, err := b.GetChild()
+				if err == nil {
+					button.ToWidget().GrabFocus()
+				}
+			}
+		}
+		showWindowTrigger = false
+		return true
+	})
+
 	gtk.Main()
+}
+
+func restoreStateAndHide() {
+	timeStart1 := time.Now()
+	win.Hide()
+
+	// 1. clear search
+	searchEntry.SetText("")
+
+	// 2. clear category filter (in gotk3 it means: rebuild, as we have no filtering here)
+	appFlowBox = setUpAppsFlowBox(nil, "")
+	for _, btn := range catButtons {
+		btn.SetImagePosition(gtk.POS_LEFT)
+		btn.SetSizeRequest(0, 0)
+	}
+
+	// 3. scroll to the top
+	resultWindow.GetVAdjustment().SetValue(0)
+
+	t := time.Now()
+	log.Debugf(fmt.Sprintf("UI hidden and restored in the backgroud in %v ms", t.Sub(timeStart1).Milliseconds()))
 }
