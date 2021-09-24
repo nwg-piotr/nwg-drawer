@@ -67,7 +67,6 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 					return true
 				} else if btnEvent.Button() == 3 {
 					unpinItem(entry.DesktopID)
-					//pinnedFlowBox = setUpPinnedFlowBox()
 					return true
 				}
 				return false
@@ -127,7 +126,6 @@ func setUpCategoriesButtonBox() *gtk.EventBox {
 			button.SetProperty("name", "category-button")
 			catButtons = append(catButtons, button)
 			button.SetLabel(cat.DisplayName)
-			// fix #8
 			button.SetAlwaysShowImage(true)
 			hBox.PackStart(button, false, false, 0)
 			name := cat.Name
