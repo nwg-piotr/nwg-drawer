@@ -173,9 +173,11 @@ func main() {
 		}
 	}()
 
-	// If running instance found and running residently, we want it to refresh and show the window.
-	// Otherwise we want the same command to terminate the drawer: kill the running instance and exit.
-	//lockFilePath := fmt.Sprintf("%s/nwg-drawer.lock", tempDir())
+	// If running instance found, we want it to show the window. The new instance will send SIGUSR1 and die
+	// (equivalent of `pkill -USR1 nwg-drawer`).
+	// Otherwise the command may behave in two ways:
+	// 	1. kill the running non-residennt instance and exit;
+	// 	2. die if a resident instance found.
 	lockFilePath := path.Join(tempDir(), "nwg-drawer.lock")
 	lockFile, err := singleinstance.CreateLockFile(lockFilePath)
 	if err != nil {
