@@ -6,6 +6,7 @@ get:
 	go get github.com/joshuarubin/go-sway
 	go get github.com/allan-simon/go-singleinstance
 	go get "github.com/sirupsen/logrus"
+	go get github.com/fsnotify/fsnotify
 
 build:
 	go build -o bin/nwg-drawer .

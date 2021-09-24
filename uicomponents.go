@@ -67,7 +67,7 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 					return true
 				} else if btnEvent.Button() == 3 {
 					unpinItem(entry.DesktopID)
-					pinnedFlowBox = setUpPinnedFlowBox()
+					//pinnedFlowBox = setUpPinnedFlowBox()
 					return true
 				}
 				return false
@@ -87,6 +87,7 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 			item.(*gtk.Widget).SetCanFocus(false)
 		})
 	}
+	flowBox.ShowAll()
 
 	return flowBox
 }
@@ -264,7 +265,6 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 			return true
 		} else if btnEvent.Button() == 3 {
 			pinItem(ID)
-			pinnedFlowBox = setUpPinnedFlowBox()
 			return true
 		}
 		return false

@@ -28,9 +28,8 @@ var (
 	configDirectory string
 	pinnedFile      string
 	pinned          []string
-	//src             glib.SourceHandle
-	id2entry      map[string]desktopEntry
-	preferredApps map[string]interface{}
+	id2entry        map[string]desktopEntry
+	preferredApps   map[string]interface{}
 )
 
 var categoryNames = [...]string{
@@ -101,6 +100,8 @@ var (
 	status                  string
 	ignore                  string
 	showWindowTrigger       bool
+	desktopTrigger          bool
+	pinnedTrigger           bool
 )
 
 func defaultStringIfBlank(s, fallback string) string {
@@ -447,8 +448,27 @@ func main() {
 			}
 		}
 		showWindowTrigger = false
+
+		// some .desktop file changed
+		if desktopTrigger {
+			log.Debug(".desktop file changed")
+			desktopFiles = listDesktopFiles()
+			status = parseDesktopFiles(desktopFiles)
+			appFlowBox = setUpAppsFlowBox(nil, "")
+			desktopTrigger = false
+		}
+
+		// pinned file changed
+		if pinnedTrigger {
+			log.Debug("pinned file changed")
+			pinnedTrigger = false
+			pinned, _ = loadTextFile(pinnedFile)
+			pinnedFlowBox = setUpPinnedFlowBox()
+		}
 		return true
 	})
+
+	go watchFiles()
 
 	gtk.Main()
 }

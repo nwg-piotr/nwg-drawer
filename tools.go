@@ -226,11 +226,17 @@ func getAppDirs() []string {
 		"/var/lib/flatpak/exports/share/applications"}
 
 	for _, d := range flatpakDirs {
-		if !isIn(dirs, d) {
+		if pathExists(d) && !isIn(dirs, d) {
 			dirs = append(dirs, d)
 		}
 	}
-	return dirs
+	var confirmedDirs []string
+	for _, d := range dirs {
+		if pathExists(d) {
+			confirmedDirs = append(confirmedDirs, d)
+		}
+	}
+	return confirmedDirs
 }
 
 func loadPreferredApps(path string) (map[string]interface{}, error) {
@@ -336,6 +342,7 @@ func setUpCategories() {
 }
 
 func parseDesktopFiles(desktopFiles []string) string {
+	desktopEntries = nil
 	id2entry = make(map[string]desktopEntry)
 	skipped := 0
 	hidden := 0
