@@ -30,6 +30,7 @@ var (
 	pinned          []string
 	id2entry        map[string]desktopEntry
 	preferredApps   map[string]interface{}
+	exclusions      []string
 )
 
 var categoryNames = [...]string{
@@ -264,9 +265,19 @@ func main() {
 	paFile := filepath.Join(configDirectory, "preferred-apps.json")
 	preferredApps, err = loadPreferredApps(paFile)
 	if err != nil {
-		log.Errorf("Custom associations file %s not found or invalid", paFile)
+		log.Infof("Custom associations file %s not found or invalid", paFile)
 	} else {
 		log.Infof("Found %v associations in %s", len(preferredApps), paFile)
+	}
+
+	// Load user-defined paths excluded from file search
+	exFile := filepath.Join(configDirectory, "excluded-dirs")
+	exclusions, err = loadTextFile(exFile)
+	if err != nil {
+		log.Infof("Search exclusions file %s not found", exFile)
+	} else {
+		log.Infof("Found %v search exclusions in %s", len(exclusions), exFile)
+		fmt.Println(exclusions)
 	}
 
 	// USER INTERFACE

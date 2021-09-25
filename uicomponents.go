@@ -291,16 +291,19 @@ func walk(path string, d fs.DirEntry, e error) error {
 	if e != nil {
 		return e
 	}
-	// don't search leading part of the path, as e.g. '/home/user/Pictures'
-	toSearch := strings.Split(path, ignore)[1]
-	if strings.Contains(strings.ToLower(toSearch), strings.ToLower(phrase)) {
-		// mark directories
-		if d.IsDir() {
-			fileSearchResults = append(fileSearchResults, fmt.Sprintf("#is_dir#%s", path))
-		} else {
-			fileSearchResults = append(fileSearchResults, path)
+	if !isExcluded(path) {
+		// don't search leading part of the path, as e.g. '/home/user/Pictures'
+		toSearch := strings.Split(path, ignore)[1]
+		if strings.Contains(strings.ToLower(toSearch), strings.ToLower(phrase)) {
+			// mark directories
+			if d.IsDir() {
+				fileSearchResults = append(fileSearchResults, fmt.Sprintf("#is_dir#%s", path))
+			} else {
+				fileSearchResults = append(fileSearchResults, path)
+			}
 		}
 	}
+
 	return nil
 }
 
@@ -386,6 +389,15 @@ func setUpSearchEntry() *gtk.SearchEntry {
 	})
 
 	return searchEntry
+}
+
+func isExcluded(dir string) bool {
+	for _, exclusion := range exclusions {
+		if strings.Contains(dir, exclusion) {
+			return true
+		}
+	}
+	return false
 }
 
 func searchUserDir(dir string) {

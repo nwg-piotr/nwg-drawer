@@ -465,7 +465,7 @@ func loadTextFile(path string) ([]string, error) {
 	var output []string
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
-		if line != "" {
+		if line != "" && !strings.HasPrefix(line, "#") {
 			output = append(output, line)
 		}
 
