@@ -208,6 +208,29 @@ func main() {
 	// ENVIRONMENT
 	configDirectory = configDir()
 
+	// Placing the drawer config files in the nwg-panel config directory was a mistake.
+	// Let's move them to their own location.
+	oldConfigDirectory, err := oldConfigDir()
+	if err == nil {
+		for _, p := range []string{"drawer.css", "preferred-apps.json"} {
+			if pathExists(path.Join(oldConfigDirectory, p)) {
+				log.Infof("File %s found in stale location, moving to %s", p, configDirectory)
+				if !pathExists(path.Join(configDirectory, p)) {
+					err = os.Rename(path.Join(oldConfigDirectory, p), path.Join(configDirectory, p))
+					if err == nil {
+						log.Info("Success")
+					} else {
+						log.Warn(err)
+					}
+				} else {
+					log.Warnf("Failed moving %s to %s: path already exists!", path.Join(oldConfigDirectory, p), path.Join(configDirectory, p))
+				}
+
+			}
+		}
+	}
+
+	// Copy default style sheet if not found
 	if !pathExists(filepath.Join(configDirectory, "drawer.css")) {
 		copyFile(filepath.Join(getDataHome(), "nwg-drawer/drawer.css"), filepath.Join(configDirectory, "drawer.css"))
 	}
@@ -241,9 +264,9 @@ func main() {
 	paFile := filepath.Join(configDirectory, "preferred-apps.json")
 	preferredApps, err = loadPreferredApps(paFile)
 	if err != nil {
-		log.Error(fmt.Sprintf("Custom associations file %s not found or invalid", paFile))
+		log.Errorf("Custom associations file %s not found or invalid", paFile)
 	} else {
-		log.Info(fmt.Sprintf("Found %v associations in %s", len(preferredApps), paFile))
+		log.Infof("Found %v associations in %s", len(preferredApps), paFile)
 	}
 
 	// USER INTERFACE

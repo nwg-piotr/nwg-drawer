@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -149,14 +150,24 @@ func readTextFile(path string) (string, error) {
 	return string(bytes), nil
 }
 
+func oldConfigDir() (string, error) {
+	if os.Getenv("XDG_CONFIG_HOME") != "" {
+		dir := path.Join(os.Getenv("XDG_CONFIG_HOME"), "nwg-panel")
+		return dir, nil
+	}
+
+	return "", errors.New("old config dir not found")
+}
+
 func configDir() string {
 	if os.Getenv("XDG_CONFIG_HOME") != "" {
-		dir := fmt.Sprintf("%s/nwg-panel", os.Getenv("XDG_CONFIG_HOME"))
+		dir := path.Join(os.Getenv("XDG_CONFIG_HOME"), "nwg-drawer")
 		createDir(dir)
-		return (fmt.Sprintf("%s/nwg-panel", os.Getenv("XDG_CONFIG_HOME")))
+		return dir
 	}
-	dir := fmt.Sprintf("%s/.config/nwg-panel", os.Getenv("HOME"))
+	dir := path.Join(os.Getenv("XDG_CONFIG_HOME"), "nwg-drawe")
 	createDir(dir)
+
 	return dir
 }
 
