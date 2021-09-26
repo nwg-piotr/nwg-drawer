@@ -97,7 +97,7 @@ When the search phrase is at least 3 characters long, your XDG user directories 
 Use the **left mouse button** to open a file with the `xdg-open` command. As configuring file associations for it is
 PITA, you may override them, by creating the `~/.config/nwg-panel/preferred-apps.json` file with your own definitions.
 
-### Sample file content
+### Sample `preferred-apps.json` file content
 
 ```json
 {
@@ -110,14 +110,24 @@ PITA, you may override them, by creating the `~/.config/nwg-panel/preferred-apps
 }
 ```
 
-Use the **right mouse button** to open the file with your file manager (see `-fm` argument). The result depends on the
-file manager you use.
+Use the **right mouse button** to open the file with your file manager (see `-fm` argument). The result depends
+on the file manager you use.
 
 - thunar will open the file location
 - pcmanfm will open the file with its associated program
 - caja won't open anything, except for directories
 
 I've noy yet tried other file managers.
+
+### File search exclusions
+
+You may want to exclude some paths inside your XDG user directories from searching. If so, define exclusions in the
+`~/.config/nwg-panel/excluded-dirs` file, e.g. like this:
+
+```text
+# exclude all paths containing 'node_modules'
+node_modules
+```
 
 ## Credits
 
@@ -128,3 +138,5 @@ Copyright (c) 2015-2018 gotk3 contributors
 - [gotk3-layershell](https://github.com/dlasky/gotk3-layershell) by [@dlasky](https://github.com/dlasky/gotk3-layershell/commits?author=dlasky) - many thanks for writing this software, and for patience with my requests!
 - [go-sway](https://github.com/joshuarubin/go-sway) Copyright (c) 2019 Joshua Rubin
 - [go-singleinstance](github.com/allan-simon/go-singleinstance) Copyright (c) 2015 Allan Simon
+- [logrus](https://github.com/sirupsen/logrus) Copyright (c) 2014 Simon Eskildsen
+- [fsnotify](https://github.com/fsnotify/fsnotify) Copyright (c) 2012-2019 fsnotify Authors
