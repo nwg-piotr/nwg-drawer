@@ -274,10 +274,10 @@ func main() {
 	exFile := filepath.Join(configDirectory, "excluded-dirs")
 	exclusions, err = loadTextFile(exFile)
 	if err != nil {
-		log.Infof("Search exclusions file %s not found", exFile)
+		log.Infof("Search exclusions file %s not found %s", exFile, err)
 	} else {
 		log.Infof("Found %v search exclusions in %s", len(exclusions), exFile)
-		fmt.Println(exclusions)
+		log.Info(exclusions)
 	}
 
 	// USER INTERFACE

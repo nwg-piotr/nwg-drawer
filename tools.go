@@ -160,12 +160,12 @@ func oldConfigDir() (string, error) {
 }
 
 func configDir() string {
-	if os.Getenv("XDG_CONFIG_HOME") != "" {
-		dir := path.Join(os.Getenv("XDG_CONFIG_HOME"), "nwg-drawer")
-		createDir(dir)
-		return dir
+	var home string
+	home = os.Getenv("XDG_CONFIG_HOME")
+	if home == "" {
+		home = os.Getenv("HOME")
 	}
-	dir := path.Join(os.Getenv("XDG_CONFIG_HOME"), "nwg-drawe")
+	dir := path.Join(home, ".config/nwg-drawer")
 	createDir(dir)
 
 	return dir
