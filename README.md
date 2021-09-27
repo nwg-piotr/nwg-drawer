@@ -55,12 +55,13 @@ $ nwg-drawer -h
 Usage of nwg-drawer:
   -c uint
     	number of Columns (default 6)
+  -d	Turn on Debug messages
   -fm string
     	File Manager (default "thunar")
   -fscol uint
     	File Search result COLumns (default 2)
   -fslen int
-    	File Search name length Limit (default 80)
+    	File Search name LENgth Limit (default 80)
   -is int
     	Icon Size (default 64)
   -lang string
@@ -73,6 +74,7 @@ Usage of nwg-drawer:
     	name of the Output to display the drawer on (sway only)
   -ovl
     	use OVerLay layer
+  -r	Leave the program resident in memory
   -s string
     	Styling: css file name (default "drawer.css")
   -spacing uint
@@ -83,6 +85,39 @@ Usage of nwg-drawer:
   ```
 
   *NOTE: the `$TERM` environment variable overrides the `-term` argument if defined.*
+
+## Running
+
+Since v0.2.x you may use the drawer in two ways:
+
+1. Simply run the `nwg-drawer` command, by adding a key binding to your sway confog file, e.g.:
+
+```text
+bindsym Mod1+F1 exec nwg-drawer
+```
+
+2. Run a resident instance on startup, and use the `nwg-drawer` command to show the window, e.g.:
+
+```text
+exec_always nwg-drawer -r
+bindsym Mod1+F1 exec nwg-drawer
+```
+
+In this case the 'nwg-drawer` command is just an equivalent to `pkill -USR1 nwg-drawer`.
+
+Running a resident instance should speed up use of the drawer significantly. Pay attention to the fact, that you
+need to `pkill -f nwg-drawer` to apply any new arguments!
+
+## Logging
+
+In case you encounter an issue, you may need debug messages. If you use the resident instance, you'll see nothing
+in the terminal. Please edit your sway config file:
+
+```text
+exec_always nwg-drawer -r -d 2> ~/drawer.log
+```
+
+`pkill` the running instance, reload sway and include the `drawer.log` content in the GitHub issue.
 
 ## Styling
 
