@@ -21,6 +21,11 @@ and `nwggrid`.
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/nwg-drawer.svg)](https://repology.org/project/nwg-drawer/versions)
 
+## v0.2.x note
+
+1. Placing config files in the nwg-panel config directory was a mistake, sorry. The 0.2.0 version migrates them to `~/.config/nwg-drawer`.
+2. From now on you may run the program residently, which should speed it up. See "Running" below.
+
 ## Installation
 
 ### Dependencies
@@ -90,7 +95,7 @@ Usage of nwg-drawer:
 
 Since v0.2.x you may use the drawer in two ways:
 
-1. Simply run the `nwg-drawer` command, by adding a key binding to your sway confog file, e.g.:
+1. Simply run the `nwg-drawer` command, by adding a key binding to your sway config file, e.g.:
 
 ```text
 bindsym Mod1+F1 exec nwg-drawer
@@ -103,7 +108,7 @@ exec_always nwg-drawer -r
 bindsym Mod1+F1 exec nwg-drawer
 ```
 
-In this case the 'nwg-drawer` command is just an equivalent to `pkill -USR1 nwg-drawer`.
+In this case the `nwg-drawer` command is just an equivalent to `pkill -USR1 nwg-drawer`.
 
 Running a resident instance should speed up use of the drawer significantly. Pay attention to the fact, that you
 need to `pkill -f nwg-drawer` to apply any new arguments!
@@ -121,7 +126,7 @@ exec_always nwg-drawer -r -d 2> ~/drawer.log
 
 ## Styling
 
-Edit `~/.config/nwg-panel/drawer.css` to your taste.
+Edit `~/.config/nwg-drawer/drawer.css` to your taste.
 
 ## Files
 
