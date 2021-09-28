@@ -291,16 +291,26 @@ func walk(path string, d fs.DirEntry, e error) error {
 	if e != nil {
 		return e
 	}
-	if !isExcluded(path) {
-		// don't search leading part of the path, as e.g. '/home/user/Pictures'
-		toSearch := strings.Split(path, ignore)[1]
-		if strings.Contains(strings.ToLower(toSearch), strings.ToLower(phrase)) {
-			// mark directories
-			if d.IsDir() {
-				fileSearchResults = append(fileSearchResults, fmt.Sprintf("#is_dir#%s", path))
-			} else {
-				fileSearchResults = append(fileSearchResults, path)
-			}
+	// don't search leading part of the path, as e.g. '/home/user/Pictures'
+	toSearch := strings.Split(path, ignore)[1]
+
+	// Remaing part of the path (w/o file name) must be checked against being present in excluded dirs
+	doSearch := true
+	parts := strings.Split(toSearch, "/")
+	remainingPart := ""
+	if len(parts) > 1 {
+		remainingPart = strings.Join(parts[:len(parts)-1], "/")
+	}
+	if remainingPart != "" && isExcluded(remainingPart) {
+		doSearch = false
+	}
+
+	if doSearch && strings.Contains(strings.ToLower(toSearch), strings.ToLower(phrase)) {
+		// mark directories
+		if d.IsDir() {
+			fileSearchResults = append(fileSearchResults, fmt.Sprintf("#is_dir#%s", path))
+		} else {
+			fileSearchResults = append(fileSearchResults, path)
 		}
 	}
 
@@ -412,8 +422,11 @@ func searchUserDir(dir string) {
 		for _, path := range fileSearchResults {
 			partOfPathToShow := strings.Split(path, userDirsMap[dir])[1]
 			if partOfPathToShow != "" {
-				btn := setUpUserFileSearchResultButton(partOfPathToShow, path)
-				fileSearchResultFlowBox.Add(btn)
+				if !(strings.HasPrefix(path, "#is_dir#") && isExcluded(path)) {
+					btn := setUpUserFileSearchResultButton(partOfPathToShow, path)
+					fileSearchResultFlowBox.Add(btn)
+				}
+
 			}
 		}
 		fileSearchResultFlowBox.Hide()
