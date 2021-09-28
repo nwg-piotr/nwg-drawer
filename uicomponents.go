@@ -237,7 +237,6 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 		pixbuf, err = createPixbuf("image-missing", *iconSize)
 	}
 	if err != nil {
-		log.Error(err)
 		pixbuf, _ = createPixbuf("unknown", *iconSize)
 	}
 	img, _ = gtk.ImageNewFromPixbuf(pixbuf)
