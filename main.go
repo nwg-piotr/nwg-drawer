@@ -263,20 +263,28 @@ func main() {
 	// For opening files we use xdg-open. As its configuration is PITA, we may override some associations
 	// in the ~/.config/nwg-panel/preferred-apps.json file.
 	paFile := path.Join(configDirectory, "preferred-apps.json")
-	preferredApps, err = loadPreferredApps(paFile)
-	if err != nil {
-		log.Infof("Custom associations file %s not found or invalid", paFile)
+	if pathExists(paFile) {
+		preferredApps, err = loadPreferredApps(paFile)
+		if err != nil {
+			log.Infof("Custom associations file %s not found or invalid", paFile)
+		} else {
+			log.Infof("Found %v associations in %s", len(preferredApps), paFile)
+		}
 	} else {
-		log.Infof("Found %v associations in %s", len(preferredApps), paFile)
+		log.Infof("%s file not found", paFile)
 	}
 
 	// Load user-defined paths excluded from file search
 	exFile := path.Join(configDirectory, "excluded-dirs")
-	exclusions, err = loadTextFile(exFile)
-	if err != nil {
-		log.Infof("Search exclusions file %s not found %s", exFile, err)
+	if pathExists(exFile) {
+		exclusions, err = loadTextFile(exFile)
+		if err != nil {
+			log.Infof("Search exclusions file %s not found %s", exFile, err)
+		} else {
+			log.Infof("Found %v search exclusions in %s", len(exclusions), exFile)
+		}
 	} else {
-		log.Infof("Found %v search exclusions in %s", len(exclusions), exFile)
+		log.Infof("%s file not found", exFile)
 	}
 
 	// USER INTERFACE
