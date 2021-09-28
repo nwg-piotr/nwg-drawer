@@ -156,7 +156,7 @@ func main() {
 			s := <-signalChan
 			switch s {
 			case syscall.SIGTERM:
-				log.Debug("SIGTERM received, bye bye")
+				log.Info("SIGTERM received, bye bye")
 				gtk.MainQuit()
 			case syscall.SIGUSR1:
 				if *resident {
@@ -165,7 +165,7 @@ func main() {
 					log.Debug("SIGUSR1 received, showing the window")
 					showWindowTrigger = true
 				} else {
-					log.Debug("SIGUSR1 received, and I'm not resident, bye bye")
+					log.Info("SIGUSR1 received, and I'm not resident, bye bye")
 					gtk.MainQuit()
 				}
 			default:
