@@ -249,7 +249,9 @@ func main() {
 	}
 	log.Info(fmt.Sprintf("Found %v pinned items", len(pinned)))
 
-	cssFile := filepath.Join(configDirectory, *cssFileName)
+	if !strings.HasPrefix(*cssFileName, "/") {
+		*cssFileName = filepath.Join(configDirectory, *cssFileName)
+	}
 
 	appDirs = getAppDirs()
 
@@ -292,12 +294,12 @@ func main() {
 
 	cssProvider, _ := gtk.CssProviderNew()
 
-	err = cssProvider.LoadFromPath(cssFile)
+	err = cssProvider.LoadFromPath(*cssFileName)
 	if err != nil {
-		log.Errorf("ERROR: %s css file not found or erroneous. Using GTK styling.", cssFile)
+		log.Errorf("ERROR: %s css file not found or erroneous. Using GTK styling.", *cssFileName)
 		log.Errorf("%s", err)
 	} else {
-		log.Info(fmt.Sprintf("Using style from %s", cssFile))
+		log.Info(fmt.Sprintf("Using style from %s", *cssFileName))
 		screen, _ := gdk.ScreenGetDefault()
 		gtk.AddProviderForScreen(screen, cssProvider, gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 	}
