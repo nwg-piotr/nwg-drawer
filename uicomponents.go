@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
 )
@@ -34,19 +35,13 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 
 			btn, _ := gtk.ButtonNew()
 
-			var pixbuf *gdk.Pixbuf
 			var img *gtk.Image
-			var err error
 			if entry.Icon != "" {
-				pixbuf, err = createPixbuf(entry.Icon, *iconSize)
+				pixbuf, _ := createPixbuf(entry.Icon, *iconSize)
+				img, _ = gtk.ImageNewFromPixbuf(pixbuf)
 			} else {
-				pixbuf, err = createPixbuf("image-missing", *iconSize)
+				img, _ = gtk.ImageNewFromIconName("image-missing", gtk.ICON_SIZE_INVALID)
 			}
-			if err != nil {
-				log.Error(err)
-				pixbuf, _ = createPixbuf("unknown", *iconSize)
-			}
-			img, _ = gtk.ImageNewFromPixbuf(pixbuf)
 
 			btn.SetImage(img)
 			btn.SetAlwaysShowImage(true)
@@ -72,7 +67,6 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 					return true
 				} else if btnEvent.Button() == 3 {
 					unpinItem(entry.DesktopID)
-					pinnedFlowBox = setUpPinnedFlowBox()
 					return true
 				}
 				return false
@@ -92,10 +86,6 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 			item.(*gtk.Widget).SetCanFocus(false)
 		})
 	}
-	flowBox.Connect("enter-notify-event", func() {
-		cancelClose()
-	})
-
 	flowBox.ShowAll()
 
 	return flowBox
@@ -115,9 +105,7 @@ func setUpCategoriesButtonBox() *gtk.EventBox {
 	}
 
 	eventBox, _ := gtk.EventBoxNew()
-	eventBox.Connect("enter-notify-event", func() {
-		cancelClose()
-	})
+
 	hBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	eventBox.Add(hBox)
 	button, _ := gtk.ButtonNewWithLabel("All")
@@ -138,7 +126,6 @@ func setUpCategoriesButtonBox() *gtk.EventBox {
 			button.SetProperty("name", "category-button")
 			catButtons = append(catButtons, button)
 			button.SetLabel(cat.DisplayName)
-			// fix #8
 			button.SetAlwaysShowImage(true)
 			hBox.PackStart(button, false, false, 0)
 			name := cat.Name
@@ -246,10 +233,10 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	if entry.Icon != "" {
 		pixbuf, err = createPixbuf(entry.Icon, *iconSize)
 	} else {
+		log.Warnf("Undefined icon for %s", entry.Name)
 		pixbuf, err = createPixbuf("image-missing", *iconSize)
 	}
 	if err != nil {
-		log.Error(err)
 		pixbuf, _ = createPixbuf("unknown", *iconSize)
 	}
 	img, _ = gtk.ImageNewFromPixbuf(pixbuf)
@@ -275,7 +262,6 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 			return true
 		} else if btnEvent.Button() == 3 {
 			pinItem(ID)
-			pinnedFlowBox = setUpPinnedFlowBox()
 			return true
 		}
 		return false
@@ -295,9 +281,6 @@ func setUpFileSearchResultContainer() *gtk.FlowBox {
 	}
 	flowBox, _ := gtk.FlowBoxNew()
 	flowBox.SetProperty("orientation", gtk.ORIENTATION_VERTICAL)
-	flowBox.Connect("enter-notify-event", func() {
-		cancelClose()
-	})
 	fileSearchResultWrapper.PackStart(flowBox, false, false, 10)
 
 	return flowBox
@@ -309,7 +292,19 @@ func walk(path string, d fs.DirEntry, e error) error {
 	}
 	// don't search leading part of the path, as e.g. '/home/user/Pictures'
 	toSearch := strings.Split(path, ignore)[1]
-	if strings.Contains(strings.ToLower(toSearch), strings.ToLower(phrase)) {
+
+	// Remaing part of the path (w/o file name) must be checked against being present in excluded dirs
+	doSearch := true
+	parts := strings.Split(toSearch, "/")
+	remainingPart := ""
+	if len(parts) > 1 {
+		remainingPart = strings.Join(parts[:len(parts)-1], "/")
+	}
+	if remainingPart != "" && isExcluded(remainingPart) {
+		doSearch = false
+	}
+
+	if doSearch && strings.Contains(strings.ToLower(toSearch), strings.ToLower(phrase)) {
 		// mark directories
 		if d.IsDir() {
 			fileSearchResults = append(fileSearchResults, fmt.Sprintf("#is_dir#%s", path))
@@ -317,15 +312,16 @@ func walk(path string, d fs.DirEntry, e error) error {
 			fileSearchResults = append(fileSearchResults, path)
 		}
 	}
+
 	return nil
 }
 
 func setUpSearchEntry() *gtk.SearchEntry {
 	searchEntry, _ := gtk.SearchEntryNew()
 	searchEntry.SetPlaceholderText("Type to search")
-	searchEntry.Connect("enter-notify-event", func() {
+	/*searchEntry.Connect("enter-notify-event", func() {
 		cancelClose()
-	})
+	})*/
 	searchEntry.Connect("search-changed", func() {
 		for _, btn := range catButtons {
 			btn.SetImagePosition(gtk.POS_LEFT)
@@ -380,7 +376,6 @@ func setUpSearchEntry() *gtk.SearchEntry {
 			if w == nil && fileSearchResultFlowBox != nil {
 				f := fileSearchResultFlowBox.GetChildAtIndex(0)
 				if f != nil {
-					//f.SetCanFocus(false)
 					button, err := f.GetChild()
 					if err == nil {
 						button.ToWidget().SetCanFocus(true)
@@ -401,11 +396,17 @@ func setUpSearchEntry() *gtk.SearchEntry {
 			}
 		}
 	})
-	/*searchEntry.Connect("focus-in-event", func() {
-		searchEntry.SetText("")
-	})*/
 
 	return searchEntry
+}
+
+func isExcluded(dir string) bool {
+	for _, exclusion := range exclusions {
+		if strings.Contains(dir, exclusion) {
+			return true
+		}
+	}
+	return false
 }
 
 func searchUserDir(dir string) {
@@ -420,8 +421,11 @@ func searchUserDir(dir string) {
 		for _, path := range fileSearchResults {
 			partOfPathToShow := strings.Split(path, userDirsMap[dir])[1]
 			if partOfPathToShow != "" {
-				btn := setUpUserFileSearchResultButton(partOfPathToShow, path)
-				fileSearchResultFlowBox.Add(btn)
+				if !(strings.HasPrefix(path, "#is_dir#") && isExcluded(path)) {
+					btn := setUpUserFileSearchResultButton(partOfPathToShow, path)
+					fileSearchResultFlowBox.Add(btn)
+				}
+
 			}
 		}
 		fileSearchResultFlowBox.Hide()

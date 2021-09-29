@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -19,26 +20,12 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/gotk3/gotk3/gdk"
-	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 	"github.com/joshuarubin/go-sway"
 )
 
 func wayland() bool {
 	return os.Getenv("WAYLAND_DISPLAY") != "" || os.Getenv("XDG_SESSION_TYPE") == "wayland"
-}
-
-/*
-Window leave-notify-event event quits the program with glib Timeout 500 ms.
-We might have left the window by accident, so let's clear the timeout if window re-entered.
-Furthermore - hovering a widget triggers window leave-notify-event event, and the timeout
-needs to be cleared as well.
-*/
-func cancelClose() {
-	if src > 0 {
-		glib.SourceRemove(src)
-		src = 0
-	}
 }
 
 func createPixbuf(icon string, size int) (*gdk.Pixbuf, error) {
@@ -163,14 +150,29 @@ func readTextFile(path string) (string, error) {
 	return string(bytes), nil
 }
 
-func configDir() string {
+func oldConfigDir() (string, error) {
 	if os.Getenv("XDG_CONFIG_HOME") != "" {
-		dir := fmt.Sprintf("%s/nwg-panel", os.Getenv("XDG_CONFIG_HOME"))
-		createDir(dir)
-		return (fmt.Sprintf("%s/nwg-panel", os.Getenv("XDG_CONFIG_HOME")))
+		dir := path.Join(os.Getenv("XDG_CONFIG_HOME"), "nwg-panel")
+		return dir, nil
+	} else if os.Getenv("HOME") != "" {
+		dir := path.Join(os.Getenv("HOME"), ".config/nwg-panel")
+		return dir, nil
 	}
-	dir := fmt.Sprintf("%s/.config/nwg-panel", os.Getenv("HOME"))
+
+	return "", errors.New("old config dir not found")
+}
+
+func configDir() string {
+	var dir string
+	if os.Getenv("XDG_CONFIG_HOME") != "" {
+		dir = path.Join(os.Getenv("XDG_CONFIG_HOME"), "nwg-drawer")
+	} else if os.Getenv("HOME") != "" {
+		dir = path.Join(os.Getenv("HOME"), ".config/nwg-drawer")
+	}
+
+	log.Infof("Config dir: %s", dir)
 	createDir(dir)
+
 	return dir
 }
 
@@ -240,11 +242,17 @@ func getAppDirs() []string {
 		"/var/lib/flatpak/exports/share/applications"}
 
 	for _, d := range flatpakDirs {
-		if !isIn(dirs, d) {
+		if pathExists(d) && !isIn(dirs, d) {
 			dirs = append(dirs, d)
 		}
 	}
-	return dirs
+	var confirmedDirs []string
+	for _, d := range dirs {
+		if pathExists(d) {
+			confirmedDirs = append(confirmedDirs, d)
+		}
+	}
+	return confirmedDirs
 }
 
 func loadPreferredApps(path string) (map[string]interface{}, error) {
@@ -350,6 +358,7 @@ func setUpCategories() {
 }
 
 func parseDesktopFiles(desktopFiles []string) string {
+	desktopEntries = nil
 	id2entry = make(map[string]desktopEntry)
 	skipped := 0
 	hidden := 0
@@ -368,7 +377,7 @@ func parseDesktopFiles(desktopFiles []string) string {
 		if entry.NoDisplay {
 			hidden++
 			// We still need hidden entries, so `continue` is disallowed here
-			// Fixes introduced in #19
+			// Fixes bug introduced in #19
 		}
 
 		id2entry[entry.DesktopID] = entry
@@ -461,7 +470,7 @@ func loadTextFile(path string) ([]string, error) {
 	var output []string
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
-		if line != "" {
+		if line != "" && !strings.HasPrefix(line, "#") {
 			output = append(output, line)
 		}
 
@@ -563,12 +572,13 @@ func launch(command string, terminal bool) {
 	msg := fmt.Sprintf("env vars: %s; command: '%s'; args: %s\n", envVars, elements[cmdIdx], elements[1+cmdIdx:])
 	log.Info(msg)
 
-	go cmd.Run()
+	cmd.Start()
 
-	glib.TimeoutAdd(uint(150), func() bool {
+	if *resident {
+		restoreStateAndHide()
+	} else {
 		gtk.MainQuit()
-		return false
-	})
+	}
 }
 
 func open(filePath string, xdgOpen bool) {
@@ -586,10 +596,15 @@ func open(filePath string, xdgOpen bool) {
 	} else {
 		cmd = exec.Command(*fileManager, filePath)
 	}
-	fmt.Printf("Executing: %s", cmd)
+	log.Infof("Executing: %s", cmd)
+
 	cmd.Start()
 
-	gtk.MainQuit()
+	if *resident {
+		restoreStateAndHide()
+	} else {
+		gtk.MainQuit()
+	}
 }
 
 // Returns map output name -> gdk.Monitor
