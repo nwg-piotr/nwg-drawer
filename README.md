@@ -108,10 +108,11 @@ exec_always nwg-drawer -r
 bindsym Mod1+F1 exec nwg-drawer
 ```
 
-In this case the `nwg-drawer` command is just an equivalent to `pkill -USR1 nwg-drawer`.
+The second line does nothing but `pkill -USR1 nwg-drawer`, so you may just use this command instead. Actually
+this should be a little bit faster.
 
 Running a resident instance should speed up use of the drawer significantly. Pay attention to the fact, that you
-need to `pkill -f nwg-drawer` to apply any new arguments!
+need to `pkill -f nwg-drawer` and reload sway to apply any new arguments!
 
 ## Logging
 
@@ -119,10 +120,10 @@ In case you encounter an issue, you may need debug messages. If you use the resi
 in the terminal. Please edit your sway config file:
 
 ```text
-exec_always nwg-drawer -r -d 2> ~/drawer.log
+exec nwg-drawer -r -d 2> ~/drawer.log
 ```
 
-`pkill` the running instance, reload sway and include the `drawer.log` content in the GitHub issue.
+exit sway, launch it again and include the `drawer.log` content in the GitHub issue. Do not use `exec_always` here: it'll destroy the log file content on sway reload.
 
 ## Styling
 
