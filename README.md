@@ -21,6 +21,11 @@ and `nwggrid`.
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/nwg-drawer.svg)](https://repology.org/project/nwg-drawer/versions)
 
+## v0.2.x note
+
+1. Placing config files in the nwg-panel config directory was a mistake, sorry. The 0.2.0 version migrates them to `~/.config/nwg-drawer`.
+2. From now on you may run the program residently, which should speed it up. See "Running" below.
+
 ## Installation
 
 ### Dependencies
@@ -55,12 +60,13 @@ $ nwg-drawer -h
 Usage of nwg-drawer:
   -c uint
     	number of Columns (default 6)
+  -d	Turn on Debug messages
   -fm string
     	File Manager (default "thunar")
   -fscol uint
     	File Search result COLumns (default 2)
   -fslen int
-    	File Search name length Limit (default 80)
+    	File Search name LENgth Limit (default 80)
   -is int
     	Icon Size (default 64)
   -lang string
@@ -73,6 +79,7 @@ Usage of nwg-drawer:
     	name of the Output to display the drawer on (sway only)
   -ovl
     	use OVerLay layer
+  -r	Leave the program resident in memory
   -s string
     	Styling: css file name (default "drawer.css")
   -spacing uint
@@ -84,9 +91,43 @@ Usage of nwg-drawer:
 
   *NOTE: the `$TERM` environment variable overrides the `-term` argument if defined.*
 
+## Running
+
+Since v0.2.x you may use the drawer in two ways:
+
+1. Simply run the `nwg-drawer` command, by adding a key binding to your sway config file, e.g.:
+
+```text
+bindsym Mod1+F1 exec nwg-drawer
+```
+
+2. Run a resident instance on startup, and use the `nwg-drawer` command to show the window, e.g.:
+
+```text
+exec_always nwg-drawer -r
+bindsym Mod1+F1 exec nwg-drawer
+```
+
+The second line does nothing but `pkill -USR1 nwg-drawer`, so you may just use this command instead. Actually
+this should be a little bit faster.
+
+Running a resident instance should speed up use of the drawer significantly. Pay attention to the fact, that you
+need to `pkill -f nwg-drawer` and reload sway to apply any new arguments!
+
+## Logging
+
+In case you encounter an issue, you may need debug messages. If you use the resident instance, you'll see nothing
+in the terminal. Please edit your sway config file:
+
+```text
+exec nwg-drawer -r -d 2> ~/drawer.log
+```
+
+exit sway, launch it again and include the `drawer.log` content in the GitHub issue. Do not use `exec_always` here: it'll destroy the log file content on sway reload.
+
 ## Styling
 
-Edit `~/.config/nwg-panel/drawer.css` to your taste.
+Edit `~/.config/nwg-drawer/drawer.css` to your taste.
 
 ## Files
 
@@ -97,7 +138,7 @@ When the search phrase is at least 3 characters long, your XDG user directories 
 Use the **left mouse button** to open a file with the `xdg-open` command. As configuring file associations for it is
 PITA, you may override them, by creating the `~/.config/nwg-panel/preferred-apps.json` file with your own definitions.
 
-### Sample file content
+### Sample `preferred-apps.json` file content
 
 ```json
 {
@@ -110,14 +151,24 @@ PITA, you may override them, by creating the `~/.config/nwg-panel/preferred-apps
 }
 ```
 
-Use the **right mouse button** to open the file with your file manager (see `-fm` argument). The result depends on the
-file manager you use.
+Use the **right mouse button** to open the file with your file manager (see `-fm` argument). The result depends
+on the file manager you use.
 
 - thunar will open the file location
 - pcmanfm will open the file with its associated program
 - caja won't open anything, except for directories
 
 I've noy yet tried other file managers.
+
+### File search exclusions
+
+You may want to exclude some paths inside your XDG user directories from searching. If so, define exclusions in the
+`~/.config/nwg-panel/excluded-dirs` file, e.g. like this:
+
+```text
+# exclude all paths containing 'node_modules'
+node_modules
+```
 
 ## Credits
 
@@ -128,3 +179,5 @@ Copyright (c) 2015-2018 gotk3 contributors
 - [gotk3-layershell](https://github.com/dlasky/gotk3-layershell) by [@dlasky](https://github.com/dlasky/gotk3-layershell/commits?author=dlasky) - many thanks for writing this software, and for patience with my requests!
 - [go-sway](https://github.com/joshuarubin/go-sway) Copyright (c) 2019 Joshua Rubin
 - [go-singleinstance](github.com/allan-simon/go-singleinstance) Copyright (c) 2015 Allan Simon
+- [logrus](https://github.com/sirupsen/logrus) Copyright (c) 2014 Simon Eskildsen
+- [fsnotify](https://github.com/fsnotify/fsnotify) Copyright (c) 2012-2019 fsnotify Authors

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -20,16 +21,16 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-const version = "0.1.12"
+const version = "0.2.0"
 
 var (
 	appDirs         []string
 	configDirectory string
 	pinnedFile      string
 	pinned          []string
-	src             glib.SourceHandle
 	id2entry        map[string]desktopEntry
 	preferredApps   map[string]interface{}
+	exclusions      []string
 )
 
 var categoryNames = [...]string{
@@ -82,6 +83,7 @@ var desktopEntries []desktopEntry
 
 // UI elements
 var (
+	win                     *gtk.Window
 	resultWindow            *gtk.ScrolledWindow
 	fileSearchResults       []string
 	searchEntry             *gtk.SearchEntry
@@ -98,6 +100,9 @@ var (
 	statusLabel             *gtk.Label
 	status                  string
 	ignore                  string
+	showWindowTrigger       bool
+	desktopTrigger          bool
+	pinnedTrigger           bool
 )
 
 func defaultStringIfBlank(s, fallback string) string {
@@ -122,13 +127,19 @@ var itemSpacing = flag.Uint("spacing", 20, "icon spacing")
 var lang = flag.String("lang", "", "force lang, e.g. \"en\", \"pl\"")
 var fileManager = flag.String("fm", "thunar", "File Manager")
 var term = flag.String("term", defaultStringIfBlank(os.Getenv("TERM"), "alacritty"), "Terminal emulator")
-var nameLimit = flag.Int("fslen", 80, "File Search name length Limit")
+var nameLimit = flag.Int("fslen", 80, "File Search name LENgth Limit")
 var noCats = flag.Bool("nocats", false, "Disable filtering by category")
 var noFS = flag.Bool("nofs", false, "Disable file search")
+var resident = flag.Bool("r", false, "Leave the program resident in memory")
+var debug = flag.Bool("d", false, "Turn on Debug messages")
 
 func main() {
 	timeStart := time.Now()
 	flag.Parse()
+
+	if *debug {
+		log.SetLevel(log.DebugLevel)
+	}
 
 	if *displayVersion {
 		fmt.Printf("nwg-drawer version %s\n", version)
@@ -136,33 +147,58 @@ func main() {
 	}
 
 	// Gentle SIGTERM handler thanks to reiki4040 https://gist.github.com/reiki4040/be3705f307d3cd136e85
+	// v0.2: we also need to support SIGUSR from now on
 	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, syscall.SIGTERM)
+	signal.Notify(signalChan, syscall.SIGTERM, syscall.SIGUSR1)
+
 	go func() {
 		for {
 			s := <-signalChan
-			if s == syscall.SIGTERM {
-				log.Info("SIGTERM received, bye bye!")
+			switch s {
+			case syscall.SIGTERM:
+				log.Info("SIGTERM received, bye bye")
 				gtk.MainQuit()
+			case syscall.SIGUSR1:
+				if *resident {
+					// As win.Show() called from inside a goroutine randomly crashes GTK,
+					// let's just set e helper variable here. We'll be checking it with glib.TimeoutAdd.
+					log.Debug("SIGUSR1 received, showing the window")
+					showWindowTrigger = true
+				} else {
+					log.Info("SIGUSR1 received, and I'm not resident, bye bye")
+					gtk.MainQuit()
+				}
+			default:
+				log.Info("Unknown signal")
 			}
 		}
 	}()
 
-	// We want the same key/mouse binding to turn the dock off: kill the running instance and exit.
-	lockFilePath := fmt.Sprintf("%s/nwg-drawer.lock", tempDir())
+	// If running instance found, we want it to show the window. The new instance will send SIGUSR1 and die
+	// (equivalent of `pkill -USR1 nwg-drawer`).
+	// Otherwise the command may behave in two ways:
+	// 	1. kill the running non-residennt instance and exit;
+	// 	2. die if a resident instance found.
+	lockFilePath := path.Join(tempDir(), "nwg-drawer.lock")
 	lockFile, err := singleinstance.CreateLockFile(lockFilePath)
 	if err != nil {
 		pid, err := readTextFile(lockFilePath)
 		if err == nil {
 			i, err := strconv.Atoi(pid)
 			if err == nil {
-				log.Info("Running instance found, sending SIGTERM and exiting...")
-				syscall.Kill(i, syscall.SIGTERM)
+				if *resident {
+					log.Warnf("Resident instance already running (PID %v)", i)
+				} else {
+					log.Infof("Showing resident instance (PID %v)", i)
+					syscall.Kill(i, syscall.SIGUSR1)
+				}
 			}
 		}
 		os.Exit(0)
 	}
 	defer lockFile.Close()
+
+	log.Infof("term: %s", *term)
 
 	// LANGUAGE
 	if *lang == "" && os.Getenv("LANG") != "" {
@@ -173,6 +209,29 @@ func main() {
 	// ENVIRONMENT
 	configDirectory = configDir()
 
+	// Placing the drawer config files in the nwg-panel config directory was a mistake.
+	// Let's move them to their own location.
+	oldConfigDirectory, err := oldConfigDir()
+	if err == nil {
+		for _, p := range []string{"drawer.css", "preferred-apps.json"} {
+			if pathExists(path.Join(oldConfigDirectory, p)) {
+				log.Infof("File %s found in stale location, moving to %s", p, configDirectory)
+				if !pathExists(path.Join(configDirectory, p)) {
+					err = os.Rename(path.Join(oldConfigDirectory, p), path.Join(configDirectory, p))
+					if err == nil {
+						log.Info("Success")
+					} else {
+						log.Warn(err)
+					}
+				} else {
+					log.Warnf("Failed moving %s to %s: path already exists!", path.Join(oldConfigDirectory, p), path.Join(configDirectory, p))
+				}
+
+			}
+		}
+	}
+
+	// Copy default style sheet if not found
 	if !pathExists(filepath.Join(configDirectory, "drawer.css")) {
 		copyFile(filepath.Join(getDataHome(), "nwg-drawer/drawer.css"), filepath.Join(configDirectory, "drawer.css"))
 	}
@@ -205,12 +264,29 @@ func main() {
 
 	// For opening files we use xdg-open. As its configuration is PITA, we may override some associations
 	// in the ~/.config/nwg-panel/preferred-apps.json file.
-	paFile := filepath.Join(configDirectory, "preferred-apps.json")
-	preferredApps, err = loadPreferredApps(paFile)
-	if err != nil {
-		log.Error(fmt.Sprintf("Custom associations file %s not found or invalid", paFile))
+	paFile := path.Join(configDirectory, "preferred-apps.json")
+	if pathExists(paFile) {
+		preferredApps, err = loadPreferredApps(paFile)
+		if err != nil {
+			log.Infof("Custom associations file %s not found or invalid", paFile)
+		} else {
+			log.Infof("Found %v associations in %s", len(preferredApps), paFile)
+		}
 	} else {
-		log.Info(fmt.Sprintf("Found %v associations in %s", len(preferredApps), paFile))
+		log.Infof("%s file not found", paFile)
+	}
+
+	// Load user-defined paths excluded from file search
+	exFile := path.Join(configDirectory, "excluded-dirs")
+	if pathExists(exFile) {
+		exclusions, err = loadTextFile(exFile)
+		if err != nil {
+			log.Infof("Search exclusions file %s not found %s", exFile, err)
+		} else {
+			log.Infof("Found %v search exclusions in %s", len(exclusions), exFile)
+		}
+	} else {
+		log.Infof("%s file not found", exFile)
 	}
 
 	// USER INTERFACE
@@ -228,7 +304,7 @@ func main() {
 		gtk.AddProviderForScreen(screen, cssProvider, gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 	}
 
-	win, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
+	win, err = gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
 	if err != nil {
 		log.Fatal("Unable to create window:", err)
 	}
@@ -277,7 +353,11 @@ func main() {
 				searchEntry.GrabFocus()
 				searchEntry.SetText("")
 			} else {
-				gtk.MainQuit()
+				if !*resident {
+					gtk.MainQuit()
+				} else {
+					restoreStateAndHide()
+				}
 			}
 			return false
 		case gdk.KEY_downarrow, gdk.KEY_Up, gdk.KEY_Down, gdk.KEY_Left, gdk.KEY_Right, gdk.KEY_Tab,
@@ -290,18 +370,6 @@ func main() {
 			}
 			return false
 		}
-	})
-
-	// Close the window on leave, but not immediately, to avoid accidental closes
-	win.Connect("leave-notify-event", func() {
-		src = glib.TimeoutAdd(uint(500), func() bool {
-			gtk.MainQuit()
-			return false
-		})
-	})
-
-	win.Connect("enter-notify-event", func() {
-		cancelClose()
 	})
 
 	/*
@@ -343,13 +411,15 @@ func main() {
 	resultWindow, _ = gtk.ScrolledWindowNew(nil, nil)
 	resultWindow.SetEvents(int(gdk.ALL_EVENTS_MASK))
 	resultWindow.SetPolicy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-	resultWindow.Connect("enter-notify-event", func() {
-		cancelClose()
-	})
+
 	resultWindow.Connect("button-release-event", func(sw *gtk.ScrolledWindow, e *gdk.Event) bool {
 		btnEvent := gdk.EventButtonNewFromEvent(e)
 		if btnEvent.Button() == 1 || btnEvent.Button() == 3 {
-			gtk.MainQuit()
+			if !*resident {
+				gtk.MainQuit()
+			} else {
+				restoreStateAndHide()
+			}
 			return true
 		}
 		return false
@@ -394,6 +464,7 @@ func main() {
 	statusLineWrapper.PackStart(statusLabel, true, false, 0)
 
 	win.ShowAll()
+
 	if !*noFS {
 		fileSearchResultWrapper.SetSizeRequest(appFlowBox.GetAllocatedWidth(), 1)
 		fileSearchResultWrapper.Hide()
@@ -401,8 +472,69 @@ func main() {
 	if !*noCats {
 		categoriesWrapper.SetSizeRequest(1, categoriesWrapper.GetAllocatedHeight()*2)
 	}
+	if *resident {
+		win.Hide()
+	}
 
 	t := time.Now()
 	log.Info(fmt.Sprintf("UI created in %v ms. Thank you for your patience.", t.Sub(timeStart).Milliseconds()))
+
+	// Check if showing the window has been requested (SIGUSR1)
+	glib.TimeoutAdd(uint(1), func() bool {
+		if showWindowTrigger && win != nil && !win.IsVisible() {
+			win.ShowAll()
+			// focus 1st element
+			b := appFlowBox.GetChildAtIndex(0)
+			if b != nil {
+				button, err := b.GetChild()
+				if err == nil {
+					button.ToWidget().GrabFocus()
+				}
+			}
+		}
+		showWindowTrigger = false
+
+		// some .desktop file changed
+		if desktopTrigger {
+			log.Debug(".desktop file changed")
+			desktopFiles = listDesktopFiles()
+			status = parseDesktopFiles(desktopFiles)
+			appFlowBox = setUpAppsFlowBox(nil, "")
+			desktopTrigger = false
+		}
+
+		// pinned file changed
+		if pinnedTrigger {
+			log.Debug("pinned file changed")
+			pinnedTrigger = false
+			pinned, _ = loadTextFile(pinnedFile)
+			pinnedFlowBox = setUpPinnedFlowBox()
+		}
+		return true
+	})
+
+	go watchFiles()
+
 	gtk.Main()
+}
+
+func restoreStateAndHide() {
+	timeStart1 := time.Now()
+	win.Hide()
+
+	// clear search
+	searchEntry.SetText("")
+
+	// clear category filter (in gotk3 it means: rebuild, as we have no filtering here)
+	appFlowBox = setUpAppsFlowBox(nil, "")
+	for _, btn := range catButtons {
+		btn.SetImagePosition(gtk.POS_LEFT)
+		btn.SetSizeRequest(0, 0)
+	}
+
+	// scroll to the top
+	resultWindow.GetVAdjustment().SetValue(0)
+
+	t := time.Now()
+	log.Debugf(fmt.Sprintf("UI hidden and restored in the backgroud in %v ms", t.Sub(timeStart1).Milliseconds()))
 }

@@ -6,11 +6,14 @@ get:
 	go get github.com/joshuarubin/go-sway
 	go get github.com/allan-simon/go-singleinstance
 	go get "github.com/sirupsen/logrus"
+	go get github.com/fsnotify/fsnotify
 
 build:
 	go build -o bin/nwg-drawer .
 
 install:
+	-pkill -f nwg-drawer
+	sleep 1
 	mkdir -p /usr/share/nwg-drawer
 	cp -r desktop-directories /usr/share/nwg-drawer
 	cp drawer.css /usr/share/nwg-drawer
@@ -21,5 +24,4 @@ uninstall:
 	rm /usr/bin/nwg-drawer
 
 run:
-	go build -o bin/nwg-drawer .
-	bin/nwg-drawer
+	go run .
