@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/fsnotify/fsnotify"
 )
@@ -19,12 +20,12 @@ func watchFiles() {
 	defer watcher.Close()
 
 	if err := watcher.Add(pinnedFile); err != nil {
-		fmt.Println("ERROR", err)
+		log.Errorf("ERROR", err)
 	}
 
 	for _, fp := range appDirs {
 		if err := filepath.Walk(fp, watchDir); err != nil {
-			fmt.Println("ERROR", err)
+			log.Errorf("ERROR", err)
 		}
 	}
 
@@ -44,7 +45,7 @@ func watchFiles() {
 				}
 
 			case err := <-watcher.Errors:
-				fmt.Println("ERROR", err)
+				log.Errorf("ERROR", err)
 			}
 		}
 	}()

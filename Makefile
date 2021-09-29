@@ -13,6 +13,7 @@ build:
 
 install:
 	-pkill -f nwg-drawer
+	sleep 1
 	mkdir -p /usr/share/nwg-drawer
 	cp -r desktop-directories /usr/share/nwg-drawer
 	cp drawer.css /usr/share/nwg-drawer
