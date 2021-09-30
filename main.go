@@ -162,8 +162,13 @@ func main() {
 				if *resident {
 					// As win.Show() called from inside a goroutine randomly crashes GTK,
 					// let's just set e helper variable here. We'll be checking it with glib.TimeoutAdd.
-					log.Debug("SIGUSR1 received, showing the window")
-					showWindowTrigger = true
+					if !win.IsVisible() {
+						log.Debug("SIGUSR1 received, showing the window")
+						showWindowTrigger = true
+					} else {
+						log.Debug("SIGUSR1 received, hiding the window")
+						restoreStateAndHide()
+					}
 				} else {
 					log.Info("SIGUSR1 received, and I'm not resident, bye bye")
 					gtk.MainQuit()
