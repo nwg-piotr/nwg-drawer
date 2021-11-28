@@ -559,7 +559,13 @@ func launch(command string, terminal bool) {
 	cmd := exec.Command(elements[cmdIdx], elements[1+cmdIdx:]...)
 
 	if terminal {
-		args := []string{"-e", elements[cmdIdx]}
+		var args []string
+		if *term != "foot" {
+			args = []string{"-e", elements[cmdIdx]}
+		} else {
+			args = []string{elements[cmdIdx]}
+		}
+
 		cmd = exec.Command(*term, args...)
 	}
 
