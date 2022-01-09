@@ -21,7 +21,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-const version = "0.2.3"
+const version = "0.2.4"
 
 var (
 	appDirs         []string
@@ -351,8 +351,7 @@ func main() {
 
 	win.Connect("key-release-event", func(window *gtk.Window, event *gdk.Event) bool {
 		key := &gdk.EventKey{Event: event}
-		switch key.KeyVal() {
-		case gdk.KEY_Escape:
+		if key.KeyVal() == gdk.KEY_Escape {
 			s, _ := searchEntry.GetText()
 			if s != "" {
 				searchEntry.GrabFocus()
@@ -365,15 +364,22 @@ func main() {
 				}
 			}
 			return true
+		}
+		return false
+	})
+
+	win.Connect("key-press-event", func(window *gtk.Window, event *gdk.Event) bool {
+		key := &gdk.EventKey{Event: event}
+		switch key.KeyVal() {
 		case gdk.KEY_downarrow, gdk.KEY_Up, gdk.KEY_Down, gdk.KEY_Left, gdk.KEY_Right, gdk.KEY_Tab,
 			gdk.KEY_Return, gdk.KEY_Page_Up, gdk.KEY_Page_Down, gdk.KEY_Home, gdk.KEY_End:
-			return true
+			return false
 
 		default:
 			if !searchEntry.IsFocus() {
 				searchEntry.GrabFocusWithoutSelecting()
 			}
-			return true
+			return false
 		}
 	})
 
