@@ -126,7 +126,7 @@ var columnsNumber = flag.Uint("c", 6, "number of Columns")
 var itemSpacing = flag.Uint("spacing", 20, "icon spacing")
 var lang = flag.String("lang", "", "force lang, e.g. \"en\", \"pl\"")
 var fileManager = flag.String("fm", "thunar", "File Manager")
-var term = flag.String("term", defaultStringIfBlank(os.Getenv("TERM"), "alacritty"), "Terminal emulator")
+var term = flag.String("term", defaultStringIfBlank(os.Getenv("TERM"), "foot"), "Terminal emulator")
 var nameLimit = flag.Int("fslen", 80, "File Search name LENgth Limit")
 var noCats = flag.Bool("nocats", false, "Disable filtering by category")
 var noFS = flag.Bool("nofs", false, "Disable file search")
@@ -349,7 +349,7 @@ func main() {
 		gtk.MainQuit()
 	})
 
-	win.Connect("key-press-event", func(window *gtk.Window, event *gdk.Event) bool {
+	win.Connect("key-release-event", func(window *gtk.Window, event *gdk.Event) bool {
 		key := &gdk.EventKey{Event: event}
 		switch key.KeyVal() {
 		case gdk.KEY_Escape:
@@ -364,16 +364,16 @@ func main() {
 					restoreStateAndHide()
 				}
 			}
-			return false
+			return true
 		case gdk.KEY_downarrow, gdk.KEY_Up, gdk.KEY_Down, gdk.KEY_Left, gdk.KEY_Right, gdk.KEY_Tab,
 			gdk.KEY_Return, gdk.KEY_Page_Up, gdk.KEY_Page_Down, gdk.KEY_Home, gdk.KEY_End:
-			return false
+			return true
 
 		default:
 			if !searchEntry.IsFocus() {
 				searchEntry.GrabFocusWithoutSelecting()
 			}
-			return false
+			return true
 		}
 	})
 
