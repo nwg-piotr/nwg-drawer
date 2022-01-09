@@ -77,6 +77,9 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 			btn.Connect("enter-notify-event", func() {
 				statusLabel.SetText(entry.CommentLoc)
 			})
+			btn.Connect("focus-in-event", func() {
+				statusLabel.SetText(entry.CommentLoc)
+			})
 			flowBox.Add(btn)
 		}
 		pinnedFlowBoxWrapper.PackStart(flowBox, true, false, 0)
@@ -270,6 +273,9 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 		launch(exec, terminal)
 	})
 	button.Connect("enter-notify-event", func() {
+		statusLabel.SetText(desc)
+	})
+	button.Connect("focus-in-event", func() {
 		statusLabel.SetText(desc)
 	})
 	return button
