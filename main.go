@@ -21,7 +21,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-const version = "0.2.4"
+const version = "0.2.5"
 
 var (
 	appDirs         []string
@@ -425,7 +425,7 @@ func main() {
 
 	resultWindow.Connect("button-release-event", func(sw *gtk.ScrolledWindow, e *gdk.Event) bool {
 		btnEvent := gdk.EventButtonNewFromEvent(e)
-		if btnEvent.Button() == 1 || btnEvent.Button() == 3 {
+		if btnEvent.Button() == 3 {
 			if !*resident {
 				gtk.MainQuit()
 			} else {
