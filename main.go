@@ -251,6 +251,7 @@ func main() {
 	pinned, err = loadTextFile(pinnedFile)
 	if err != nil {
 		pinned = nil
+		savePinned()
 	}
 	log.Info(fmt.Sprintf("Found %v pinned items", len(pinned)))
 
@@ -494,6 +495,7 @@ func main() {
 	glib.TimeoutAdd(uint(1), func() bool {
 		if showWindowTrigger && win != nil && !win.IsVisible() {
 			win.ShowAll()
+			fileSearchResultWrapper.Hide()
 			// focus 1st element
 			b := appFlowBox.GetChildAtIndex(0)
 			if b != nil {
