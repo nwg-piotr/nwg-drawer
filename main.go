@@ -251,6 +251,7 @@ func main() {
 	pinned, err = loadTextFile(pinnedFile)
 	if err != nil {
 		pinned = nil
+		savePinned()
 	}
 	log.Info(fmt.Sprintf("Found %v pinned items", len(pinned)))
 
