@@ -495,7 +495,9 @@ func main() {
 	glib.TimeoutAdd(uint(1), func() bool {
 		if showWindowTrigger && win != nil && !win.IsVisible() {
 			win.ShowAll()
-			fileSearchResultWrapper.Hide()
+			if fileSearchResultWrapper != nil {
+				fileSearchResultWrapper.Hide()
+			}
 			// focus 1st element
 			b := appFlowBox.GetChildAtIndex(0)
 			if b != nil {
