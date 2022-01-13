@@ -52,9 +52,6 @@ confirmed to work well with the program. Also see **Files** below.
 3. `make build`
 4. `sudo make install`
 
-Building the gotk3 library takes quite a lot of time. If your machine is x86_64, you may skip steps 2-3, and
-install the provided binary by executing step 4.
-
 ## Command line arguments
 
 ```text
