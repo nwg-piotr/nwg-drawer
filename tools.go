@@ -15,6 +15,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"syscall"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -577,6 +578,10 @@ func launch(command string, terminal bool) {
 
 	msg := fmt.Sprintf("env vars: %s; command: '%s'; args: %s\n", envVars, elements[cmdIdx], elements[1+cmdIdx:])
 	log.Info(msg)
+
+	cmd.SysProcAttr = &syscall.SysProcAttr {
+		Setsid: true,
+	}
 
 	cmd.Start()
 
