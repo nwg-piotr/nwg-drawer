@@ -21,7 +21,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-const version = "0.2.5"
+const version = "0.2.7"
 
 var (
 	appDirs         []string
