@@ -15,9 +15,9 @@ You may pin applications by right-clicking them. Pinned items will appear above 
 a pinned item to unpin it. The pinned items cache is shared with [nwg-menu](https://github.com/nwg-piotr/nwg-menu)
 and `nwggrid`.
 
-![screenshot-01.png](https://scrot.cloud/images/2021/05/30/screenshot-01.png)
+![screenshot.png](https://raw.githubusercontent.com/nwg-piotr/nwg-shell/main/images/nwg-shell/nwg-drawer.png)
 
-[more screenshots](https://scrot.cloud/album/nwg-drawer.Bogd) | [see on YouTube](https://youtu.be/iIgxJQhCQf0)
+[see on YouTube](https://youtu.be/iIgxJQhCQf0)
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/nwg-drawer.svg)](https://repology.org/project/nwg-drawer/versions)
 
@@ -132,7 +132,7 @@ Edit `~/.config/nwg-drawer/drawer.css` to your taste.
 
 When the search phrase is at least 3 characters long, your XDG user directories are being searched.
 
-![screenshot-03.png](https://scrot.cloud/images/2021/05/30/screenshot-03.png)
+![screenshot-02.png](https://raw.githubusercontent.com/nwg-piotr/nwg-shell/main/images/nwg-drawer/search.png)
 
 Use the **left mouse button** to open a file with the `xdg-open` command. As configuring file associations for it is
 PITA, you may override them, by creating the `~/.config/nwg-panel/preferred-apps.json` file with your own definitions.
