@@ -15,7 +15,7 @@ You may pin applications by right-clicking them. Pinned items will appear above 
 a pinned item to unpin it. The pinned items cache is shared with [nwg-menu](https://github.com/nwg-piotr/nwg-menu)
 and `nwggrid`.
 
-![screenshot.png](https://raw.githubusercontent.com/nwg-piotr/nwg-shell/main/images/nwg-shell/nwg-drawer.png)
+![screenshot.png](https://raw.githubusercontent.com/nwg-piotr/nwg-shell-resources/master/images/nwg-shell/nwg-drawer.png)
 
 [see on YouTube](https://youtu.be/iIgxJQhCQf0)
 
