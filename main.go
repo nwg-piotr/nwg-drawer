@@ -120,6 +120,10 @@ var targetOutput = flag.String("o", "", "name of the Output to display the drawe
 var displayVersion = flag.Bool("v", false, "display Version information")
 var overlay = flag.Bool("ovl", false, "use OVerLay layer")
 var iconSize = flag.Int("is", 64, "Icon Size")
+var marginTop = flag.Int("mt", 0, "Margin Top")
+var marginLeft = flag.Int("ml", 0, "Margin Left")
+var marginRight = flag.Int("mr", 0, "Margin Right")
+var marginBottom = flag.Int("mb", 0, "Margin Bottom")
 var fsColumns = flag.Uint("fscol", 2, "File Search result COLumns")
 var columnsNumber = flag.Uint("c", 6, "number of Columns")
 var itemSpacing = flag.Uint("spacing", 20, "icon spacing")
@@ -342,6 +346,11 @@ func main() {
 		} else {
 			layershell.SetLayer(win, layershell.LAYER_SHELL_LAYER_TOP)
 		}
+
+		layershell.SetMargin(win, layershell.LAYER_SHELL_EDGE_TOP, *marginTop)
+		layershell.SetMargin(win, layershell.LAYER_SHELL_EDGE_LEFT, *marginLeft)
+		layershell.SetMargin(win, layershell.LAYER_SHELL_EDGE_RIGHT, *marginRight)
+		layershell.SetMargin(win, layershell.LAYER_SHELL_EDGE_BOTTOM, *marginBottom)
 
 		layershell.SetKeyboardMode(win, layershell.LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE)
 	}
