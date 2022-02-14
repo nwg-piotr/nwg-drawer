@@ -41,7 +41,9 @@ func watchFiles() {
 						event.Op.String() == "RENAME") {
 					desktopTrigger = true
 				} else if event.Name == pinnedFile {
-					pinnedTrigger = true
+					// TODO: This can be used to propagate information about the changed file to the
+					//       GUI to avoid recreating everything
+					pinnedItemsChanged <- struct{}{}
 				}
 
 			case err := <-watcher.Errors:

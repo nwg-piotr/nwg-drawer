@@ -100,9 +100,8 @@ var (
 	statusLabel             *gtk.Label
 	status                  string
 	ignore                  string
-	showWindowTrigger       bool
 	desktopTrigger          bool
-	pinnedTrigger           bool
+	pinnedItemsChanged      chan interface{} = make(chan interface{}, 1)
 )
 
 func defaultStringIfBlank(s, fallback string) string {
@@ -148,6 +147,7 @@ func main() {
 
 	// Gentle SIGTERM handler thanks to reiki4040 https://gist.github.com/reiki4040/be3705f307d3cd136e85
 	// v0.2: we also need to support SIGUSR from now on
+	showWindowChannel := make(chan interface{}, 1)
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, syscall.SIGTERM, syscall.SIGUSR1)
 
@@ -164,7 +164,7 @@ func main() {
 					// let's just set e helper variable here. We'll be checking it with glib.TimeoutAdd.
 					if !win.IsVisible() {
 						log.Debug("SIGUSR1 received, showing the window")
-						showWindowTrigger = true
+						showWindowChannel <- struct{}{}
 					} else {
 						log.Debug("SIGUSR1 received, hiding the window")
 						restoreStateAndHide()
@@ -492,41 +492,53 @@ func main() {
 	log.Info(fmt.Sprintf("UI created in %v ms. Thank you for your patience.", t.Sub(timeStart).Milliseconds()))
 
 	// Check if showing the window has been requested (SIGUSR1)
-	glib.TimeoutAdd(uint(1), func() bool {
-		if showWindowTrigger && win != nil && !win.IsVisible() {
-			win.ShowAll()
-			if fileSearchResultWrapper != nil {
-				fileSearchResultWrapper.Hide()
-			}
-			// focus 1st element
-			b := appFlowBox.GetChildAtIndex(0)
-			if b != nil {
-				button, err := b.GetChild()
-				if err == nil {
-					button.ToWidget().GrabFocus()
-				}
-			}
-		}
-		showWindowTrigger = false
+	go func() {
+		for {
+			select {
+			case <-showWindowChannel:
+				log.Debug("Showing window")
+				glib.TimeoutAdd(0, func() bool {
+					if win != nil && !win.IsVisible() {
 
-		// some .desktop file changed
-		if desktopTrigger {
-			log.Debug(".desktop file changed")
-			desktopFiles = listDesktopFiles()
-			status = parseDesktopFiles(desktopFiles)
-			appFlowBox = setUpAppsFlowBox(nil, "")
-			desktopTrigger = false
-		}
+						// Refresh files before displaying the root window
+						// some .desktop file changed
+						if desktopTrigger {
+							log.Debug(".desktop file changed")
+							desktopFiles = listDesktopFiles()
+							status = parseDesktopFiles(desktopFiles)
+							appFlowBox = setUpAppsFlowBox(nil, "")
+							desktopTrigger = false
+						}
 
-		// pinned file changed
-		if pinnedTrigger {
-			log.Debug("pinned file changed")
-			pinnedTrigger = false
-			pinned, _ = loadTextFile(pinnedFile)
-			pinnedFlowBox = setUpPinnedFlowBox()
+						// Show window and focus the search box
+						win.ShowAll()
+						if fileSearchResultWrapper != nil {
+							fileSearchResultWrapper.Hide()
+						}
+						// focus 1st element
+						b := appFlowBox.GetChildAtIndex(0)
+						if b != nil {
+							button, err := b.GetChild()
+							if err == nil {
+								button.ToWidget().GrabFocus()
+							}
+						}
+					}
+
+					return false
+				})
+
+			case <-pinnedItemsChanged:
+				glib.TimeoutAdd(0, func() bool {
+					log.Debug("pinned file changed")
+					pinned, _ = loadTextFile(pinnedFile)
+					pinnedFlowBox = setUpPinnedFlowBox()
+
+					return false
+				})
+			}
 		}
-		return true
-	})
+	}()
 
 	go watchFiles()
 
