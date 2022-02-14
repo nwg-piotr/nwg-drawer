@@ -101,7 +101,7 @@ var (
 	status                  string
 	ignore                  string
 	desktopTrigger          bool
-	pinnedTrigger           bool
+	pinnedItemsChanged      chan interface{} = make(chan interface{}, 1)
 )
 
 func defaultStringIfBlank(s, fallback string) string {
@@ -494,47 +494,49 @@ func main() {
 	// Check if showing the window has been requested (SIGUSR1)
 	go func() {
 		for {
-			<-showWindowChannel
+			select {
+			case <-showWindowChannel:
+				log.Debug("Showing window")
+				glib.TimeoutAdd(0, func() bool {
+					if win != nil && !win.IsVisible() {
 
-			log.Debug("SHOW WINDOW")
-			glib.TimeoutAdd(0, func() bool {
-				if win != nil && !win.IsVisible() {
+						// Refresh files before displaying the root window
+						// some .desktop file changed
+						if desktopTrigger {
+							log.Debug(".desktop file changed")
+							desktopFiles = listDesktopFiles()
+							status = parseDesktopFiles(desktopFiles)
+							appFlowBox = setUpAppsFlowBox(nil, "")
+							desktopTrigger = false
+						}
 
-					// Refresh files before displaying the root window
-					// some .desktop file changed
-					if desktopTrigger {
-						log.Debug(".desktop file changed")
-						desktopFiles = listDesktopFiles()
-						status = parseDesktopFiles(desktopFiles)
-						appFlowBox = setUpAppsFlowBox(nil, "")
-						desktopTrigger = false
-					}
-
-					// pinned file changed
-					if pinnedTrigger {
-						log.Debug("pinned file changed")
-						pinnedTrigger = false
-						pinned, _ = loadTextFile(pinnedFile)
-						pinnedFlowBox = setUpPinnedFlowBox()
-					}
-
-					// Show window and focus the search box
-					win.ShowAll()
-					if fileSearchResultWrapper != nil {
-						fileSearchResultWrapper.Hide()
-					}
-					// focus 1st element
-					b := appFlowBox.GetChildAtIndex(0)
-					if b != nil {
-						button, err := b.GetChild()
-						if err == nil {
-							button.ToWidget().GrabFocus()
+						// Show window and focus the search box
+						win.ShowAll()
+						if fileSearchResultWrapper != nil {
+							fileSearchResultWrapper.Hide()
+						}
+						// focus 1st element
+						b := appFlowBox.GetChildAtIndex(0)
+						if b != nil {
+							button, err := b.GetChild()
+							if err == nil {
+								button.ToWidget().GrabFocus()
+							}
 						}
 					}
-				}
 
-				return false
-			})
+					return false
+				})
+
+			case <-pinnedItemsChanged:
+				glib.TimeoutAdd(0, func() bool {
+					log.Debug("pinned file changed")
+					pinned, _ = loadTextFile(pinnedFile)
+					pinnedFlowBox = setUpPinnedFlowBox()
+
+					return false
+				})
+			}
 		}
 	}()
 
