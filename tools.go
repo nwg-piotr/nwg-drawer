@@ -579,11 +579,19 @@ func launch(command string, terminal bool) {
 	msg := fmt.Sprintf("env vars: %s; command: '%s'; args: %s\n", envVars, elements[cmdIdx], elements[1+cmdIdx:])
 	log.Info(msg)
 
-	cmd.SysProcAttr = &syscall.SysProcAttr {
+	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Setsid: true,
 	}
 
-	cmd.Start()
+	if cmd.Start() != nil {
+		log.Warn("Unable to launch terminal emulator!")
+	} else {
+		// Collect the exit code of the child process to prevent zombies
+		// if the drawer runs in resident mode
+		go func() {
+			_ = cmd.Wait()
+		}()
+	}
 
 	if *resident {
 		restoreStateAndHide()
@@ -609,7 +617,15 @@ func open(filePath string, xdgOpen bool) {
 	}
 	log.Infof("Executing: %s", cmd)
 
-	cmd.Start()
+	if cmd.Start() != nil {
+		log.Warn("Unable to execute command!")
+	} else {
+		// Collect the exit code of the child process to prevent zombies
+		// if the drawer runs in resident mode
+		go func() {
+			_ = cmd.Wait()
+		}()
+	}
 
 	if *resident {
 		restoreStateAndHide()
