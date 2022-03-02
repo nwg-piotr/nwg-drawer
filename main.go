@@ -116,6 +116,7 @@ func defaultStringIfBlank(s, fallback string) string {
 
 // Flags
 var cssFileName = flag.String("s", "drawer.css", "Styling: css file name")
+var userDefinedAppsDirectory = flag.String("dir", "", "where to search for applications")
 var targetOutput = flag.String("o", "", "name of the Output to display the drawer on (sway only)")
 var displayVersion = flag.Bool("v", false, "display Version information")
 var overlay = flag.Bool("ovl", false, "use OVerLay layer")
