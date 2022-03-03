@@ -318,12 +318,13 @@ func setUpCategories() {
 	}
 	defer jsonFile.Close()
 
-	for _, cName := range categoryNames {
+	for cName, cMatches := range categoryMatches {
 		fileName := fmt.Sprintf("%s.directory", cName)
 		lines, err := loadTextFile(filepath.Join(path, fileName))
 		if err == nil {
 			var cat category
 			cat.Name = cName
+			cat.Matches = cMatches
 
 			name := ""
 			nameLoc := ""
@@ -367,6 +368,7 @@ func setUpCategories() {
 			}
 		}
 	}
+
 	sort.Slice(categories, func(i, j int) bool {
 		return categories[i].DisplayName < categories[j].DisplayName
 	})
@@ -411,11 +413,15 @@ func parseDesktopFiles(desktopFiles []string) string {
 // freedesktop Main Categories list consists of 13 entries. Let's contract it to 8+1 ("Other").
 func assignToLists(desktopID, appCategories string) {
 	cats := strings.Split(appCategories, ";")
+	assigned := false
 	for i := 0; i < len(categories); i++ {
 		for _, appCat := range cats {
-			if appCat == categories[i].Name {
+			if isIn(categories[i].Matches, appCat) {
 				categories[i].Apps = append(categories[i].Apps, desktopID)
+				assigned = true
 				continue
+			} else if i == len(categories)-1 && !assigned {
+				categories[i].Apps = append(categories[i].Apps, desktopID)
 			}
 		}
 	}
