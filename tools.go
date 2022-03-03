@@ -224,32 +224,27 @@ func getAppDirs() []string {
 	var dirs []string
 	xdgDataDirs := ""
 
-	userApps := *userDefinedAppsDirectory
-	if userApps != "" {
-		dirs = append(dirs, userApps)
+	home := os.Getenv("HOME")
+	xdgDataHome := os.Getenv("XDG_DATA_HOME")
+	if os.Getenv("XDG_DATA_DIRS") != "" {
+		xdgDataDirs = os.Getenv("XDG_DATA_DIRS")
 	} else {
-		home := os.Getenv("HOME")
-		xdgDataHome := os.Getenv("XDG_DATA_HOME")
-		if os.Getenv("XDG_DATA_DIRS") != "" {
-			xdgDataDirs = os.Getenv("XDG_DATA_DIRS")
-		} else {
-			xdgDataDirs = "/usr/local/share/:/usr/share/"
-		}
-		if xdgDataHome != "" {
-			dirs = append(dirs, filepath.Join(xdgDataHome, "applications"))
-		} else if home != "" {
-			dirs = append(dirs, filepath.Join(home, ".local/share/applications"))
-		}
-		for _, d := range strings.Split(xdgDataDirs, ":") {
-			dirs = append(dirs, filepath.Join(d, "applications"))
-		}
-		flatpakDirs := []string{filepath.Join(home, ".local/share/flatpak/exports/share/applications"),
-			"/var/lib/flatpak/exports/share/applications"}
+		xdgDataDirs = "/usr/local/share/:/usr/share/"
+	}
+	if xdgDataHome != "" {
+		dirs = append(dirs, filepath.Join(xdgDataHome, "applications"))
+	} else if home != "" {
+		dirs = append(dirs, filepath.Join(home, ".local/share/applications"))
+	}
+	for _, d := range strings.Split(xdgDataDirs, ":") {
+		dirs = append(dirs, filepath.Join(d, "applications"))
+	}
+	flatpakDirs := []string{filepath.Join(home, ".local/share/flatpak/exports/share/applications"),
+		"/var/lib/flatpak/exports/share/applications"}
 
-		for _, d := range flatpakDirs {
-			if pathExists(d) && !isIn(dirs, d) {
-				dirs = append(dirs, d)
-			}
+	for _, d := range flatpakDirs {
+		if pathExists(d) && !isIn(dirs, d) {
+			dirs = append(dirs, d)
 		}
 	}
 	var confirmedDirs []string
