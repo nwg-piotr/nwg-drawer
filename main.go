@@ -49,6 +49,7 @@ type category struct {
 	Name        string
 	DisplayName string
 	Icon        string
+	Apps        []string
 }
 
 var categories []category
@@ -65,19 +66,6 @@ type desktopEntry struct {
 	Terminal   bool
 	NoDisplay  bool
 }
-
-// slices below will hold DesktopID strings
-var (
-	listUtility            []string
-	listDevelopment        []string
-	listGame               []string
-	listGraphics           []string
-	listInternetAndNetwork []string
-	listOffice             []string
-	listAudioVideo         []string
-	listSystemTools        []string
-	listOther              []string
-)
 
 var desktopEntries []desktopEntry
 

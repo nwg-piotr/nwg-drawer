@@ -308,6 +308,16 @@ func setUpCategories() {
 	path := filepath.Join(getDataHome(), "nwg-drawer/desktop-directories")
 	var other category
 
+	jsonFile, err := os.Open("/home/apoema/.config/nwg-drawer/categories.json")
+	if err == nil {
+		byteValue, _ := ioutil.ReadAll(jsonFile)
+
+		var usrCats []category
+		json.Unmarshal([]byte(byteValue), &usrCats)
+		categories = append(categories, usrCats[:]...)
+	}
+	defer jsonFile.Close()
+
 	for _, cName := range categoryNames {
 		fileName := fmt.Sprintf("%s.directory", cName)
 		lines, err := loadTextFile(filepath.Join(path, fileName))
@@ -399,53 +409,15 @@ func parseDesktopFiles(desktopFiles []string) string {
 }
 
 // freedesktop Main Categories list consists of 13 entries. Let's contract it to 8+1 ("Other").
-func assignToLists(desktopID, categories string) {
-	cats := strings.Split(categories, ";")
-	assigned := false
-	for _, cat := range cats {
-		if cat == "Utility" && !isIn(listUtility, desktopID) {
-			listUtility = append(listUtility, desktopID)
-			assigned = true
-			continue
+func assignToLists(desktopID, appCategories string) {
+	cats := strings.Split(appCategories, ";")
+	for i := 0; i < len(categories); i++ {
+		for _, appCat := range cats {
+			if appCat == categories[i].Name {
+				categories[i].Apps = append(categories[i].Apps, desktopID)
+				continue
+			}
 		}
-		if cat == "Development" && !isIn(listDevelopment, desktopID) {
-			listDevelopment = append(listDevelopment, desktopID)
-			assigned = true
-			continue
-		}
-		if cat == "Game" && !isIn(listGame, desktopID) {
-			listGame = append(listGame, desktopID)
-			assigned = true
-			continue
-		}
-		if cat == "Graphics" && !isIn(listGraphics, desktopID) {
-			listGraphics = append(listGraphics, desktopID)
-			assigned = true
-			continue
-		}
-		if cat == "Network" && !isIn(listInternetAndNetwork, desktopID) {
-			listInternetAndNetwork = append(listInternetAndNetwork, desktopID)
-			assigned = true
-			continue
-		}
-		if isIn([]string{"Office", "Science", "Education"}, cat) && !isIn(listOffice, desktopID) {
-			listOffice = append(listOffice, desktopID)
-			assigned = true
-			continue
-		}
-		if isIn([]string{"AudioVideo", "Audio", "Video"}, cat) && !isIn(listAudioVideo, desktopID) {
-			listAudioVideo = append(listAudioVideo, desktopID)
-			assigned = true
-			continue
-		}
-		if isIn([]string{"Settings", "System", "DesktopSettings", "PackageManager"}, cat) && !isIn(listSystemTools, desktopID) {
-			listSystemTools = append(listSystemTools, desktopID)
-			assigned = true
-			continue
-		}
-	}
-	if categories != "" && !assigned && !isIn(listOther, desktopID) {
-		listOther = append(listOther, desktopID)
 	}
 }
 

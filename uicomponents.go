@@ -95,18 +95,6 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 }
 
 func setUpCategoriesButtonBox() *gtk.EventBox {
-	lists := map[string][]string{
-		"utility":              listUtility,
-		"development":          listDevelopment,
-		"game":                 listGame,
-		"graphics":             listGraphics,
-		"internet-and-network": listInternetAndNetwork,
-		"office":               listOffice,
-		"audio-video":          listAudioVideo,
-		"system-tools":         listSystemTools,
-		"other":                listOther,
-	}
-
 	eventBox, _ := gtk.EventBoxNew()
 
 	hBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
@@ -124,19 +112,19 @@ func setUpCategoriesButtonBox() *gtk.EventBox {
 	hBox.PackStart(button, false, false, 0)
 
 	for _, cat := range categories {
-		if isSupposedToShowUp(cat.Name) {
+		if isSupposedToShowUp(cat) {
 			button, _ = gtk.ButtonNewFromIconName(cat.Icon, gtk.ICON_SIZE_MENU)
 			button.SetProperty("name", "category-button")
 			catButtons = append(catButtons, button)
 			button.SetLabel(cat.DisplayName)
 			button.SetAlwaysShowImage(true)
 			hBox.PackStart(button, false, false, 0)
-			name := cat.Name
+			list := cat.Apps
 			b := *button
 			button.Connect("clicked", func(item *gtk.Button) {
 				searchEntry.SetText("")
 				// !!! since gotk3 FlowBox type does not implement set_filter_func, we need to rebuild appFlowBox
-				appFlowBox = setUpAppsFlowBox(lists[name], "")
+				appFlowBox = setUpAppsFlowBox(list, "")
 				for _, btn := range catButtons {
 					btn.SetImagePosition(gtk.POS_LEFT)
 				}
@@ -152,18 +140,8 @@ func setUpCategoriesButtonBox() *gtk.EventBox {
 	return eventBox
 }
 
-func isSupposedToShowUp(catName string) bool {
-	result := catName == "utility" && notEmpty(listUtility) ||
-		catName == "development" && notEmpty(listDevelopment) ||
-		catName == "game" && notEmpty(listGame) ||
-		catName == "graphics" && notEmpty(listGraphics) ||
-		catName == "internet-and-network" && notEmpty(listInternetAndNetwork) ||
-		catName == "office" && notEmpty(listOffice) ||
-		catName == "audio-video" && notEmpty(listAudioVideo) ||
-		catName == "system-tools" && notEmpty(listSystemTools) ||
-		catName == "other" && notEmpty(listOther)
-
-	return result
+func isSupposedToShowUp(cat category) bool {
+	return notEmpty(cat.Apps)
 }
 
 func notEmpty(listCategory []string) bool {
