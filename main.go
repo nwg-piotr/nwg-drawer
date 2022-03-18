@@ -119,6 +119,7 @@ var cssFileName = flag.String("s", "drawer.css", "Styling: css file name")
 var targetOutput = flag.String("o", "", "name of the Output to display the drawer on (sway only)")
 var displayVersion = flag.Bool("v", false, "display Version information")
 var overlay = flag.Bool("ovl", false, "use OVerLay layer")
+var gtkTheme = flag.String("g", "", "GTK theme name")
 var iconSize = flag.Int("is", 64, "Icon Size")
 var marginTop = flag.Int("mt", 0, "Margin Top")
 var marginLeft = flag.Int("ml", 0, "Margin Left")
@@ -301,6 +302,14 @@ func main() {
 
 	// USER INTERFACE
 	gtk.Init(nil)
+
+	if *gtkTheme != "" {
+		settings, _ := gtk.SettingsGetDefault()
+		err = settings.SetProperty("gtk-theme-name", *gtkTheme)
+		if err != nil {
+			log.Error("Unable to set theme:", err)
+		}
+	}
 
 	cssProvider, _ := gtk.CssProviderNew()
 

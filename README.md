@@ -66,6 +66,8 @@ Usage of nwg-drawer:
     	File Search result COLumns (default 2)
   -fslen int
     	File Search name LENgth Limit (default 80)
+  -g string
+    	GTK theme name, eg. "Adwaita-dark"
   -is int
     	Icon Size (default 64)
   -lang string
