@@ -21,7 +21,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-const version = "0.2.8"
+const version = "0.2.9"
 
 var (
 	appDirs         []string
@@ -303,12 +303,17 @@ func main() {
 	// USER INTERFACE
 	gtk.Init(nil)
 
+	settings, _ := gtk.SettingsGetDefault()
 	if *gtkTheme != "" {
-		settings, _ := gtk.SettingsGetDefault()
 		err = settings.SetProperty("gtk-theme-name", *gtkTheme)
 		if err != nil {
 			log.Error("Unable to set theme:", err)
+		} else {
+			log.Infof("User demanded theme: %s", *gtkTheme)
 		}
+	} else {
+		settings.SetProperty("gtk-application-prefer-dark-theme", true)
+		log.Info("Preferring dark theme variants")
 	}
 
 	cssProvider, _ := gtk.CssProviderNew()
