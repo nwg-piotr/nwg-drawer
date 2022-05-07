@@ -258,6 +258,11 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	exec := entry.Exec
 	terminal := entry.Terminal
 	desc := entry.CommentLoc
+	if len(desc) > 120 {
+		r := []rune(desc)
+		desc = string(r[:117])
+		desc = fmt.Sprintf("%s…", desc)
+	}
 	button.Connect("button-release-event", func(btn *gtk.Button, e *gdk.Event) bool {
 		btnEvent := gdk.EventButtonNewFromEvent(e)
 		if btnEvent.Button() == 1 {
