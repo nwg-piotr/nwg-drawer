@@ -248,8 +248,8 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	button.SetImagePosition(gtk.POS_TOP)
 	name := entry.NameLoc
 	if len(name) > 20 {
-		r := []rune(name)
-		name = string(r[:17])
+		r := []rune(name[:17])
+		name = string(r)
 		name = fmt.Sprintf("%s…", name)
 	}
 	button.SetLabel(name)
@@ -259,8 +259,8 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	terminal := entry.Terminal
 	desc := entry.CommentLoc
 	if len(desc) > 120 {
-		r := []rune(desc)
-		desc = string(r[:117])
+		r := []rune(desc[:117])
+		desc = string(r)
 		desc = fmt.Sprintf("%s…", desc)
 	}
 	button.Connect("button-release-event", func(btn *gtk.Button, e *gdk.Event) bool {
