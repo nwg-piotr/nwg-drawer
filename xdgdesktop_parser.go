@@ -54,7 +54,34 @@ func parseDesktopEntry(id string, in io.Reader) (entry desktopEntry, err error) 
 		case "Terminal":
 			entry.Terminal, _ = strconv.ParseBool(value)
 		case "NoDisplay":
-			entry.NoDisplay, _ = strconv.ParseBool(value)
+			if !entry.NoDisplay {
+				entry.NoDisplay, _ = strconv.ParseBool(value)
+			}
+		case "Hidden":
+			if !entry.NoDisplay {
+				entry.NoDisplay, _ = strconv.ParseBool(value)
+			}
+		case "OnlyShowIn":
+			if !entry.NoDisplay {
+				entry.NoDisplay = true
+				currentDesktop := os.Getenv("XDG_CURRENT_DESKTOP")
+				if currentDesktop != "" {
+					for _, ele := range strings.Split(value, ";") {
+						if ele == currentDesktop && ele != "" {
+							entry.NoDisplay = false
+						}
+					}
+				}
+			}
+		case "NotShowIn":
+			currentDesktop := os.Getenv("XDG_CURRENT_DESKTOP")
+			if !entry.NoDisplay && currentDesktop != "" {
+				for _, ele := range strings.Split(value, ";") {
+					if ele == currentDesktop && ele != "" {
+						entry.NoDisplay = true
+					}
+				}
+			}
 		case "Exec":
 			entry.Exec = cleanexec.Replace(value)
 		}
