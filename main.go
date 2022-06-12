@@ -33,22 +33,24 @@ var (
 	exclusions      []string
 )
 
-var categoryNames = [...]string{
-	"utility",
-	"development",
-	"game",
-	"graphics",
-	"internet-and-network",
-	"office",
-	"audio-video",
-	"system-tools",
-	"other",
+var categoryMatches = map[string][]string{
+	"utility":              {"Utility"},
+	"development":          {"Development"},
+	"game":                 {"Game"},
+	"graphics":             {"Graphics"},
+	"internet-and-network": {"Network"},
+	"office":               {"Office", "Science", "Educations"},
+	"audio-video":          {"AudioVideo", "Audio", "Video"},
+	"system-tools":         {"Settings", "System", "DesktopSettings", "PackageManager"},
+	"other":                {},
 }
 
 type category struct {
 	Name        string
 	DisplayName string
 	Icon        string
+	Matches     []string
+	Apps        []string
 }
 
 var categories []category
@@ -65,19 +67,6 @@ type desktopEntry struct {
 	Terminal   bool
 	NoDisplay  bool
 }
-
-// slices below will hold DesktopID strings
-var (
-	listUtility            []string
-	listDevelopment        []string
-	listGame               []string
-	listGraphics           []string
-	listInternetAndNetwork []string
-	listOffice             []string
-	listAudioVideo         []string
-	listSystemTools        []string
-	listOther              []string
-)
 
 var desktopEntries []desktopEntry
 
@@ -116,6 +105,7 @@ func defaultStringIfBlank(s, fallback string) string {
 
 // Flags
 var cssFileName = flag.String("s", "drawer.css", "Styling: css file name")
+var userDefinedAppsDirectory = flag.String("dir", "", "where to search for applications")
 var targetOutput = flag.String("o", "", "name of the Output to display the drawer on (sway only)")
 var displayVersion = flag.Bool("v", false, "display Version information")
 var overlay = flag.Bool("ovl", false, "use OVerLay layer")

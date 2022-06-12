@@ -224,27 +224,32 @@ func getAppDirs() []string {
 	var dirs []string
 	xdgDataDirs := ""
 
-	home := os.Getenv("HOME")
-	xdgDataHome := os.Getenv("XDG_DATA_HOME")
-	if os.Getenv("XDG_DATA_DIRS") != "" {
-		xdgDataDirs = os.Getenv("XDG_DATA_DIRS")
+	userApps := *userDefinedAppsDirectory
+	if userApps != "" {
+		dirs = append(dirs, userApps)
 	} else {
-		xdgDataDirs = "/usr/local/share/:/usr/share/"
-	}
-	if xdgDataHome != "" {
-		dirs = append(dirs, filepath.Join(xdgDataHome, "applications"))
-	} else if home != "" {
-		dirs = append(dirs, filepath.Join(home, ".local/share/applications"))
-	}
-	for _, d := range strings.Split(xdgDataDirs, ":") {
-		dirs = append(dirs, filepath.Join(d, "applications"))
-	}
-	flatpakDirs := []string{filepath.Join(home, ".local/share/flatpak/exports/share/applications"),
-		"/var/lib/flatpak/exports/share/applications"}
+		home := os.Getenv("HOME")
+		xdgDataHome := os.Getenv("XDG_DATA_HOME")
+		if os.Getenv("XDG_DATA_DIRS") != "" {
+			xdgDataDirs = os.Getenv("XDG_DATA_DIRS")
+		} else {
+			xdgDataDirs = "/usr/local/share/:/usr/share/"
+		}
+		if xdgDataHome != "" {
+			dirs = append(dirs, filepath.Join(xdgDataHome, "applications"))
+		} else if home != "" {
+			dirs = append(dirs, filepath.Join(home, ".local/share/applications"))
+		}
+		for _, d := range strings.Split(xdgDataDirs, ":") {
+			dirs = append(dirs, filepath.Join(d, "applications"))
+		}
+		flatpakDirs := []string{filepath.Join(home, ".local/share/flatpak/exports/share/applications"),
+			"/var/lib/flatpak/exports/share/applications"}
 
-	for _, d := range flatpakDirs {
-		if pathExists(d) && !isIn(dirs, d) {
-			dirs = append(dirs, d)
+		for _, d := range flatpakDirs {
+			if pathExists(d) && !isIn(dirs, d) {
+				dirs = append(dirs, d)
+			}
 		}
 	}
 	var confirmedDirs []string
@@ -303,12 +308,23 @@ func setUpCategories() {
 	path := filepath.Join(getDataHome(), "nwg-drawer/desktop-directories")
 	var other category
 
-	for _, cName := range categoryNames {
+	jsonFile, err := os.Open("/home/apoema/.config/nwg-drawer/categories.json")
+	if err == nil {
+		byteValue, _ := ioutil.ReadAll(jsonFile)
+
+		var usrCats []category
+		json.Unmarshal([]byte(byteValue), &usrCats)
+		categories = append(categories, usrCats[:]...)
+	}
+	defer jsonFile.Close()
+
+	for cName, cMatches := range categoryMatches {
 		fileName := fmt.Sprintf("%s.directory", cName)
 		lines, err := loadTextFile(filepath.Join(path, fileName))
 		if err == nil {
 			var cat category
 			cat.Name = cName
+			cat.Matches = cMatches
 
 			name := ""
 			nameLoc := ""
@@ -352,6 +368,7 @@ func setUpCategories() {
 			}
 		}
 	}
+
 	sort.Slice(categories, func(i, j int) bool {
 		return categories[i].DisplayName < categories[j].DisplayName
 	})
@@ -394,53 +411,19 @@ func parseDesktopFiles(desktopFiles []string) string {
 }
 
 // freedesktop Main Categories list consists of 13 entries. Let's contract it to 8+1 ("Other").
-func assignToLists(desktopID, categories string) {
-	cats := strings.Split(categories, ";")
+func assignToLists(desktopID, appCategories string) {
+	cats := strings.Split(appCategories, ";")
 	assigned := false
-	for _, cat := range cats {
-		if cat == "Utility" && !isIn(listUtility, desktopID) {
-			listUtility = append(listUtility, desktopID)
-			assigned = true
-			continue
+	for i := 0; i < len(categories); i++ {
+		for _, appCat := range cats {
+			if isIn(categories[i].Matches, appCat) {
+				categories[i].Apps = append(categories[i].Apps, desktopID)
+				assigned = true
+				continue
+			} else if i == len(categories)-1 && !assigned {
+				categories[i].Apps = append(categories[i].Apps, desktopID)
+			}
 		}
-		if cat == "Development" && !isIn(listDevelopment, desktopID) {
-			listDevelopment = append(listDevelopment, desktopID)
-			assigned = true
-			continue
-		}
-		if cat == "Game" && !isIn(listGame, desktopID) {
-			listGame = append(listGame, desktopID)
-			assigned = true
-			continue
-		}
-		if cat == "Graphics" && !isIn(listGraphics, desktopID) {
-			listGraphics = append(listGraphics, desktopID)
-			assigned = true
-			continue
-		}
-		if cat == "Network" && !isIn(listInternetAndNetwork, desktopID) {
-			listInternetAndNetwork = append(listInternetAndNetwork, desktopID)
-			assigned = true
-			continue
-		}
-		if isIn([]string{"Office", "Science", "Education"}, cat) && !isIn(listOffice, desktopID) {
-			listOffice = append(listOffice, desktopID)
-			assigned = true
-			continue
-		}
-		if isIn([]string{"AudioVideo", "Audio", "Video"}, cat) && !isIn(listAudioVideo, desktopID) {
-			listAudioVideo = append(listAudioVideo, desktopID)
-			assigned = true
-			continue
-		}
-		if isIn([]string{"Settings", "System", "DesktopSettings", "PackageManager"}, cat) && !isIn(listSystemTools, desktopID) {
-			listSystemTools = append(listSystemTools, desktopID)
-			assigned = true
-			continue
-		}
-	}
-	if categories != "" && !assigned && !isIn(listOther, desktopID) {
-		listOther = append(listOther, desktopID)
 	}
 }
 
