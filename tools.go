@@ -300,13 +300,16 @@ func listDesktopFiles() []string {
 }
 
 func setUpCategories() {
-	path := filepath.Join(getDataHome(), "nwg-drawer/desktop-directories")
+	p := filepath.Join(getDataHome(), "nwg-drawer/desktop-directories")
+	log.Debugf("Desktop dirs location: %s", p)
 	var other category
 
 	for _, cName := range categoryNames {
 		fileName := fmt.Sprintf("%s.directory", cName)
-		lines, err := loadTextFile(filepath.Join(path, fileName))
+		fp := filepath.Join(p, fileName)
+		lines, err := loadTextFile(fp)
 		if err == nil {
+			log.Debugf("Opened file '%s'", fp)
 			var cat category
 			cat.Name = cName
 
@@ -350,6 +353,8 @@ func setUpCategories() {
 			} else {
 				other = cat
 			}
+		} else {
+			log.Errorf("Couldn't open %s", fp)
 		}
 	}
 	sort.Slice(categories, func(i, j int) bool {
