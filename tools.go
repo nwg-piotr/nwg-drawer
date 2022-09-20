@@ -213,13 +213,6 @@ func copyFile(src, dst string) error {
 	return os.Chmod(dst, srcinfo.Mode())
 }
 
-func getDataHome() string {
-	if os.Getenv("XDG_DATA_HOME") != "" {
-		return os.Getenv("XDG_DATA_HOME")
-	}
-	return "/usr/share/"
-}
-
 func getAppDirs() []string {
 	var dirs []string
 	xdgDataDirs := ""
@@ -300,16 +293,13 @@ func listDesktopFiles() []string {
 }
 
 func setUpCategories() {
-	p := filepath.Join(getDataHome(), "nwg-drawer/desktop-directories")
-	log.Debugf("Desktop dirs location: %s", p)
 	var other category
 
 	for _, cName := range categoryNames {
 		fileName := fmt.Sprintf("%s.directory", cName)
-		fp := filepath.Join(p, fileName)
+		fp := filepath.Join("/usr/share/nwg-drawer/desktop-directories", fileName)
 		lines, err := loadTextFile(fp)
 		if err == nil {
-			log.Debugf("Opened file '%s'", fp)
 			var cat category
 			cat.Name = cName
 
