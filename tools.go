@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
@@ -143,7 +142,7 @@ func tempDir() string {
 }
 
 func readTextFile(path string) (string, error) {
-	bytes, err := ioutil.ReadFile(path)
+	bytes, err := os.ReadFile(path)
 	if err != nil {
 		return "", err
 	}
@@ -256,10 +255,13 @@ func loadPreferredApps(path string) (map[string]interface{}, error) {
 	}
 	defer jsonFile.Close()
 
-	byteValue, _ := ioutil.ReadAll(jsonFile)
+	byteValue, _ := io.ReadAll(jsonFile)
 
 	var result map[string]interface{}
-	json.Unmarshal([]byte(byteValue), &result)
+	err = json.Unmarshal([]byte(byteValue), &result)
+	if err != nil {
+		return nil, err
+	}
 
 	if len(result) == 0 {
 		return nil, errors.New("json invalid or empty")
@@ -268,8 +270,8 @@ func loadPreferredApps(path string) (map[string]interface{}, error) {
 	return result, nil
 }
 
-func listFiles(dir string) ([]fs.FileInfo, error) {
-	files, err := ioutil.ReadDir(dir)
+func listFiles(dir string) ([]fs.DirEntry, error) {
+	files, err := os.ReadDir(dir)
 	if err == nil {
 		return files, nil
 	}
@@ -458,7 +460,7 @@ func pathExists(name string) bool {
 }
 
 func loadTextFile(path string) ([]string, error) {
-	bytes, err := ioutil.ReadFile(path)
+	bytes, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
