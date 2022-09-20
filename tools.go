@@ -273,7 +273,7 @@ func loadPreferredApps(path string) (map[string]interface{}, error) {
 	byteValue, _ := io.ReadAll(jsonFile)
 
 	var result map[string]interface{}
-	err = json.Unmarshal([]byte(byteValue), &result)
+	err = json.Unmarshal(byteValue, &result)
 	if err != nil {
 		return nil, err
 	}
