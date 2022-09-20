@@ -538,7 +538,7 @@ func savePinned() {
 			_, err := f.WriteString(line + "\n")
 
 			if err != nil {
-				log.Errorf("Error saving pinned", err)
+				log.Error("Error saving pinned", err)
 			}
 		}
 	}
