@@ -196,12 +196,22 @@ func copyFile(src, dst string) error {
 	if srcfd, err = os.Open(src); err != nil {
 		return err
 	}
-	defer srcfd.Close()
+	defer func(srcfd *os.File) {
+		err := srcfd.Close()
+		if err != nil {
+			log.Errorf("Error closing file: %v", srcfd)
+		}
+	}(srcfd)
 
 	if dstfd, err = os.Create(dst); err != nil {
 		return err
 	}
-	defer dstfd.Close()
+	defer func(dstfd *os.File) {
+		err := dstfd.Close()
+		if err != nil {
+			log.Errorf("Error closing file: %v", dstfd)
+		}
+	}(dstfd)
 
 	if _, err = io.Copy(dstfd, srcfd); err != nil {
 		return err
@@ -253,7 +263,12 @@ func loadPreferredApps(path string) (map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer jsonFile.Close()
+	defer func(jsonFile *os.File) {
+		err := jsonFile.Close()
+		if err != nil {
+			log.Errorf("Error closing file: %v", jsonFile)
+		}
+	}(jsonFile)
 
 	byteValue, _ := io.ReadAll(jsonFile)
 
@@ -511,7 +526,12 @@ func savePinned() {
 		log.Fatal(err)
 	}
 
-	defer f.Close()
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			log.Errorf("Error closing file: %v", f)
+		}
+	}(f)
 
 	for _, line := range pinned {
 		if line != "" {
