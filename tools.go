@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
@@ -143,7 +142,7 @@ func tempDir() string {
 }
 
 func readTextFile(path string) (string, error) {
-	bytes, err := ioutil.ReadFile(path)
+	bytes, err := os.ReadFile(path)
 	if err != nil {
 		return "", err
 	}
@@ -197,12 +196,22 @@ func copyFile(src, dst string) error {
 	if srcfd, err = os.Open(src); err != nil {
 		return err
 	}
-	defer srcfd.Close()
+	defer func(srcfd *os.File) {
+		err := srcfd.Close()
+		if err != nil {
+			log.Errorf("Error closing file: %v", srcfd)
+		}
+	}(srcfd)
 
 	if dstfd, err = os.Create(dst); err != nil {
 		return err
 	}
-	defer dstfd.Close()
+	defer func(dstfd *os.File) {
+		err := dstfd.Close()
+		if err != nil {
+			log.Errorf("Error closing file: %v", dstfd)
+		}
+	}(dstfd)
 
 	if _, err = io.Copy(dstfd, srcfd); err != nil {
 		return err
@@ -211,13 +220,6 @@ func copyFile(src, dst string) error {
 		return err
 	}
 	return os.Chmod(dst, srcinfo.Mode())
-}
-
-func getDataHome() string {
-	if os.Getenv("XDG_DATA_HOME") != "" {
-		return os.Getenv("XDG_DATA_HOME")
-	}
-	return "/usr/share/"
 }
 
 func getAppDirs() []string {
@@ -261,12 +263,20 @@ func loadPreferredApps(path string) (map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer jsonFile.Close()
+	defer func(jsonFile *os.File) {
+		err := jsonFile.Close()
+		if err != nil {
+			log.Errorf("Error closing file: %v", jsonFile)
+		}
+	}(jsonFile)
 
-	byteValue, _ := ioutil.ReadAll(jsonFile)
+	byteValue, _ := io.ReadAll(jsonFile)
 
 	var result map[string]interface{}
-	json.Unmarshal([]byte(byteValue), &result)
+	err = json.Unmarshal(byteValue, &result)
+	if err != nil {
+		return nil, err
+	}
 
 	if len(result) == 0 {
 		return nil, errors.New("json invalid or empty")
@@ -275,8 +285,8 @@ func loadPreferredApps(path string) (map[string]interface{}, error) {
 	return result, nil
 }
 
-func listFiles(dir string) ([]fs.FileInfo, error) {
-	files, err := ioutil.ReadDir(dir)
+func listFiles(dir string) ([]fs.DirEntry, error) {
+	files, err := os.ReadDir(dir)
 	if err == nil {
 		return files, nil
 	}
@@ -300,12 +310,12 @@ func listDesktopFiles() []string {
 }
 
 func setUpCategories() {
-	path := filepath.Join(getDataHome(), "nwg-drawer/desktop-directories")
 	var other category
 
 	for _, cName := range categoryNames {
 		fileName := fmt.Sprintf("%s.directory", cName)
-		lines, err := loadTextFile(filepath.Join(path, fileName))
+		fp := filepath.Join("/usr/share/nwg-drawer/desktop-directories", fileName)
+		lines, err := loadTextFile(fp)
 		if err == nil {
 			var cat category
 			cat.Name = cName
@@ -350,6 +360,8 @@ func setUpCategories() {
 			} else {
 				other = cat
 			}
+		} else {
+			log.Errorf("Couldn't open %s", fp)
 		}
 	}
 	sort.Slice(categories, func(i, j int) bool {
@@ -463,7 +475,7 @@ func pathExists(name string) bool {
 }
 
 func loadTextFile(path string) ([]string, error) {
-	bytes, err := ioutil.ReadFile(path)
+	bytes, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -514,14 +526,19 @@ func savePinned() {
 		log.Fatal(err)
 	}
 
-	defer f.Close()
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			log.Errorf("Error closing file: %v", f)
+		}
+	}(f)
 
 	for _, line := range pinned {
 		if line != "" {
 			_, err := f.WriteString(line + "\n")
 
 			if err != nil {
-				log.Errorf("Error saving pinned", err)
+				log.Error("Error saving pinned", err)
 			}
 		}
 	}

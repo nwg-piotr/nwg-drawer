@@ -243,7 +243,10 @@ func main() {
 
 	// Copy default style sheet if not found
 	if !pathExists(filepath.Join(configDirectory, "drawer.css")) {
-		copyFile(filepath.Join(getDataHome(), "nwg-drawer/drawer.css"), filepath.Join(configDirectory, "drawer.css"))
+		err := copyFile("/usr/share/nwg-drawer/drawer.css", filepath.Join(configDirectory, "drawer.css"))
+		if err != nil {
+			log.Errorf("Failed copying 'drawer.css' file: %s", err)
+		}
 	}
 
 	cacheDirectory := cacheDir()
@@ -312,7 +315,11 @@ func main() {
 			log.Infof("User demanded theme: %s", *gtkTheme)
 		}
 	} else {
-		settings.SetProperty("gtk-application-prefer-dark-theme", true)
+		err := settings.SetProperty("gtk-application-prefer-dark-theme", true)
+		if err != nil {
+			log.Error("Error setting 'gtk-application-prefer-dark-theme' property")
+			return
+		}
 		log.Info("Preferring dark theme variants")
 	}
 
