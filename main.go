@@ -21,7 +21,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-const version = "0.3.1"
+const version = "0.3.2"
 
 var (
 	appDirs         []string
@@ -200,7 +200,10 @@ func main() {
 					log.Warnf("Resident instance already running (PID %v)", i)
 				} else {
 					log.Infof("Showing resident instance (PID %v)", i)
-					syscall.Kill(i, syscall.SIGUSR1)
+					err := syscall.Kill(i, syscall.SIGUSR1)
+					if err != nil {
+						return
+					}
 				}
 			}
 		}
@@ -577,7 +580,9 @@ func main() {
 
 func restoreStateAndHide() {
 	timeStart1 := time.Now()
-	win.Hide()
+	if win != nil {
+		win.Hide()
+	}
 
 	// clear search
 	searchEntry.SetText("")
@@ -590,7 +595,9 @@ func restoreStateAndHide() {
 	}
 
 	// scroll to the top
-	resultWindow.GetVAdjustment().SetValue(0)
+	if resultWindow != nil {
+		resultWindow.GetVAdjustment().SetValue(0)
+	}
 
 	t := time.Now()
 	log.Debugf(fmt.Sprintf("UI hidden and restored in the backgroud in %v ms", t.Sub(timeStart1).Milliseconds()))
