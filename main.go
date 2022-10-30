@@ -21,7 +21,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-const version = "0.3.2"
+const version = "0.3.3"
 
 var (
 	appDirs         []string
@@ -549,12 +549,14 @@ func main() {
 							fileSearchResultWrapper.Hide()
 						}
 						// focus 1st element
-						b := appFlowBox.GetChildAtIndex(0)
-						if b != nil {
-							button, err := b.GetChild()
-							if err == nil {
-								button.ToWidget().GrabFocus()
-							}
+						var button gtk.IWidget
+						if pinnedFlowBox.GetChildren().Length() > 0 {
+							button, err = pinnedFlowBox.GetChildAtIndex(0).GetChild()
+						} else {
+							button, err = appFlowBox.GetChildAtIndex(0).GetChild()
+						}
+						if err == nil {
+							button.ToWidget().GrabFocus()
 						}
 					}
 
