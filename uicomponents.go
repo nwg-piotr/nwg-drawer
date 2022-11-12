@@ -32,6 +32,10 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 	if len(pinned) > 0 {
 		for _, desktopID := range pinned {
 			entry := id2entry[desktopID]
+			if entry.DesktopID == "" {
+				log.Debugf("Pinned item doesn't seem to exist: %s", desktopID)
+				continue
+			}
 
 			btn, _ := gtk.ButtonNew()
 

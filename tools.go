@@ -534,7 +534,8 @@ func savePinned() {
 	}(f)
 
 	for _, line := range pinned {
-		if line != "" {
+		//skip invalid lines
+		if line != "" && id2entry[line].DesktopID != "" {
 			_, err := f.WriteString(line + "\n")
 
 			if err != nil {
