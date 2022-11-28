@@ -78,7 +78,7 @@ func mapXdgUserDirs() map[string]string {
 	result["pictures"] = filepath.Join(home, "Pictures")
 	result["videos"] = filepath.Join(home, "Videos")
 
-	userDirsFile := filepath.Join(home, ".config/user-dirs.dirs")
+	userDirsFile := filepath.Join(filepath.Join(os.Getenv("XDG_CONFIG_HOME"), "user-dirs.dirs"))
 	if pathExists(userDirsFile) {
 		log.Debugf("userDirsFile found: %s", userDirsFile)
 		log.Info(fmt.Sprintf("Using XDG user dirs from %s", userDirsFile))
