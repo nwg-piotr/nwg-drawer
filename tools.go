@@ -80,6 +80,7 @@ func mapXdgUserDirs() map[string]string {
 
 	userDirsFile := filepath.Join(home, ".config/user-dirs.dirs")
 	if pathExists(userDirsFile) {
+		log.Debugf("userDirsFile found: %s", userDirsFile)
 		log.Info(fmt.Sprintf("Using XDG user dirs from %s", userDirsFile))
 		lines, _ := loadTextFile(userDirsFile)
 		for _, l := range lines {
@@ -104,7 +105,7 @@ func mapXdgUserDirs() map[string]string {
 			}
 		}
 	} else {
-		log.Warnf("%s file not found, using defaults", userDirsFile)
+		log.Warnf("userDirsFile %s not found, using defaults", userDirsFile)
 	}
 
 	return result
