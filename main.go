@@ -490,6 +490,7 @@ func main() {
 	}
 
 	userDirsMap = mapXdgUserDirs()
+	log.Debugf("User dirs map: %s", userDirsMap)
 
 	placeholder, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
 	resultsWrapper.PackStart(placeholder, true, true, 0)
