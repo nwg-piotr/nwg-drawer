@@ -434,6 +434,7 @@ func searchUserDir(dir string) {
 		fileSearchResultFlowBox.Add(btn)
 
 		for _, path := range fileSearchResults {
+			log.Debugf("Path: %s", path)
 			partOfPathToShow := strings.Split(path, userDirsMap[dir])[1]
 			if partOfPathToShow != "" {
 				if !(strings.HasPrefix(path, "#is_dir#") && isExcluded(path)) {
