@@ -21,7 +21,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-const version = "0.3.5"
+const version = "0.3.6"
 
 var (
 	appDirs         []string
@@ -189,7 +189,7 @@ func main() {
 	// Otherwise the command may behave in two ways:
 	// 	1. kill the running non-residennt instance and exit;
 	// 	2. die if a resident instance found.
-	lockFilePath := path.Join(tempDir(), "nwg-drawer.lock")
+	lockFilePath := path.Join(dataDir(), "nwg-drawer.lock")
 	lockFile, err := singleinstance.CreateLockFile(lockFilePath)
 	if err != nil {
 		pid, err := readTextFile(lockFilePath)

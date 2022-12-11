@@ -131,17 +131,6 @@ func cacheDir() string {
 	return ""
 }
 
-func tempDir() string {
-	if os.Getenv("TMPDIR") != "" {
-		return os.Getenv("TMPDIR")
-	} else if os.Getenv("TEMP") != "" {
-		return os.Getenv("TEMP")
-	} else if os.Getenv("TMP") != "" {
-		return os.Getenv("TMP")
-	}
-	return "/tmp"
-}
-
 func readTextFile(path string) (string, error) {
 	bytes, err := os.ReadFile(path)
 	if err != nil {
@@ -172,6 +161,20 @@ func configDir() string {
 	}
 
 	log.Infof("Config dir: %s", dir)
+	createDir(dir)
+
+	return dir
+}
+
+func dataDir() string {
+	var dir string
+	if os.Getenv("XDG_DATA_HOME") != "" {
+		dir = path.Join(os.Getenv("XDG_DATA_HOME"), "nwg-drawer")
+	} else if os.Getenv("HOME") != "" {
+		dir = path.Join(os.Getenv("HOME"), ".local/share/nwg-drawer")
+	}
+
+	log.Infof("Data dir: %s", dir)
 	createDir(dir)
 
 	return dir
