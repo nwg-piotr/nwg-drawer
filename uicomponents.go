@@ -58,9 +58,8 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 				name = entry.Name
 			}
 			if len(name) > 20 {
-				r := []rune(name)
-				name = string(r[:17])
-				name = fmt.Sprintf("%s…", name)
+				r := substring(name, 0, 17)
+				name = fmt.Sprintf("%s…", string(r))
 			}
 			btn.SetLabel(name)
 
@@ -252,9 +251,8 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	button.SetImagePosition(gtk.POS_TOP)
 	name := entry.NameLoc
 	if len(name) > 20 {
-		r := []rune(name[:17])
-		name = string(r)
-		name = fmt.Sprintf("%s…", name)
+		r := substring(name, 0, 17)
+		name = fmt.Sprintf("%s…", string(r))
 	}
 	button.SetLabel(name)
 
@@ -263,9 +261,8 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	terminal := entry.Terminal
 	desc := entry.CommentLoc
 	if len(desc) > 120 {
-		r := []rune(desc[:117])
-		desc = string(r)
-		desc = fmt.Sprintf("%s…", desc)
+		r := substring(desc, 0, 117)
+		desc = fmt.Sprintf("%s…", string(r))
 	}
 	button.Connect("button-release-event", func(btn *gtk.Button, e *gdk.Event) bool {
 		btnEvent := gdk.EventButtonNewFromEvent(e)

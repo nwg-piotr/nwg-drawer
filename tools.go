@@ -691,3 +691,19 @@ func mapOutputs() (map[string]*gdk.Monitor, error) {
 	}
 	return result, nil
 }
+
+// KAdot / https://stackoverflow.com/a/38537764/4040598 - thanks!
+func substring(s string, start int, end int) string {
+	startStrIdx := 0
+	i := 0
+	for j := range s {
+		if i == start {
+			startStrIdx = j
+		}
+		if i == end {
+			return s[startStrIdx:j]
+		}
+		i++
+	}
+	return s[startStrIdx:]
+}
