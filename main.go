@@ -21,7 +21,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-const version = "0.3.7"
+const version = "0.3.8"
 
 var (
 	appDirs         []string
@@ -120,6 +120,7 @@ var targetOutput = flag.String("o", "", "name of the Output to display the drawe
 var displayVersion = flag.Bool("v", false, "display Version information")
 var overlay = flag.Bool("ovl", false, "use OVerLay layer")
 var gtkTheme = flag.String("g", "", "GTK theme name")
+var gtkIconTheme = flag.String("i", "", "GTK icon theme name")
 var iconSize = flag.Int("is", 64, "Icon Size")
 var marginTop = flag.Int("mt", 0, "Margin Top")
 var marginLeft = flag.Int("ml", 0, "Margin Left")
@@ -324,6 +325,15 @@ func main() {
 			return
 		}
 		log.Info("Preferring dark theme variants")
+	}
+
+	if *gtkIconTheme != "" {
+		err = settings.SetProperty("gtk-icon-theme-name", *gtkIconTheme)
+		if err != nil {
+			log.Error("Unable to set icon theme:", err)
+		} else {
+			log.Infof("User demanded icon theme: %s", *gtkIconTheme)
+		}
 	}
 
 	cssProvider, _ := gtk.CssProviderNew()
