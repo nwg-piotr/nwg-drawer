@@ -1,6 +1,8 @@
 # nwg-drawer
 
-This application is a part of the [nwg-shell](https://github.com/nwg-piotr/nwg-shell) project.
+This application is a part of the [nwg-shell](https://nwg-piotr.github.io/nwg-shell) project.
+
+**Contributing:** please read the [general contributing rules for the nwg-shell project](https://nwg-piotr.github.io/nwg-shell/contribution).
 
 Nwg-drawer is a golang replacement to the `nwggrid` command
 (a part of [nwg-launchers](https://github.com/nwg-piotr/nwg-launchers)). It's being developed with
