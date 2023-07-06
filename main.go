@@ -393,7 +393,7 @@ func main() {
 		gtk.MainQuit()
 	})
 
-	win.Connect("key-release-event", func(window *gtk.Window, event *gdk.Event) bool {
+	win.Connect("key-release-event", func(_ *gtk.Window, event *gdk.Event) bool {
 		key := &gdk.EventKey{Event: event}
 		if key.KeyVal() == gdk.KEY_Escape {
 			s, _ := searchEntry.GetText()
@@ -412,7 +412,7 @@ func main() {
 		return false
 	})
 
-	win.Connect("key-press-event", func(window *gtk.Window, event *gdk.Event) bool {
+	win.Connect("key-press-event", func(_ *gtk.Window, event *gdk.Event) bool {
 		key := &gdk.EventKey{Event: event}
 		switch key.KeyVal() {
 		case gdk.KEY_downarrow, gdk.KEY_Up, gdk.KEY_Down, gdk.KEY_Left, gdk.KEY_Right, gdk.KEY_Tab,
@@ -467,8 +467,8 @@ func main() {
 	resultWindow.SetEvents(int(gdk.ALL_EVENTS_MASK))
 	resultWindow.SetPolicy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 
-	resultWindow.Connect("button-release-event", func(sw *gtk.ScrolledWindow, e *gdk.Event) bool {
-		btnEvent := gdk.EventButtonNewFromEvent(e)
+	resultWindow.Connect("button-release-event", func(_ *gtk.ScrolledWindow, event *gdk.Event) bool {
+		btnEvent := gdk.EventButtonNewFromEvent(event)
 		if btnEvent.Button() == 3 {
 			if !*resident {
 				gtk.MainQuit()
