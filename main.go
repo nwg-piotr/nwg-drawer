@@ -180,7 +180,7 @@ func main() {
 					gtk.MainQuit()
 				}
 			default:
-				log.Info("Unknown signal")
+				log.Infof("Unknown signal: %s", s.String())
 			}
 		}
 	}()
