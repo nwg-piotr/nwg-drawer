@@ -121,11 +121,11 @@ func getUserDir(home, line string) string {
 }
 
 func cacheDir() string {
-	if os.Getenv("XDG_CACHE_HOME") != "" {
-		return os.Getenv("XDG_CONFIG_HOME")
+	if xdgCache := os.Getenv("XDG_CACHE_HOME"); xdgCache != "" {
+		return xdgCache
 	}
-	if os.Getenv("HOME") != "" && pathExists(filepath.Join(os.Getenv("HOME"), ".cache")) {
-		p := filepath.Join(os.Getenv("HOME"), ".cache")
+	if home := os.Getenv("HOME"); home != "" && pathExists(filepath.Join(home, ".cache")) {
+		p := filepath.Join(home, ".cache")
 		return p
 	}
 	return ""
@@ -141,11 +141,11 @@ func readTextFile(path string) (string, error) {
 }
 
 func oldConfigDir() (string, error) {
-	if os.Getenv("XDG_CONFIG_HOME") != "" {
-		dir := path.Join(os.Getenv("XDG_CONFIG_HOME"), "nwg-panel")
+	if xdgConfig := os.Getenv("XDG_CONFIG_HOME"); xdgConfig != "" {
+		dir := path.Join(xdgConfig, "nwg-panel")
 		return dir, nil
-	} else if os.Getenv("HOME") != "" {
-		dir := path.Join(os.Getenv("HOME"), ".config/nwg-panel")
+	} else if home := os.Getenv("HOME"); home != "" {
+		dir := path.Join(home, ".config/nwg-panel")
 		return dir, nil
 	}
 
@@ -154,10 +154,10 @@ func oldConfigDir() (string, error) {
 
 func configDir() string {
 	var dir string
-	if os.Getenv("XDG_CONFIG_HOME") != "" {
-		dir = path.Join(os.Getenv("XDG_CONFIG_HOME"), "nwg-drawer")
-	} else if os.Getenv("HOME") != "" {
-		dir = path.Join(os.Getenv("HOME"), ".config/nwg-drawer")
+	if xdgConfig := os.Getenv("XDG_CONFIG_HOME"); xdgConfig != "" {
+		dir = path.Join(xdgConfig, "nwg-drawer")
+	} else if home := os.Getenv("HOME"); home != "" {
+		dir = path.Join(home, ".config/nwg-drawer")
 	}
 
 	log.Infof("Config dir: %s", dir)
@@ -168,10 +168,10 @@ func configDir() string {
 
 func dataDir() string {
 	var dir string
-	if os.Getenv("XDG_DATA_HOME") != "" {
-		dir = path.Join(os.Getenv("XDG_DATA_HOME"), "nwg-drawer")
-	} else if os.Getenv("HOME") != "" {
-		dir = path.Join(os.Getenv("HOME"), ".local/share/nwg-drawer")
+	if xdgData := os.Getenv("XDG_DATA_HOME"); xdgData != "" {
+		dir = path.Join(xdgData, "nwg-drawer")
+	} else if home := os.Getenv("HOME"); home != "" {
+		dir = path.Join(home, ".local/share/nwg-drawer")
 	}
 
 	log.Infof("Data dir: %s", dir)
@@ -228,13 +228,11 @@ func copyFile(src, dst string) error {
 
 func getAppDirs() []string {
 	var dirs []string
-	xdgDataDirs := ""
 
 	home := os.Getenv("HOME")
 	xdgDataHome := os.Getenv("XDG_DATA_HOME")
-	if os.Getenv("XDG_DATA_DIRS") != "" {
-		xdgDataDirs = os.Getenv("XDG_DATA_DIRS")
-	} else {
+	xdgDataDirs := os.Getenv("XDG_DATA_DIRS")
+	if xdgDataDirs == "" {
 		xdgDataDirs = "/usr/local/share/:/usr/share/"
 	}
 	if xdgDataHome != "" {
