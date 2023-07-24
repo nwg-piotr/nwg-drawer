@@ -388,7 +388,7 @@ func main() {
 		layershell.SetMargin(win, layershell.LAYER_SHELL_EDGE_BOTTOM, *marginBottom)
 
 		if (*keyboard) == "" {
-			log.Warnf("Empty string passed to --keyboard: %s)", *keyboard)
+			log.Warnf("Empty string passed to -k: %s)", *keyboard)
 			log.Warn("Setting GTK layer shell keyboard mode to default: exclusive")
 			layershell.SetKeyboardMode(win, layershell.LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE)
 		} else if (*keyboard)[0] == 'e' {
@@ -398,7 +398,7 @@ func main() {
 			log.Info("Setting GTK layer shell keyboard mode to: on-demand")
 			layershell.SetKeyboardMode(win, layershell.LAYER_SHELL_KEYBOARD_MODE_ON_DEMAND)
 		} else {
-			log.Warnf("Invalid option passed to --keyboard: %s)", *keyboard)
+			log.Warnf("Invalid option passed to -k: %s)", *keyboard)
 			log.Warn("Setting GTK layer shell keyboard mode to default: exclusive")
 			layershell.SetKeyboardMode(win, layershell.LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE)
 		}
