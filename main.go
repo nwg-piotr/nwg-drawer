@@ -387,7 +387,11 @@ func main() {
 		layershell.SetMargin(win, layershell.LAYER_SHELL_EDGE_RIGHT, *marginRight)
 		layershell.SetMargin(win, layershell.LAYER_SHELL_EDGE_BOTTOM, *marginBottom)
 
-		if (*keyboard)[0] == 'e' {
+		if (*keyboard) == "" {
+			log.Warnf("Empty string passed to --keyboard: %s)", *keyboard)
+			log.Warn("Setting GTK layer shell keyboard mode to default: exclusive")
+			layershell.SetKeyboardMode(win, layershell.LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE)
+		} else if (*keyboard)[0] == 'e' {
 			log.Info("Setting GTK layer shell keyboard mode to: exclusive")
 			layershell.SetKeyboardMode(win, layershell.LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE)
 		} else if (*keyboard)[0] == 'o' {
