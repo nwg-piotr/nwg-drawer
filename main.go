@@ -118,7 +118,7 @@ func defaultStringIfBlank(s, fallback string) string {
 var cssFileName = flag.String("s", "drawer.css", "Styling: css file name")
 var targetOutput = flag.String("o", "", "name of the Output to display the drawer on (sway only)")
 var displayVersion = flag.Bool("v", false, "display Version information")
-var keyboard = flag.String("k",        "exclusive", "Set GTK layer shell keyboard interactivity: 'none', 'exclusive' or 'on-demand' (or 'n', 'e' or 'o')")
+var keyboard = flag.String("k",        "exclusive", "Set GTK layer shell keyboard interactivity: 'exclusive' or 'on-demand' (or: 'e', 'o')")
 var overlay = flag.Bool("ovl", false, "use OVerLay layer")
 var gtkTheme = flag.String("g", "", "GTK theme name")
 var gtkIconTheme = flag.String("i", "", "GTK icon theme name")
@@ -393,9 +393,6 @@ func main() {
 		} else if (*keyboard)[0] == 'o' {
 			log.Info("Setting GTK layer shell keyboard mode to: on-demand")
 			layershell.SetKeyboardMode(win, layershell.LAYER_SHELL_KEYBOARD_MODE_ON_DEMAND)
-		} else if (*keyboard)[0] == 'n' {
-			log.Info("Setting GTK layer shell keyboard mode to: none")
-			layershell.SetKeyboardMode(win, layershell.LAYER_SHELL_KEYBOARD_MODE_NONE)
 		} else {
 			log.Warnf("Invalid option passed to --keyboard: %s)", *keyboard)
 			log.Warn("Setting GTK layer shell keyboard mode to default: exclusive")
