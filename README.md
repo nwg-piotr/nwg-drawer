@@ -72,8 +72,8 @@ Usage of nwg-drawer:
     	GTK theme name, eg. "Adwaita-dark"
   -is int
     	Icon Size (default 64)
-  -k string
-    	Set GTK layer shell keyboard interactivity: 'exclusive' or 'on-demand' (or: 'e', 'o') (default "exclusive")
+  -k
+    	Set GTK layer shell keyboard interactivity to "on-demand" mode (default "exclusive")
   -lang string
     	force lang, e.g. "en", "pl"
   -nocats
