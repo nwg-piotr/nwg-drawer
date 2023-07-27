@@ -118,6 +118,7 @@ func defaultStringIfBlank(s, fallback string) string {
 var cssFileName = flag.String("s", "drawer.css", "Styling: css file name")
 var targetOutput = flag.String("o", "", "name of the Output to display the drawer on (sway only)")
 var displayVersion = flag.Bool("v", false, "display Version information")
+var keyboard = flag.Bool("k", false, "Set GTK layer shell keyboard interactivity to 'on-demand' mode")
 var overlay = flag.Bool("ovl", false, "use OVerLay layer")
 var gtkTheme = flag.String("g", "", "GTK theme name")
 var gtkIconTheme = flag.String("i", "", "GTK icon theme name")
@@ -387,7 +388,14 @@ func main() {
 		layershell.SetMargin(win, layershell.LAYER_SHELL_EDGE_RIGHT, *marginRight)
 		layershell.SetMargin(win, layershell.LAYER_SHELL_EDGE_BOTTOM, *marginBottom)
 
-		layershell.SetKeyboardMode(win, layershell.LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE)
+		if *keyboard {
+			log.Info("Setting GTK layer shell keyboard mode to: on-demand")
+			layershell.SetKeyboardMode(win, layershell.LAYER_SHELL_KEYBOARD_MODE_ON_DEMAND)
+		} else {
+			log.Info("Setting GTK layer shell keyboard mode to default: exclusive")
+			layershell.SetKeyboardMode(win, layershell.LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE)
+		}
+
 	}
 
 	win.Connect("destroy", func() {
