@@ -69,7 +69,7 @@ Usage of nwg-drawer:
   -fslen int
     	File Search name LENgth Limit (default 80)
   -ft
-    	Force Theme for libadwaita apps, by adding GTK_THEME=<default-gtk-theme> env var
+    	Force Theme for libadwaita apps, by adding 'GTK_THEME=<default-gtk-theme>' env var
   -g string
     	GTK theme name
   -i string
