@@ -548,6 +548,15 @@ func savePinned() {
 }
 
 func launch(command string, terminal bool) {
+	themeToPrepend := ""
+	// add "GTK_THEME=<default_gtk_theme>" environment variable
+	if *forceTheme {
+		settings, _ := gtk.SettingsGetDefault()
+		th, err := settings.GetProperty("gtk-theme-name")
+		if err == nil {
+			themeToPrepend = th.(string)
+		}
+	}
 	// trim % and everything afterwards
 	if strings.Contains(command, "%") {
 		cutAt := strings.Index(command, "%")
@@ -575,6 +584,10 @@ func launch(command string, terminal bool) {
 	}
 	if cmdIdx == -1 {
 		cmdIdx = 0
+	}
+
+	if themeToPrepend != "" {
+		envVars = append(envVars, fmt.Sprintf("GTK_THEME=%s", themeToPrepend))
 	}
 
 	cmd := exec.Command(elements[cmdIdx], elements[1+cmdIdx:]...)
