@@ -34,7 +34,7 @@ To close the window w/o running a program, you may use `Esc` key, or right-click
 
 ### Dependencies
 
-- go >=1.16 (just to build)
+- go >=1.20 (just to build)
 - gtk3
 - gtk-layer-shell
 - xdg-utils
@@ -68,14 +68,25 @@ Usage of nwg-drawer:
     	File Search result COLumns (default 2)
   -fslen int
     	File Search name LENgth Limit (default 80)
+  -ft
+    	Force Theme for libadwaita apps, by adding GTK_THEME=<default-gtk-theme> env var
   -g string
-    	GTK theme name, eg. "Adwaita-dark"
+    	GTK theme name
+  -i string
+    	GTK icon theme name
   -is int
     	Icon Size (default 64)
-  -k
-    	Set GTK layer shell keyboard interactivity to "on-demand" mode (default "exclusive")
+  -k	set GTK layer shell Keyboard interactivity to 'on-demand' mode
   -lang string
     	force lang, e.g. "en", "pl"
+  -mb int
+    	Margin Bottom
+  -ml int
+    	Margin Left
+  -mr int
+    	Margin Right
+  -mt int
+    	Margin Top
   -nocats
     	Disable filtering by category
   -nofs
@@ -90,7 +101,7 @@ Usage of nwg-drawer:
   -spacing uint
     	icon spacing (default 20)
   -term string
-    	Terminal emulator (default "alacritty")
+    	Terminal emulator (default "foot")
   -v	display Version information
   ```
 
