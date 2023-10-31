@@ -592,15 +592,20 @@ func launch(command string, terminal bool) {
 
 	cmd := exec.Command(elements[cmdIdx], elements[1+cmdIdx:]...)
 
+	var prefixCommand string
+	var args []string
 	if terminal {
-		var args []string
+		prefixCommand = *term
 		if *term != "foot" {
 			args = []string{"-e", elements[cmdIdx]}
 		} else {
 			args = []string{elements[cmdIdx]}
 		}
-
-		cmd = exec.Command(*term, args...)
+		cmd = exec.Command(prefixCommand, args...)
+	} else if *swaymsg {
+		prefixCommand = "swaymsg"
+		args = []string{"exec", elements[cmdIdx]}
+		cmd = exec.Command(prefixCommand, args...)
 	}
 
 	// set env variables
