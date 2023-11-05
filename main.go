@@ -104,7 +104,7 @@ var (
 	pinnedItemsChanged      chan interface{} = make(chan interface{}, 1)
 )
 
-func defaultStringIfBlank(s, fallback string) string {
+func defaultTermIfBlank(s, fallback string) string {
 	s = strings.TrimSpace(s)
 	// os.Getenv("TERM") returns "linux" instead of empty string, if program has been started
 	// from a key binding defined in the config file. See #23.
@@ -114,14 +114,19 @@ func defaultStringIfBlank(s, fallback string) string {
 	return s
 }
 
-func defaultBoolIfBlank(s string, fallback bool) bool {
+func defaultStringIfBlank(s, fallback string) string {
 	s = strings.TrimSpace(s)
-	// os.Getenv("TERM") returns "linux" instead of empty string, if program has been started
-	// from a key binding defined in the config file. See #23.
-	if s != "sway" {
+	if s == "" {
 		return fallback
 	}
-	return true
+	return s
+}
+
+func validateWm() {
+	if !(*wm == "sway" || *wm == "hyprland") && *wm != "" {
+		*wm = ""
+		log.Warn("nwg-drawer support only `swaymsg` or `hyprland`.")
+	}
 }
 
 // Flags
@@ -143,8 +148,8 @@ var columnsNumber = flag.Uint("c", 6, "number of Columns")
 var itemSpacing = flag.Uint("spacing", 20, "icon spacing")
 var lang = flag.String("lang", "", "force lang, e.g. \"en\", \"pl\"")
 var fileManager = flag.String("fm", "thunar", "File Manager")
-var term = flag.String("term", defaultStringIfBlank(os.Getenv("TERM"), "foot"), "Terminal emulator")
-var swaymsg = flag.Bool("swaymsg", defaultBoolIfBlank(os.Getenv("XDG_CURRENT_DESKTOP"), false), "Use swaymsg (sway only)")
+var term = flag.String("term", defaultTermIfBlank(os.Getenv("TERM"), "foot"), "Terminal emulator")
+var wm = flag.String("wm", defaultStringIfBlank(os.Getenv("XDG_CURRENT_DESKTOP"), ""), "Use swaymsg or hyprlandctl")
 var nameLimit = flag.Int("fslen", 80, "File Search name LENgth Limit")
 var noCats = flag.Bool("nocats", false, "Disable filtering by category")
 var noFS = flag.Bool("nofs", false, "Disable file search")
@@ -163,6 +168,8 @@ func main() {
 		fmt.Printf("nwg-drawer version %s\n", version)
 		os.Exit(0)
 	}
+
+	validateWm()
 
 	// Gentle SIGTERM handler thanks to reiki4040 https://gist.github.com/reiki4040/be3705f307d3cd136e85
 	// v0.2: we also need to support SIGUSR from now on

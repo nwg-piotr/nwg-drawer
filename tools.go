@@ -602,9 +602,13 @@ func launch(command string, terminal bool) {
 			args = []string{elements[cmdIdx]}
 		}
 		cmd = exec.Command(prefixCommand, args...)
-	} else if *swaymsg {
+	} else if *wm == "sway" {
 		prefixCommand = "swaymsg"
 		args = []string{"exec", elements[cmdIdx]}
+		cmd = exec.Command(prefixCommand, args...)
+	} else if *wm == "hyprland" {
+		prefixCommand = "hyprlandctl"
+		args = []string{"dispatch", "exec", elements[cmdIdx]}
 		cmd = exec.Command(prefixCommand, args...)
 	}
 
