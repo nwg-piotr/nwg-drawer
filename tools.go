@@ -607,7 +607,7 @@ func launch(command string, terminal bool) {
 		args = []string{"exec", elements[cmdIdx]}
 		cmd = exec.Command(prefixCommand, args...)
 	} else if *wm == "hyprland" {
-		prefixCommand = "hyprlandctl"
+		prefixCommand = "hyprctl"
 		args = []string{"dispatch", "exec", elements[cmdIdx]}
 		cmd = exec.Command(prefixCommand, args...)
 	}
