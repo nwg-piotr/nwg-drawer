@@ -618,7 +618,7 @@ func launch(command string, terminal bool) {
 		cmd.Env = append(cmd.Env, envVars...)
 	}
 
-	msg := fmt.Sprintf("env vars: %s; command: '%s'; args: %s\n", envVars, elements[cmdIdx], elements[1+cmdIdx:])
+	msg := fmt.Sprintf("env vars: %s; command: '%s'; args: %s\n", envVars, cmd.Args[cmdIdx], cmd.Args[1+cmdIdx:])
 	log.Info(msg)
 
 	cmd.SysProcAttr = &syscall.SysProcAttr{
