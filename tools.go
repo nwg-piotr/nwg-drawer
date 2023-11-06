@@ -567,49 +567,51 @@ func launch(command string, terminal bool) {
 
 	elements := strings.Split(command, " ")
 
-	// find prepended env variables, if any
-	envVarsNum := strings.Count(command, "=")
-	var envVars []string
-
-	cmdIdx := -1
-
-	if envVarsNum > 0 {
-		for idx, item := range elements {
-			if strings.Contains(item, "=") {
-				envVars = append(envVars, item)
-			} else if !strings.HasPrefix(item, "-") && cmdIdx == -1 {
-				cmdIdx = idx
+	envVarsNum := 0
+	if strings.Contains(elements[0], "=") {
+		for _, element := range elements {
+			if strings.Contains(element, "=") {
+				envVarsNum++
+			} else {
+				break
 			}
 		}
 	}
-	if cmdIdx == -1 {
-		cmdIdx = 0
-	}
+
+	// find prepended env variables, if any
+	var envVars []string
 
 	if themeToPrepend != "" {
 		envVars = append(envVars, fmt.Sprintf("GTK_THEME=%s", themeToPrepend))
 	}
 
-	cmd := exec.Command(elements[cmdIdx], elements[1+cmdIdx:]...)
+	cmdIdx := envVarsNum
+	firstArgIdx := envVarsNum + 1
+
+	if envVarsNum > 0 {
+		for idx, item := range elements {
+			if envVarsNum > idx && strings.Contains(item, "=") {
+				envVars = append(envVars, item)
+			}
+		}
+	}
+
+	cmd := exec.Command(elements[cmdIdx], elements[firstArgIdx:]...)
 
 	var prefixCommand string
 	var args []string
 	if terminal {
 		prefixCommand = *term
 		if *term != "foot" {
-			args = []string{"-e", elements[cmdIdx]}
+			args = []string{"-e", strings.Join(elements, " ")}
 		} else {
-			args = []string{elements[cmdIdx]}
+			args = elements[cmdIdx:]
 		}
 		cmd = exec.Command(prefixCommand, args...)
 	} else if *wm == "sway" {
-		prefixCommand = "swaymsg"
-		args = []string{"exec", elements[cmdIdx]}
-		cmd = exec.Command(prefixCommand, args...)
+		cmd = exec.Command("swaymsg", "exec", strings.Join(elements, " "))
 	} else if *wm == "hyprland" {
-		prefixCommand = "hyprctl"
-		args = []string{"dispatch", "exec", elements[cmdIdx]}
-		cmd = exec.Command(prefixCommand, args...)
+		cmd = exec.Command("hyprctl", "dispatch", "exec", strings.Join(elements, " "))
 	}
 
 	// set env variables
@@ -618,7 +620,7 @@ func launch(command string, terminal bool) {
 		cmd.Env = append(cmd.Env, envVars...)
 	}
 
-	msg := fmt.Sprintf("env vars: %s; command: '%s'; args: %s\n", envVars, cmd.Args[cmdIdx], cmd.Args[1+cmdIdx:])
+	msg := fmt.Sprintf("env vars: %s; command: '%s'; args: %s\n", envVars, cmd.Args[0], cmd.Args[1:])
 	log.Info(msg)
 
 	cmd.SysProcAttr = &syscall.SysProcAttr{
