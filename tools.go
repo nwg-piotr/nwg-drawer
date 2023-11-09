@@ -548,6 +548,14 @@ func savePinned() {
 }
 
 func launch(command string, terminal bool) {
+	// trim % and everything afterwards
+	if strings.Contains(command, "%") {
+		cutAt := strings.Index(command, "%")
+		if cutAt != -1 {
+			command = command[:cutAt-1]
+		}
+	}
+
 	themeToPrepend := ""
 	// add "GTK_THEME=<default_gtk_theme>" environment variable
 	if *forceTheme {
