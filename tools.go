@@ -548,6 +548,14 @@ func savePinned() {
 }
 
 func launch(command string, terminal bool) {
+	// trim % and everything afterwards
+	if strings.Contains(command, "%") {
+		cutAt := strings.Index(command, "%")
+		if cutAt != -1 {
+			command = command[:cutAt-1]
+		}
+	}
+
 	themeToPrepend := ""
 	// add "GTK_THEME=<default_gtk_theme>" environment variable
 	if *forceTheme {
@@ -557,55 +565,22 @@ func launch(command string, terminal bool) {
 			themeToPrepend = th.(string)
 		}
 	}
-	// trim % and everything afterwards
-	if strings.Contains(command, "%") {
-		cutAt := strings.Index(command, "%")
-		if cutAt != -1 {
-			command = command[:cutAt-1]
-		}
-	}
-
-	elements := strings.Split(command, " ")
-
-	envVarsNum := 0
-	if strings.Contains(elements[0], "=") {
-		for _, element := range elements {
-			if strings.Contains(element, "=") {
-				envVarsNum++
-			} else {
-				break
-			}
-		}
-	}
-
-	// find prepended env variables, if any
-	var envVars []string
 
 	if themeToPrepend != "" {
-		envVars = append(envVars, fmt.Sprintf("GTK_THEME=%s", themeToPrepend))
+		command = fmt.Sprintf("GTK_THEME=%q %s", themeToPrepend, command)
 	}
 
-	cmdIdx := envVarsNum
-	firstArgIdx := envVarsNum + 1
+	var elements = []string{"/usr/bin/env", "-S", command}
 
-	if envVarsNum > 0 {
-		for idx, item := range elements {
-			if envVarsNum > idx && strings.Contains(item, "=") {
-				envVars = append(envVars, item)
-			}
-		}
-	}
+	cmd := exec.Command(elements[0], elements[1:]...)
 
-	cmd := exec.Command(elements[cmdIdx], elements[firstArgIdx:]...)
-
-	var prefixCommand string
-	var args []string
 	if terminal {
-		prefixCommand = *term
-		if *term != "foot" {
-			args = []string{"-e", strings.Join(elements, " ")}
+		var prefixCommand = *term
+		var args []string
+		if prefixCommand != "foot" {
+			args = []string{"-e", command}
 		} else {
-			args = elements[cmdIdx:]
+			args = elements
 		}
 		cmd = exec.Command(prefixCommand, args...)
 	} else if *wm == "sway" {
@@ -614,13 +589,7 @@ func launch(command string, terminal bool) {
 		cmd = exec.Command("hyprctl", "dispatch", "exec", strings.Join(elements, " "))
 	}
 
-	// set env variables
-	if len(envVars) > 0 {
-		cmd.Env = os.Environ()
-		cmd.Env = append(cmd.Env, envVars...)
-	}
-
-	msg := fmt.Sprintf("env vars: %s; command: '%s'; args: %s\n", envVars, cmd.Args[0], cmd.Args[1:])
+	msg := fmt.Sprintf("command: %q; args: %q\n", cmd.Args[0], cmd.Args[1:])
 	log.Info(msg)
 
 	cmd.SysProcAttr = &syscall.SysProcAttr{
