@@ -542,8 +542,10 @@ func main() {
 	}
 
 	statusLineWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	statusLineWrapper.SetProperty("name", "status-line-wrapper")
 	outerVBox.PackStart(statusLineWrapper, false, false, 10)
 	statusLabel, _ = gtk.LabelNew(status)
+	statusLabel.SetProperty("name", "status-label")
 	statusLineWrapper.PackStart(statusLabel, true, false, 0)
 
 	win.ShowAll()
