@@ -585,7 +585,7 @@ func launch(command string, terminal bool) {
 		cmd = exec.Command(prefixCommand, args...)
 	} else if *wm == "sway" {
 		cmd = exec.Command("swaymsg", "exec", strings.Join(elements, " "))
-	} else if *wm == "hyprland" {
+	} else if *wm == "hyprland" || *wm == "Hyprland" {
 		cmd = exec.Command("hyprctl", "dispatch", "exec", strings.Join(elements, " "))
 	}
 
