@@ -114,14 +114,6 @@ func defaultTermIfBlank(s, fallback string) string {
 	return s
 }
 
-func defaultStringIfBlank(s, fallback string) string {
-	s = strings.TrimSpace(s)
-	if s == "" {
-		return fallback
-	}
-	return s
-}
-
 func validateWm() {
 	if !(*wm == "sway" || *wm == "hyprland" || *wm == "Hyprland") && *wm != "" {
 		*wm = ""
