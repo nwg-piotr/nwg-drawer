@@ -21,16 +21,17 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-const version = "0.4.2"
+const version = "0.4.3"
 
 var (
-	appDirs         []string
-	configDirectory string
-	pinnedFile      string
-	pinned          []string
-	id2entry        map[string]desktopEntry
-	preferredApps   map[string]interface{}
-	exclusions      []string
+	appDirs          []string
+	configDirectory  string
+	pinnedFile       string
+	pinned           []string
+	id2entry         map[string]desktopEntry
+	preferredApps    map[string]interface{}
+	exclusions       []string
+	hyprlandMonitors []monitor
 )
 
 var categoryNames = [...]string{
@@ -64,6 +65,30 @@ type desktopEntry struct {
 	Category   string
 	Terminal   bool
 	NoDisplay  bool
+}
+
+type monitor struct {
+	Id              int     `json:"id"`
+	Name            string  `json:"name"`
+	Description     string  `json:"description"`
+	Make            string  `json:"make"`
+	Model           string  `json:"model"`
+	Serial          string  `json:"serial"`
+	Width           int     `json:"width"`
+	Height          int     `json:"height"`
+	RefreshRate     float64 `json:"refreshRate"`
+	X               int     `json:"x"`
+	Y               int     `json:"y"`
+	ActiveWorkspace struct {
+		Id   int    `json:"id"`
+		Name string `json:"name"`
+	} `json:"activeWorkspace"`
+	Reserved   []int   `json:"reserved"`
+	Scale      float64 `json:"scale"`
+	Transform  int     `json:"transform"`
+	Focused    bool    `json:"focused"`
+	DpmsStatus bool    `json:"dpmsStatus"`
+	Vrr        bool    `json:"vrr"`
 }
 
 // slices below will hold DesktopID strings
@@ -123,7 +148,7 @@ func validateWm() {
 
 // Flags
 var cssFileName = flag.String("s", "drawer.css", "Styling: css file name")
-var targetOutput = flag.String("o", "", "name of the Output to display the drawer on (sway only)")
+var targetOutput = flag.String("o", "", "name of the Output to display the drawer on (sway & Hyprland only)")
 var displayVersion = flag.Bool("v", false, "display Version information")
 var keyboard = flag.Bool("k", false, "set GTK layer shell Keyboard interactivity to 'on-demand' mode")
 var overlay = flag.Bool("ovl", false, "use OVerLay layer")
@@ -141,7 +166,7 @@ var itemSpacing = flag.Uint("spacing", 20, "icon spacing")
 var lang = flag.String("lang", "", "force lang, e.g. \"en\", \"pl\"")
 var fileManager = flag.String("fm", "thunar", "File Manager")
 var term = flag.String("term", defaultTermIfBlank(os.Getenv("TERM"), "foot"), "Terminal emulator")
-var wm = flag.String("wm", "", "Use `swaymsg exec` (with 'sway' argument) or `hyprctl dispatch exec` (with 'hyprland') to launch programs")
+var wm = flag.String("wm", "", "use swaymsg exec (with 'sway' argument) or hyprctl dispatch exec (with 'hyprland') to launch programs")
 var nameLimit = flag.Int("fslen", 80, "File Search name LENgth Limit")
 var noCats = flag.Bool("nocats", false, "Disable filtering by category")
 var noFS = flag.Bool("nofs", false, "Disable file search")
@@ -372,6 +397,7 @@ func main() {
 		if *targetOutput != "" {
 			// We want to assign layershell to a monitor, but we only know the output name!
 			output2mon, err = mapOutputs()
+			fmt.Println(">>>", output2mon)
 			if err == nil {
 				monitor := output2mon[*targetOutput]
 				layershell.SetMonitor(win, monitor)
