@@ -24,13 +24,14 @@ import (
 const version = "0.4.2"
 
 var (
-	appDirs         []string
-	configDirectory string
-	pinnedFile      string
-	pinned          []string
-	id2entry        map[string]desktopEntry
-	preferredApps   map[string]interface{}
-	exclusions      []string
+	appDirs          []string
+	configDirectory  string
+	pinnedFile       string
+	pinned           []string
+	id2entry         map[string]desktopEntry
+	preferredApps    map[string]interface{}
+	exclusions       []string
+	hyprlandMonitors []monitor
 )
 
 var categoryNames = [...]string{
@@ -64,6 +65,30 @@ type desktopEntry struct {
 	Category   string
 	Terminal   bool
 	NoDisplay  bool
+}
+
+type monitor struct {
+	Id              int     `json:"id"`
+	Name            string  `json:"name"`
+	Description     string  `json:"description"`
+	Make            string  `json:"make"`
+	Model           string  `json:"model"`
+	Serial          string  `json:"serial"`
+	Width           int     `json:"width"`
+	Height          int     `json:"height"`
+	RefreshRate     float64 `json:"refreshRate"`
+	X               int     `json:"x"`
+	Y               int     `json:"y"`
+	ActiveWorkspace struct {
+		Id   int    `json:"id"`
+		Name string `json:"name"`
+	} `json:"activeWorkspace"`
+	Reserved   []int   `json:"reserved"`
+	Scale      float64 `json:"scale"`
+	Transform  int     `json:"transform"`
+	Focused    bool    `json:"focused"`
+	DpmsStatus bool    `json:"dpmsStatus"`
+	Vrr        bool    `json:"vrr"`
 }
 
 // slices below will hold DesktopID strings
@@ -372,6 +397,7 @@ func main() {
 		if *targetOutput != "" {
 			// We want to assign layershell to a monitor, but we only know the output name!
 			output2mon, err = mapOutputs()
+			fmt.Println(">>>", output2mon)
 			if err == nil {
 				monitor := output2mon[*targetOutput]
 				layershell.SetMonitor(win, monitor)

@@ -5,8 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/joshuarubin/go-sway"
+	log "github.com/sirupsen/logrus"
 	"io"
 	"io/fs"
+	"net"
 	"os"
 	"os/exec"
 	"path"
@@ -17,11 +20,8 @@ import (
 	"syscall"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
-	"github.com/joshuarubin/go-sway"
 )
 
 func wayland() bool {
@@ -651,35 +651,64 @@ func open(filePath string, xdgOpen bool) {
 func mapOutputs() (map[string]*gdk.Monitor, error) {
 	result := make(map[string]*gdk.Monitor)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
-	defer cancel()
+	if os.Getenv("HYPRLAND_INSTANCE_SIGNATURE") != "" {
+		err := listHyprlandMonitors()
+		if err == nil {
 
-	client, err := sway.New(ctx)
-	if err != nil {
-		return nil, err
-	}
+			display, err := gdk.DisplayGetDefault()
+			if err != nil {
+				return nil, err
+			}
 
-	outputs, err := client.GetOutputs(ctx)
-	if err != nil {
-		return nil, err
-	}
+			num := display.GetNMonitors()
+			for i := 0; i < num; i++ {
+				mon, _ := display.GetMonitor(i)
+				geometry := mon.GetGeometry()
+				// assign output to monitor on the basis of the same x, y coordinates
+				for _, output := range hyprlandMonitors {
+					if int(output.X) == geometry.GetX() && int(output.Y) == geometry.GetY() {
+						result[output.Name] = mon
+					}
+				}
+			}
+		} else {
+			return nil, err
+		}
 
-	display, err := gdk.DisplayGetDefault()
-	if err != nil {
-		return nil, err
-	}
+	} else if os.Getenv("SWAYSOCK") != "" {
+		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+		defer cancel()
 
-	num := display.GetNMonitors()
-	for i := 0; i < num; i++ {
-		monitor, _ := display.GetMonitor(i)
-		geometry := monitor.GetGeometry()
-		// assign output to monitor on the basis of the same x, y coordinates
-		for _, output := range outputs {
-			if int(output.Rect.X) == geometry.GetX() && int(output.Rect.Y) == geometry.GetY() {
-				result[output.Name] = monitor
+		client, err := sway.New(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		outputs, err := client.GetOutputs(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		display, err := gdk.DisplayGetDefault()
+		if err != nil {
+			return nil, err
+		}
+
+		num := display.GetNMonitors()
+		for i := 0; i < num; i++ {
+			monitor, _ := display.GetMonitor(i)
+			geometry := monitor.GetGeometry()
+			// assign output to monitor on the basis of the same x, y coordinates
+			for _, output := range outputs {
+				if int(output.Rect.X) == geometry.GetX() && int(output.Rect.Y) == geometry.GetY() {
+					result[output.Name] = monitor
+				}
 			}
 		}
+	} else {
+		return nil, errors.New("output assignment only supported on sway and Hyprland")
 	}
+
 	return result, nil
 }
 
@@ -697,4 +726,39 @@ func substring(s string, start int, end int) string {
 		i++
 	}
 	return s[startStrIdx:]
+}
+
+func hyprctl(cmd string) ([]byte, error) {
+	his := os.Getenv("HYPRLAND_INSTANCE_SIGNATURE")
+	socketFile := fmt.Sprintf("/tmp/hypr/%s/.socket.sock", his)
+	conn, err := net.Dial("unix", socketFile)
+	if err != nil {
+		return nil, err
+	}
+
+	message := []byte(cmd)
+	_, err = conn.Write(message)
+	if err != nil {
+		return nil, err
+	}
+
+	reply := make([]byte, 102400)
+	n, err := conn.Read(reply)
+	if err != nil {
+		return nil, err
+	}
+
+	defer conn.Close()
+
+	return reply[:n], nil
+}
+
+func listHyprlandMonitors() error {
+	reply, err := hyprctl("j/monitors")
+	if err != nil {
+		return err
+	} else {
+		err = json.Unmarshal([]byte(reply), &hyprlandMonitors)
+	}
+	return err
 }
