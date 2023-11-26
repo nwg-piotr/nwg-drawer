@@ -696,12 +696,12 @@ func mapOutputs() (map[string]*gdk.Monitor, error) {
 
 		num := display.GetNMonitors()
 		for i := 0; i < num; i++ {
-			monitor, _ := display.GetMonitor(i)
-			geometry := monitor.GetGeometry()
+			mon, _ := display.GetMonitor(i)
+			geometry := mon.GetGeometry()
 			// assign output to monitor on the basis of the same x, y coordinates
 			for _, output := range outputs {
 				if int(output.Rect.X) == geometry.GetX() && int(output.Rect.Y) == geometry.GetY() {
-					result[output.Name] = monitor
+					result[output.Name] = mon
 				}
 			}
 		}
