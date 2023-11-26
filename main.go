@@ -148,7 +148,7 @@ func validateWm() {
 
 // Flags
 var cssFileName = flag.String("s", "drawer.css", "Styling: css file name")
-var targetOutput = flag.String("o", "", "name of the Output to display the drawer on (sway only)")
+var targetOutput = flag.String("o", "", "name of the Output to display the drawer on (sway & Hyprland only)")
 var displayVersion = flag.Bool("v", false, "display Version information")
 var keyboard = flag.Bool("k", false, "set GTK layer shell Keyboard interactivity to 'on-demand' mode")
 var overlay = flag.Bool("ovl", false, "use OVerLay layer")
