@@ -19,6 +19,9 @@ install:
 	cp drawer.css /usr/share/nwg-drawer
 	cp bin/nwg-drawer /usr/bin
 
+	cp LICENSE /usr/share/licenses/nwg-shell-drawer/LICENSE
+	cp README.md /usr/share/doc/nwg-shell-drawer/README.md
+
 uninstall:
 	rm -r /usr/share/nwg-drawer
 	rm /usr/bin/nwg-drawer
