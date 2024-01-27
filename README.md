@@ -149,8 +149,6 @@ Edit `~/.config/nwg-drawer/drawer.css` to your taste.
 
 When the search phrase is at least 3 characters long, your XDG user directories are being searched.
 
-![screenshot-02.png](https://raw.githubusercontent.com/nwg-piotr/nwg-shell/main/images/nwg-drawer/search.png)
-
 Use the **left mouse button** to open a file with the `xdg-open` command. As configuring file associations for it is
 PITA, you may override them, by creating the `~/.config/nwg-panel/preferred-apps.json` file with your own definitions.
 
