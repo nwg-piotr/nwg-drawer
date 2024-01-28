@@ -1,3 +1,6 @@
+PREFIX ?= /usr
+DESTDIR ?=
+
 get:
 	go get github.com/gotk3/gotk3
 	go get github.com/gotk3/gotk3/gdk
@@ -14,17 +17,18 @@ build:
 install:
 	-pkill -f nwg-drawer
 	sleep 1
-	mkdir -p /usr/share/nwg-drawer
-	cp -r desktop-directories /usr/share/nwg-drawer
-	cp drawer.css /usr/share/nwg-drawer
-	cp bin/nwg-drawer /usr/bin
+	mkdir -p $(DESTDIR)$(PREFIX)/bin
+	mkdir -p $(DESTDIR)$(PREFIX)/share/nwg-dock
+	cp -r desktop-directories $(DESTDIR)$(PREFIX)/share/nwg-drawer
+	cp drawer.css $(DESTDIR)$(PREFIX)/share/nwg-drawer
+	cp bin/nwg-drawer $(DESTDIR)$(PREFIX)/bin
 
 	cp LICENSE /usr/share/licenses/nwg-shell-drawer/LICENSE
 	cp README.md /usr/share/doc/nwg-shell-drawer/README.md
 
 uninstall:
-	rm -r /usr/share/nwg-drawer
-	rm /usr/bin/nwg-drawer
+	rm -r $(DESTDIR)$(PREFIX)/share/nwg-drawer
+	rm $(DESTDIR)$(PREFIX)/bin/nwg-drawer
 
 run:
 	go run .
