@@ -281,6 +281,9 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	button.Connect("enter-notify-event", func() {
 		statusLabel.SetText(desc)
 	})
+	button.Connect("leave-notify-event", func() {
+		statusLabel.SetText("")
+	})
 	button.Connect("focus-in-event", func() {
 		statusLabel.SetText(desc)
 	})
@@ -316,6 +319,9 @@ func powerButton(iconPath, command string) *gtk.Button {
 	})
 	button.Connect("enter-notify-event", func() {
 		statusLabel.SetText(command)
+	})
+	button.Connect("leave-notify-event", func() {
+		statusLabel.SetText("")
 	})
 	button.Connect("focus-in-event", func() {
 		statusLabel.SetText(command)
