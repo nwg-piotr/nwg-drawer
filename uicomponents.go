@@ -287,6 +287,43 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	return button
 }
 
+func powerButton(iconPath, command string) *gtk.Button {
+	button, _ := gtk.ButtonNew()
+	button.SetAlwaysShowImage(true)
+
+	var pixbuf *gdk.Pixbuf
+	var img *gtk.Image
+	var err error
+	//pixbuf, err = createPixbuf(iconPath, *iconSize)
+	pixbuf, err = gdk.PixbufNewFromFileAtSize(iconPath, *iconSize, *iconSize)
+	if err != nil {
+		pixbuf, _ = createPixbuf("unknown", *iconSize)
+		log.Warnf("Couldn't find icon %s", iconPath)
+	}
+	img, _ = gtk.ImageNewFromPixbuf(pixbuf)
+	button.SetImage(img)
+	button.SetImagePosition(gtk.POS_TOP)
+
+	button.Connect("button-release-event", func(btn *gtk.Button, e *gdk.Event) bool {
+		btnEvent := gdk.EventButtonNewFromEvent(e)
+		if btnEvent.Button() == 1 {
+			launch(command, false)
+			return true
+		}
+		return false
+	})
+	button.Connect("activate", func() {
+		launch(command, false)
+	})
+	button.Connect("enter-notify-event", func() {
+		statusLabel.SetText(command)
+	})
+	button.Connect("focus-in-event", func() {
+		statusLabel.SetText(command)
+	})
+	return button
+}
+
 func setUpFileSearchResultContainer() *gtk.FlowBox {
 	if fileSearchResultFlowBox != nil {
 		fileSearchResultFlowBox.Destroy()
