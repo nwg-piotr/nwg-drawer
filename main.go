@@ -571,6 +571,7 @@ func main() {
 		outerVBox.PackStart(powerBarWrapper, false, false, 0)
 		powerButtonsWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 		powerBarWrapper.PackStart(powerButtonsWrapper, true, false, 12)
+
 		if *pbLock != "" {
 			btn := powerButton("/usr/share/nwg-drawer/img/lock.svg", *pbLock)
 			powerButtonsWrapper.PackStart(btn, true, false, 0)

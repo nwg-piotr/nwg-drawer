@@ -294,7 +294,6 @@ func powerButton(iconPath, command string) *gtk.Button {
 	var pixbuf *gdk.Pixbuf
 	var img *gtk.Image
 	var err error
-	//pixbuf, err = createPixbuf(iconPath, *iconSize)
 	pixbuf, err = gdk.PixbufNewFromFileAtSize(iconPath, *pbSize, *pbSize)
 	if err != nil {
 		pixbuf, _ = createPixbuf("unknown", *pbSize)
