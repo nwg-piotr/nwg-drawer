@@ -295,9 +295,9 @@ func powerButton(iconPath, command string) *gtk.Button {
 	var img *gtk.Image
 	var err error
 	//pixbuf, err = createPixbuf(iconPath, *iconSize)
-	pixbuf, err = gdk.PixbufNewFromFileAtSize(iconPath, *iconSize, *iconSize)
+	pixbuf, err = gdk.PixbufNewFromFileAtSize(iconPath, *pbSize, *pbSize)
 	if err != nil {
-		pixbuf, _ = createPixbuf("unknown", *iconSize)
+		pixbuf, _ = createPixbuf("unknown", *pbSize)
 		log.Warnf("Couldn't find icon %s", iconPath)
 	}
 	img, _ = gtk.ImageNewFromPixbuf(pixbuf)

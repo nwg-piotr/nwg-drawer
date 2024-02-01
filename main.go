@@ -171,11 +171,12 @@ var nameLimit = flag.Int("fslen", 80, "File Search name LENgth Limit")
 var noCats = flag.Bool("nocats", false, "Disable filtering by category")
 var noFS = flag.Bool("nofs", false, "Disable file search")
 var resident = flag.Bool("r", false, "Leave the program resident in memory")
-var cmdExit = flag.String("cmdexit", "", "command for the Exit power bar icon")
-var cmdLock = flag.String("cmdlock", "", "command for the Lock power bar icon")
-var cmdPoweroff = flag.String("cmdpoweroff", "", "command for the Poweroff power bar icon")
-var cmdReboot = flag.String("cmdreboot", "", "command for the Reboot power bar icon")
-var cmdSleep = flag.String("cmdsleep", "", "command for the sleep power bar icon")
+var pbExit = flag.String("pbexit", "", "command for the Exit power bar icon")
+var pbLock = flag.String("pblock", "", "command for the Lock power bar icon")
+var pbPoweroff = flag.String("pbpoweroff", "", "command for the Poweroff power bar icon")
+var pbReboot = flag.String("pbreboot", "", "command for the Reboot power bar icon")
+var pbSleep = flag.String("pbsleep", "", "command for the sleep power bar icon")
+var pbSize = flag.Int("pbsize", 64, "power bar icon size")
 var debug = flag.Bool("d", false, "Turn on Debug messages")
 
 func main() {
@@ -565,29 +566,29 @@ func main() {
 	}
 
 	// Power Button Bar
-	if *cmdExit != "" || *cmdLock != "" || *cmdPoweroff != "" || *cmdReboot != "" || *cmdSleep != "" {
+	if *pbExit != "" || *pbLock != "" || *pbPoweroff != "" || *pbReboot != "" || *pbSleep != "" {
 		powerBarWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 		outerVBox.PackStart(powerBarWrapper, false, false, 0)
 		powerButtonsWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
-		powerBarWrapper.PackStart(powerButtonsWrapper, true, false, 6)
-		if *cmdLock != "" {
-			btn := powerButton("/usr/share/nwg-drawer/img/lock.svg", *cmdLock)
+		powerBarWrapper.PackStart(powerButtonsWrapper, true, false, 12)
+		if *pbLock != "" {
+			btn := powerButton("/usr/share/nwg-drawer/img/lock.svg", *pbLock)
 			powerButtonsWrapper.PackStart(btn, true, false, 0)
 		}
-		if *cmdExit != "" {
-			btn := powerButton("/usr/share/nwg-drawer/img/exit.svg", *cmdExit)
+		if *pbExit != "" {
+			btn := powerButton("/usr/share/nwg-drawer/img/exit.svg", *pbExit)
 			powerButtonsWrapper.PackStart(btn, true, false, 0)
 		}
-		if *cmdReboot != "" {
-			btn := powerButton("/usr/share/nwg-drawer/img/reboot.svg", *cmdReboot)
+		if *pbReboot != "" {
+			btn := powerButton("/usr/share/nwg-drawer/img/reboot.svg", *pbReboot)
 			powerButtonsWrapper.PackStart(btn, true, false, 0)
 		}
-		if *cmdSleep != "" {
-			btn := powerButton("/usr/share/nwg-drawer/img/sleep.svg", *cmdSleep)
+		if *pbSleep != "" {
+			btn := powerButton("/usr/share/nwg-drawer/img/sleep.svg", *pbSleep)
 			powerButtonsWrapper.PackStart(btn, true, false, 0)
 		}
-		if *cmdPoweroff != "" {
-			btn := powerButton("/usr/share/nwg-drawer/img/poweroff.svg", *cmdPoweroff)
+		if *pbPoweroff != "" {
+			btn := powerButton("/usr/share/nwg-drawer/img/poweroff.svg", *pbPoweroff)
 			powerButtonsWrapper.PackStart(btn, true, false, 0)
 		}
 	}
