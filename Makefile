@@ -16,11 +16,12 @@ install:
 	sleep 1
 	mkdir -p /usr/share/nwg-drawer
 	cp -r desktop-directories /usr/share/nwg-drawer
+	cp -r img /usr/share/nwg-drawer
 	cp drawer.css /usr/share/nwg-drawer
 	cp bin/nwg-drawer /usr/bin
 
-	cp LICENSE /usr/share/licenses/nwg-shell-drawer/LICENSE
-	cp README.md /usr/share/doc/nwg-shell-drawer/README.md
+	install -Dm 644 -t "/usr/share/licenses/nwg-drawer" LICENSE
+	install -Dm 644 -t "/usr/share/doc/nwg-drawer" README.md
 
 uninstall:
 	rm -r /usr/share/nwg-drawer

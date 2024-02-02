@@ -281,8 +281,50 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	button.Connect("enter-notify-event", func() {
 		statusLabel.SetText(desc)
 	})
+	button.Connect("leave-notify-event", func() {
+		statusLabel.SetText("")
+	})
 	button.Connect("focus-in-event", func() {
 		statusLabel.SetText(desc)
+	})
+	return button
+}
+
+func powerButton(iconPath, command string) *gtk.Button {
+	button, _ := gtk.ButtonNew()
+	button.SetAlwaysShowImage(true)
+
+	var pixbuf *gdk.Pixbuf
+	var img *gtk.Image
+	var err error
+	pixbuf, err = gdk.PixbufNewFromFileAtSize(iconPath, *pbSize, *pbSize)
+	if err != nil {
+		pixbuf, _ = createPixbuf("unknown", *pbSize)
+		log.Warnf("Couldn't find icon %s", iconPath)
+	}
+	img, _ = gtk.ImageNewFromPixbuf(pixbuf)
+	button.SetImage(img)
+	button.SetImagePosition(gtk.POS_TOP)
+
+	button.Connect("button-release-event", func(btn *gtk.Button, e *gdk.Event) bool {
+		btnEvent := gdk.EventButtonNewFromEvent(e)
+		if btnEvent.Button() == 1 {
+			launch(command, false)
+			return true
+		}
+		return false
+	})
+	button.Connect("activate", func() {
+		launch(command, false)
+	})
+	button.Connect("enter-notify-event", func() {
+		statusLabel.SetText(command)
+	})
+	button.Connect("leave-notify-event", func() {
+		statusLabel.SetText("")
+	})
+	button.Connect("focus-in-event", func() {
+		statusLabel.SetText(command)
 	})
 	return button
 }
