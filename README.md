@@ -112,11 +112,11 @@ Usage of /tmp/go-build3511850078/b001/exe/nwg-drawer:
     	use swaymsg exec (with 'sway' argument) or hyprctl dispatch exec (with 'hyprland') to launch programs
   ```
 
-  *NOTE: the `$TERM` environment variable overrides the `-term` argument if defined.*
+  *NOTE: the `$TERM` environment variable overrides the `-term` argument.*
 
 ## Running
 
-Since v0.2.x you may use the drawer in two ways:
+You may use the drawer in two ways:
 
 1. Simply run the `nwg-drawer` command, by adding a key binding to your sway config file, e.g.:
 
@@ -135,7 +135,7 @@ The second line does nothing but `pkill -USR1 nwg-drawer`, so you may just use t
 this should be a little bit faster.
 
 Running a resident instance should speed up use of the drawer significantly. Pay attention to the fact, that you
-need to `pkill -f nwg-drawer` and reload sway to apply any new arguments!
+need to `pkill -f nwg-drawer` and reload the compositor to apply any new arguments!
 
 ## Logging
 
@@ -152,7 +152,7 @@ exit sway, launch it again and include the `drawer.log` content in the GitHub is
 
 Edit `~/.config/nwg-drawer/drawer.css` to your taste.
 
-## Files
+## File search
 
 When the search phrase is at least 3 characters long, your XDG user directories are being searched.
 
