@@ -17,9 +17,7 @@ You may pin applications by right-clicking them. Pinned items will appear above 
 a pinned item to unpin it. The pinned items cache is shared with [nwg-menu](https://github.com/nwg-piotr/nwg-menu)
 and `nwggrid`.
 
-<img src="https://raw.githubusercontent.com/nwg-piotr/nwg-shell-resources/master/images/nwg-shell/nwg-drawer.png" width=640 alt="screenshot"><br>
-
-[see on YouTube](https://youtu.be/iIgxJQhCQf0)
+<img src="https://github.com/nwg-piotr/nwg-drawer/assets/20579136/8f4eacb4-5395-4350-889b-a9037aa34f08" width=640 alt="screenshot"><br>
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/nwg-drawer.svg)](https://repology.org/project/nwg-drawer/versions)
 
