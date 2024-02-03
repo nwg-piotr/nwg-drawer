@@ -2,13 +2,9 @@
 
 This application is a part of the [nwg-shell](https://nwg-piotr.github.io/nwg-shell) project.
 
-**Contributing:** please read the [general contributing rules for the nwg-shell project](https://nwg-piotr.github.io/nwg-shell/contribution).
-
-Nwg-drawer is a golang replacement to the `nwggrid` command
-(a part of [nwg-launchers](https://github.com/nwg-piotr/nwg-launchers)). It's being developed with
-[sway](https://github.com/swaywm/sway) in mind, but should also work with other wlroots-based Wayland compositors.
-X Window System is not officially supported, but you should be able to use the drawer on some floating
-window managers (tested on Openbox).
+**Nwg-drawer** is an application launcher. It's being developed with [sway](https://github.com/swaywm/sway) and 
+[Hyprland](https://github.com/hyprwm/Hyprland) in mind, but should also work with other wlroots-based Wayland 
+compositors.
 
 The `nwg-drawer` command displays the application grid. The search entry allows to look for installed applications,
 and for files in XDG user directories. The grid view may also be filtered by categories.
@@ -16,6 +12,10 @@ and for files in XDG user directories. The grid view may also be filtered by cat
 You may pin applications by right-clicking them. Pinned items will appear above the application grid. Right-click
 a pinned item to unpin it. The pinned items cache is shared with [nwg-menu](https://github.com/nwg-piotr/nwg-menu)
 and `nwggrid`.
+
+Below the grid there is the power bar - a row of buttons to lock screen, exit the compositor, reboot, suspend and power
+your machine off. For each button to appear, you need to provide the corresponding command. See "Command line arguments"
+below.
 
 <img src="https://github.com/nwg-piotr/nwg-drawer/assets/20579136/8f4eacb4-5395-4350-889b-a9037aa34f08" width=640 alt="screenshot"><br>
 
