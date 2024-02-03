@@ -19,7 +19,7 @@ below.
 
 <img src="https://github.com/nwg-piotr/nwg-drawer/assets/20579136/8f4eacb4-5395-4350-889b-a9037aa34f08" width=640 alt="screenshot"><br>
 
-To close the window w/o running a program, you may use `Esc` key, or right-click the window next to the grid.
+To close the window w/o running a program, you may use the `Esc` key, or right-click the window next to the grid.
 
 ## Installation
 
