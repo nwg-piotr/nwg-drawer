@@ -1,4 +1,5 @@
-# nwg-drawer
+<img src="https://github.com/nwg-piotr/nwg-drawer/assets/20579136/1a7578e8-5332-4e4c-bdce-9b9bf875c0e7" width="90" style="margin-right:10px" align=left alt="logo">
+<H1>nwg-drawer</H1><br>
 
 This application is a part of the [nwg-shell](https://nwg-piotr.github.io/nwg-shell) project.
 
