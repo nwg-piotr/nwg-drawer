@@ -10,18 +10,15 @@ The `nwg-drawer` command displays the application grid. The search entry allows 
 and for files in XDG user directories. The grid view may also be filtered by categories.
 
 You may pin applications by right-clicking them. Pinned items will appear above the application grid. Right-click
-a pinned item to unpin it. The pinned items cache is shared with [nwg-menu](https://github.com/nwg-piotr/nwg-menu)
-and `nwggrid`.
+a pinned item to unpin it. The pinned items cache is shared with [nwg-menu](https://github.com/nwg-piotr/nwg-menu).
 
-Below the grid there is the power bar - a row of buttons to lock screen, exit the compositor, reboot, suspend and power
-your machine off. For each button to appear, you need to provide the corresponding command. See "Command line arguments"
+Below the grid there is the power bar - a row of buttons to lock the screen, exit the compositor, reboot, suspend and power
+the machine off. For each button to appear, you need to provide a corresponding command. See "Command line arguments"
 below.
 
 <img src="https://github.com/nwg-piotr/nwg-drawer/assets/20579136/8f4eacb4-5395-4350-889b-a9037aa34f08" width=640 alt="screenshot"><br>
 
-[![Packaging status](https://repology.org/badge/vertical-allrepos/nwg-drawer.svg)](https://repology.org/project/nwg-drawer/versions)
-
-To close the window w/o running a program, you may use `Esc` key, or right-click the window next to the icons.
+To close the window w/o running a program, you may use `Esc` key, or right-click the window next to the grid.
 
 ## v0.2.x note
 
@@ -29,6 +26,8 @@ To close the window w/o running a program, you may use `Esc` key, or right-click
 2. From now on you may run the program residently, which should speed it up (but also occupy some resources!). See "Running" below.
 
 ## Installation
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/nwg-drawer.svg)](https://repology.org/project/nwg-drawer/versions)
 
 ### Dependencies
 
