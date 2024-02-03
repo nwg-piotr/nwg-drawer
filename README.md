@@ -58,7 +58,7 @@ confirmed to work well with the program. Also see **Files** below.
 
 ```text
 $ nwg-drawer -h
-Usage of nwg-drawer:
+Usage of /tmp/go-build3511850078/b001/exe/nwg-drawer:
   -c uint
     	number of Columns (default 6)
   -d	Turn on Debug messages
@@ -92,9 +92,21 @@ Usage of nwg-drawer:
   -nofs
     	Disable file search
   -o string
-    	name of the Output to display the drawer on (sway only)
+    	name of the Output to display the drawer on (sway & Hyprland only)
   -ovl
     	use OVerLay layer
+  -pbexit string
+    	command for the Exit power bar icon
+  -pblock string
+    	command for the Lock power bar icon
+  -pbpoweroff string
+    	command for the Poweroff power bar icon
+  -pbreboot string
+    	command for the Reboot power bar icon
+  -pbsize int
+    	power bar icon size (default 64)
+  -pbsleep string
+    	command for the sleep power bar icon
   -r	Leave the program resident in memory
   -s string
     	Styling: css file name (default "drawer.css")
@@ -103,6 +115,8 @@ Usage of nwg-drawer:
   -term string
     	Terminal emulator (default "foot")
   -v	display Version information
+  -wm string
+    	use swaymsg exec (with 'sway' argument) or hyprctl dispatch exec (with 'hyprland') to launch programs
   ```
 
   *NOTE: the `$TERM` environment variable overrides the `-term` argument if defined.*
@@ -158,7 +172,7 @@ PITA, you may override them, by creating the `~/.config/nwg-panel/preferred-apps
 {
   "\\.pdf$": "atril",
   "\\.svg$": "inkscape",
-  "\\.(jpg|png|tiff|gif)$": "feh",
+  "\\.(jpg|png|tiff|gif)$": "swayimg",
   "\\.(mp3|ogg|flac|wav|wma)$": "audacious",
   "\\.(avi|mp4|mkv|mov|wav)$": "mpv",
   "\\.(doc|docx|xls|xlsx)$": "libreoffice"
