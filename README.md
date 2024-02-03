@@ -21,11 +21,6 @@ below.
 
 To close the window w/o running a program, you may use `Esc` key, or right-click the window next to the grid.
 
-## v0.2.x note
-
-1. Placing config files in the nwg-panel config directory was a mistake, sorry. The 0.2.0 version migrates them to `~/.config/nwg-drawer`.
-2. From now on you may run the program residently, which should speed it up (but also occupy some resources!). See "Running" below.
-
 ## Installation
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/nwg-drawer.svg)](https://repology.org/project/nwg-drawer/versions)
