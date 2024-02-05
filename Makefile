@@ -9,7 +9,7 @@ get:
 	go get github.com/fsnotify/fsnotify
 
 build:
-	go build -o bin/nwg-drawer .
+	go build -v -o bin/nwg-drawer .
 
 install:
 	-pkill -f nwg-drawer
