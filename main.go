@@ -32,6 +32,7 @@ var (
 	preferredApps    map[string]interface{}
 	exclusions       []string
 	hyprlandMonitors []monitor
+	beenScrolled     bool
 )
 
 var categoryNames = [...]string{
@@ -517,6 +518,15 @@ func main() {
 	resultWindow, _ = gtk.ScrolledWindowNew(nil, nil)
 	resultWindow.SetEvents(int(gdk.ALL_EVENTS_MASK))
 	resultWindow.SetPolicy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+
+	vAdj := resultWindow.GetVAdjustment()
+	vAdj.Connect("value-changed", func() {
+		beenScrolled = true
+	})
+	hAdj := resultWindow.GetVAdjustment()
+	hAdj.Connect("value-changed", func() {
+		beenScrolled = true
+	})
 
 	resultWindow.Connect("button-release-event", func(_ *gtk.ScrolledWindow, event *gdk.Event) bool {
 		btnEvent := gdk.EventButtonNewFromEvent(event)
