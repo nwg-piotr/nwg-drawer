@@ -266,6 +266,7 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	}
 
 	button.Connect("button-press-event", func() {
+		// if not scrolled from now on, we will allow launching apps on button-release-event
 		beenScrolled = false
 	})
 
