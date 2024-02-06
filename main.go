@@ -32,6 +32,7 @@ var (
 	preferredApps    map[string]interface{}
 	exclusions       []string
 	hyprlandMonitors []monitor
+	beenScrolled     bool
 )
 
 var categoryNames = [...]string{
@@ -517,6 +518,18 @@ func main() {
 	resultWindow, _ = gtk.ScrolledWindowNew(nil, nil)
 	resultWindow.SetEvents(int(gdk.ALL_EVENTS_MASK))
 	resultWindow.SetPolicy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+
+	// On touch screen we don't want the button-release-event to launch the app if the user just wanted to scroll the
+	// window. Let's forbid doing so if the content has been scrolled. We will reset the value on button-press-event.
+	// Resolves https://github.com/nwg-piotr/nwg-drawer/issues/110
+	vAdj := resultWindow.GetVAdjustment()
+	vAdj.Connect("value-changed", func() {
+		beenScrolled = true
+	})
+	hAdj := resultWindow.GetHAdjustment()
+	hAdj.Connect("value-changed", func() {
+		beenScrolled = true
+	})
 
 	resultWindow.Connect("button-release-event", func(_ *gtk.ScrolledWindow, event *gdk.Event) bool {
 		btnEvent := gdk.EventButtonNewFromEvent(event)

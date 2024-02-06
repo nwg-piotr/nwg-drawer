@@ -264,11 +264,19 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 		r := substring(desc, 0, 117)
 		desc = fmt.Sprintf("%s…", string(r))
 	}
+
+	button.Connect("button-press-event", func() {
+		// if not scrolled from now on, we will allow launching apps on button-release-event
+		beenScrolled = false
+	})
+
 	button.Connect("button-release-event", func(btn *gtk.Button, e *gdk.Event) bool {
 		btnEvent := gdk.EventButtonNewFromEvent(e)
 		if btnEvent.Button() == 1 {
-			launch(exec, terminal)
-			return true
+			if !beenScrolled {
+				launch(exec, terminal)
+				return true
+			}
 		} else if btnEvent.Button() == 3 {
 			pinItem(ID)
 			return true
