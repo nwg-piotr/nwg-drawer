@@ -526,7 +526,7 @@ func main() {
 	vAdj.Connect("value-changed", func() {
 		beenScrolled = true
 	})
-	hAdj := resultWindow.GetVAdjustment()
+	hAdj := resultWindow.GetHAdjustment()
 	hAdj.Connect("value-changed", func() {
 		beenScrolled = true
 	})
