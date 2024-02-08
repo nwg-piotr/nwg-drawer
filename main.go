@@ -34,6 +34,7 @@ var (
 	exclusions       []string
 	hyprlandMonitors []monitor
 	beenScrolled     bool
+	firstPowerBtn    *gtk.Button
 )
 
 var categoryNames = [...]string{
@@ -462,6 +463,10 @@ func main() {
 				}
 			}
 			return true
+		} else if key.KeyVal() == gdk.KEY_Tab {
+			if firstPowerBtn != nil {
+				firstPowerBtn.ToWidget().GrabFocus()
+			}
 		}
 		return false
 	})
@@ -588,25 +593,30 @@ func main() {
 			powerButtonsWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 			powerBarWrapper.PackStart(powerButtonsWrapper, true, false, 12)
 
-			if *pbLock != "" {
-				btn := powerButton(filepath.Join(dataDirectory, "img/lock.svg"), *pbLock)
-				powerButtonsWrapper.PackStart(btn, true, false, 0)
-			}
-			if *pbExit != "" {
-				btn := powerButton(filepath.Join(dataDirectory, "img/exit.svg"), *pbExit)
-				powerButtonsWrapper.PackStart(btn, true, false, 0)
-			}
-			if *pbReboot != "" {
-				btn := powerButton(filepath.Join(dataDirectory, "img/reboot.svg"), *pbReboot)
-				powerButtonsWrapper.PackStart(btn, true, false, 0)
+			if *pbPoweroff != "" {
+				btn := powerButton(filepath.Join(dataDirectory, "img/poweroff.svg"), *pbPoweroff)
+				powerButtonsWrapper.PackEnd(btn, true, false, 0)
+				firstPowerBtn = btn
 			}
 			if *pbSleep != "" {
 				btn := powerButton(filepath.Join(dataDirectory, "img/sleep.svg"), *pbSleep)
-				powerButtonsWrapper.PackStart(btn, true, false, 0)
+				powerButtonsWrapper.PackEnd(btn, true, false, 0)
+				firstPowerBtn = btn
 			}
-			if *pbPoweroff != "" {
-				btn := powerButton(filepath.Join(dataDirectory, "img/poweroff.svg"), *pbPoweroff)
-				powerButtonsWrapper.PackStart(btn, true, false, 0)
+			if *pbReboot != "" {
+				btn := powerButton(filepath.Join(dataDirectory, "img/reboot.svg"), *pbReboot)
+				powerButtonsWrapper.PackEnd(btn, true, false, 0)
+				firstPowerBtn = btn
+			}
+			if *pbExit != "" {
+				btn := powerButton(filepath.Join(dataDirectory, "img/exit.svg"), *pbExit)
+				powerButtonsWrapper.PackEnd(btn, true, false, 0)
+				firstPowerBtn = btn
+			}
+			if *pbLock != "" {
+				btn := powerButton(filepath.Join(dataDirectory, "img/lock.svg"), *pbLock)
+				powerButtonsWrapper.PackEnd(btn, true, false, 0)
+				firstPowerBtn = btn
 			}
 		}
 	} else {
