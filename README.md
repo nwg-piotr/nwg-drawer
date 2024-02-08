@@ -51,7 +51,7 @@ confirmed to work well with the program. Also see **Files** below.
 
 ```text
 $ nwg-drawer -h
-Usage of /tmp/go-build3511850078/b001/exe/nwg-drawer:
+Usage of nwg-drawer:
   -c uint
     	number of Columns (default 6)
   -d	Turn on Debug messages
