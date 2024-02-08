@@ -26,6 +26,7 @@ const version = "0.4.6"
 var (
 	appDirs          []string
 	configDirectory  string
+	dataDirectory    string
 	pinnedFile       string
 	pinned           []string
 	id2entry         map[string]desktopEntry
@@ -266,6 +267,7 @@ func main() {
 
 	// ENVIRONMENT
 	configDirectory = configDir()
+	dataDirectory = dataDir()
 
 	// Placing the drawer config files in the nwg-panel config directory was a mistake.
 	// Let's move them to their own location.
@@ -291,7 +293,7 @@ func main() {
 
 	// Copy default style sheet if not found
 	if !pathExists(filepath.Join(configDirectory, "drawer.css")) {
-		err := copyFile("/usr/share/nwg-drawer/drawer.css", filepath.Join(configDirectory, "drawer.css"))
+		err := copyFile(filepath.Join(dataDirectory, "drawer.css"), filepath.Join(configDirectory, "drawer.css"))
 		if err != nil {
 			log.Errorf("Failed copying 'drawer.css' file: %s", err)
 		}
@@ -579,8 +581,7 @@ func main() {
 	}
 
 	// Power Button Bar
-	dDir := dataDir()
-	if dDir != "" {
+	if dataDirectory != "" {
 		if *pbExit != "" || *pbLock != "" || *pbPoweroff != "" || *pbReboot != "" || *pbSleep != "" {
 			powerBarWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 			outerVBox.PackStart(powerBarWrapper, false, false, 0)
@@ -588,23 +589,23 @@ func main() {
 			powerBarWrapper.PackStart(powerButtonsWrapper, true, false, 12)
 
 			if *pbLock != "" {
-				btn := powerButton(filepath.Join(dDir, "img/lock.svg"), *pbLock)
+				btn := powerButton(filepath.Join(dataDirectory, "img/lock.svg"), *pbLock)
 				powerButtonsWrapper.PackStart(btn, true, false, 0)
 			}
 			if *pbExit != "" {
-				btn := powerButton(filepath.Join(dDir, "img/exit.svg"), *pbExit)
+				btn := powerButton(filepath.Join(dataDirectory, "img/exit.svg"), *pbExit)
 				powerButtonsWrapper.PackStart(btn, true, false, 0)
 			}
 			if *pbReboot != "" {
-				btn := powerButton(filepath.Join(dDir, "img/reboot.svg"), *pbReboot)
+				btn := powerButton(filepath.Join(dataDirectory, "img/reboot.svg"), *pbReboot)
 				powerButtonsWrapper.PackStart(btn, true, false, 0)
 			}
 			if *pbSleep != "" {
-				btn := powerButton(filepath.Join(dDir, "img/sleep.svg"), *pbSleep)
+				btn := powerButton(filepath.Join(dataDirectory, "img/sleep.svg"), *pbSleep)
 				powerButtonsWrapper.PackStart(btn, true, false, 0)
 			}
 			if *pbPoweroff != "" {
-				btn := powerButton(filepath.Join(dDir, "img/poweroff.svg"), *pbPoweroff)
+				btn := powerButton(filepath.Join(dataDirectory, "img/poweroff.svg"), *pbPoweroff)
 				powerButtonsWrapper.PackStart(btn, true, false, 0)
 			}
 		}

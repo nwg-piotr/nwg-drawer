@@ -197,7 +197,7 @@ func createDir(dir string) {
 }
 
 func copyFile(src, dst string) error {
-	log.Infof("Copying file: %s", dst)
+	log.Infof("Copying: '%s' => '%s'", src, dst)
 
 	var err error
 	var srcfd *os.File
