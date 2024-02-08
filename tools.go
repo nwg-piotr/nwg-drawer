@@ -337,9 +337,10 @@ func listDesktopFiles() []string {
 func setUpCategories() {
 	var other category
 
+	dDir := dataDir()
 	for _, cName := range categoryNames {
 		fileName := fmt.Sprintf("%s.directory", cName)
-		fp := filepath.Join("/usr/share/nwg-drawer/desktop-directories", fileName)
+		fp := filepath.Join(dDir, "desktop-directories", fileName)
 		lines, err := loadTextFile(fp)
 		if err == nil {
 			var cat category
