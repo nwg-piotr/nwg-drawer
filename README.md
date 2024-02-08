@@ -13,9 +13,9 @@ and for files in XDG user directories. The grid view may also be filtered by cat
 You may pin applications by right-clicking them. Pinned items will appear above the application grid. Right-click
 a pinned item to unpin it. The pinned items cache is shared with [nwg-menu](https://github.com/nwg-piotr/nwg-menu).
 
-Below the grid there is the power bar - a row of buttons to lock the screen, exit the compositor, reboot, suspend and power
-the machine off. For each button to appear, you need to provide a corresponding command. See "Command line arguments"
-below.
+Below the grid there is the **power bar** - a row of buttons to lock the screen, exit the compositor, reboot, suspend 
+and power the machine off. For each button to appear, you need to provide a corresponding command. See "Command line 
+arguments" below. If the power bar is present, pressing **Tab** will move focus to its first button.
 
 <img src="https://github.com/nwg-piotr/nwg-drawer/assets/20579136/8f4eacb4-5395-4350-889b-a9037aa34f08" width=640 alt="screenshot"><br>
 

@@ -21,11 +21,12 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-const version = "0.4.6"
+const version = "0.4.7"
 
 var (
 	appDirs          []string
 	configDirectory  string
+	dataDirectory    string
 	pinnedFile       string
 	pinned           []string
 	id2entry         map[string]desktopEntry
@@ -33,6 +34,7 @@ var (
 	exclusions       []string
 	hyprlandMonitors []monitor
 	beenScrolled     bool
+	firstPowerBtn    *gtk.Button
 )
 
 var categoryNames = [...]string{
@@ -234,7 +236,7 @@ func main() {
 	// Otherwise the command may behave in two ways:
 	// 	1. kill the running non-residennt instance and exit;
 	// 	2. die if a resident instance found.
-	lockFilePath := path.Join(dataDir(), "nwg-drawer.lock")
+	lockFilePath := path.Join(dataHome(), "nwg-drawer.lock")
 	lockFile, err := singleinstance.CreateLockFile(lockFilePath)
 	if err != nil {
 		pid, err := readTextFile(lockFilePath)
@@ -266,6 +268,7 @@ func main() {
 
 	// ENVIRONMENT
 	configDirectory = configDir()
+	dataDirectory = dataDir()
 
 	// Placing the drawer config files in the nwg-panel config directory was a mistake.
 	// Let's move them to their own location.
@@ -291,7 +294,7 @@ func main() {
 
 	// Copy default style sheet if not found
 	if !pathExists(filepath.Join(configDirectory, "drawer.css")) {
-		err := copyFile("/usr/share/nwg-drawer/drawer.css", filepath.Join(configDirectory, "drawer.css"))
+		err := copyFile(filepath.Join(dataDirectory, "drawer.css"), filepath.Join(configDirectory, "drawer.css"))
 		if err != nil {
 			log.Errorf("Failed copying 'drawer.css' file: %s", err)
 		}
@@ -460,6 +463,10 @@ func main() {
 				}
 			}
 			return true
+		} else if key.KeyVal() == gdk.KEY_Tab {
+			if firstPowerBtn != nil {
+				firstPowerBtn.ToWidget().GrabFocus()
+			}
 		}
 		return false
 	})
@@ -579,32 +586,41 @@ func main() {
 	}
 
 	// Power Button Bar
-	if *pbExit != "" || *pbLock != "" || *pbPoweroff != "" || *pbReboot != "" || *pbSleep != "" {
-		powerBarWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
-		outerVBox.PackStart(powerBarWrapper, false, false, 0)
-		powerButtonsWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
-		powerBarWrapper.PackStart(powerButtonsWrapper, true, false, 12)
+	if dataDirectory != "" {
+		if *pbExit != "" || *pbLock != "" || *pbPoweroff != "" || *pbReboot != "" || *pbSleep != "" {
+			powerBarWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+			outerVBox.PackStart(powerBarWrapper, false, false, 0)
+			powerButtonsWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+			powerBarWrapper.PackStart(powerButtonsWrapper, true, false, 12)
 
-		if *pbLock != "" {
-			btn := powerButton("/usr/share/nwg-drawer/img/lock.svg", *pbLock)
-			powerButtonsWrapper.PackStart(btn, true, false, 0)
+			if *pbPoweroff != "" {
+				btn := powerButton(filepath.Join(dataDirectory, "img/poweroff.svg"), *pbPoweroff)
+				powerButtonsWrapper.PackEnd(btn, true, false, 0)
+				firstPowerBtn = btn
+			}
+			if *pbSleep != "" {
+				btn := powerButton(filepath.Join(dataDirectory, "img/sleep.svg"), *pbSleep)
+				powerButtonsWrapper.PackEnd(btn, true, false, 0)
+				firstPowerBtn = btn
+			}
+			if *pbReboot != "" {
+				btn := powerButton(filepath.Join(dataDirectory, "img/reboot.svg"), *pbReboot)
+				powerButtonsWrapper.PackEnd(btn, true, false, 0)
+				firstPowerBtn = btn
+			}
+			if *pbExit != "" {
+				btn := powerButton(filepath.Join(dataDirectory, "img/exit.svg"), *pbExit)
+				powerButtonsWrapper.PackEnd(btn, true, false, 0)
+				firstPowerBtn = btn
+			}
+			if *pbLock != "" {
+				btn := powerButton(filepath.Join(dataDirectory, "img/lock.svg"), *pbLock)
+				powerButtonsWrapper.PackEnd(btn, true, false, 0)
+				firstPowerBtn = btn
+			}
 		}
-		if *pbExit != "" {
-			btn := powerButton("/usr/share/nwg-drawer/img/exit.svg", *pbExit)
-			powerButtonsWrapper.PackStart(btn, true, false, 0)
-		}
-		if *pbReboot != "" {
-			btn := powerButton("/usr/share/nwg-drawer/img/reboot.svg", *pbReboot)
-			powerButtonsWrapper.PackStart(btn, true, false, 0)
-		}
-		if *pbSleep != "" {
-			btn := powerButton("/usr/share/nwg-drawer/img/sleep.svg", *pbSleep)
-			powerButtonsWrapper.PackStart(btn, true, false, 0)
-		}
-		if *pbPoweroff != "" {
-			btn := powerButton("/usr/share/nwg-drawer/img/poweroff.svg", *pbPoweroff)
-			powerButtonsWrapper.PackStart(btn, true, false, 0)
-		}
+	} else {
+		log.Warn("Couldn't find data dir, power bar icons unavailable")
 	}
 
 	statusLineWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
