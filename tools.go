@@ -173,7 +173,7 @@ func configHome() string {
 	return path.Join(os.Getenv("HOME"), ".config")
 }
 
-func dataDir() string {
+func dataHome() string {
 	var dir string
 	if xdgData := os.Getenv("XDG_DATA_HOME"); xdgData != "" {
 		dir = path.Join(xdgData, "nwg-drawer")
@@ -181,7 +181,7 @@ func dataDir() string {
 		dir = path.Join(home, ".local/share/nwg-drawer")
 	}
 
-	log.Infof("Data dir: %s", dir)
+	log.Infof("Data home: %s", dir)
 	createDir(dir)
 
 	return dir
@@ -231,6 +231,22 @@ func copyFile(src, dst string) error {
 		return err
 	}
 	return os.Chmod(dst, srcinfo.Mode())
+}
+
+func dataDir() string {
+	xdgDataDirs := os.Getenv("XDG_DATA_DIRS")
+	if xdgDataDirs == "" {
+		xdgDataDirs = "/usr/local/share/:/usr/share/"
+	}
+	for _, d := range strings.Split(xdgDataDirs, ":") {
+		p := filepath.Join(d, "nwg-drawer")
+		if pathExists(p) {
+			log.Infof("Data dir: %v", p)
+			return p
+		}
+	}
+	log.Warnf("Data dir not found")
+	return ""
 }
 
 func getAppDirs() []string {
