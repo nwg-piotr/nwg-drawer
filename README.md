@@ -27,7 +27,7 @@ To close the window w/o running a program, you may use the `Esc` key, or right-c
 
 ### Dependencies
 
-- go >=1.20 (just to build)
+- go
 - gtk3
 - gtk-layer-shell
 - xdg-utils
