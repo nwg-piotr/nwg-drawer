@@ -66,7 +66,7 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 			btn.Connect("button-release-event", func(row *gtk.Button, e *gdk.Event) bool {
 				btnEvent := gdk.EventButtonNewFromEvent(e)
 				if btnEvent.Button() == 1 {
-					launch(entry.Exec, entry.Terminal)
+					launchApp(&entry)
 					return true
 				} else if btnEvent.Button() == 3 {
 					unpinItem(entry.DesktopID)
@@ -75,7 +75,7 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 				return false
 			})
 			btn.Connect("activate", func() {
-				launch(entry.Exec, entry.Terminal)
+				launchApp(&entry)
 			})
 			btn.Connect("enter-notify-event", func() {
 				statusLabel.SetText(entry.CommentLoc)
@@ -257,8 +257,6 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	button.SetLabel(name)
 
 	ID := entry.DesktopID
-	exec := entry.Exec
-	terminal := entry.Terminal
 	desc := entry.CommentLoc
 	if len(desc) > 120 {
 		r := substring(desc, 0, 117)
@@ -274,7 +272,7 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 		btnEvent := gdk.EventButtonNewFromEvent(e)
 		if btnEvent.Button() == 1 {
 			if !beenScrolled {
-				launch(exec, terminal)
+				launchApp(&entry)
 				return true
 			}
 		} else if btnEvent.Button() == 3 {
@@ -284,7 +282,7 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 		return false
 	})
 	button.Connect("activate", func() {
-		launch(exec, terminal)
+		launchApp(&entry)
 	})
 	button.Connect("enter-notify-event", func() {
 		statusLabel.SetText(desc)
@@ -317,13 +315,13 @@ func powerButton(iconPath, command string) *gtk.Button {
 	button.Connect("button-release-event", func(btn *gtk.Button, e *gdk.Event) bool {
 		btnEvent := gdk.EventButtonNewFromEvent(e)
 		if btnEvent.Button() == 1 {
-			launch(command, false)
+			launchCommand(command, false)
 			return true
 		}
 		return false
 	})
 	button.Connect("activate", func() {
-		launch(command, false)
+		launchCommand(command, false)
 	})
 	button.Connect("enter-notify-event", func() {
 		statusLabel.SetText(command)

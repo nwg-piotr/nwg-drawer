@@ -34,7 +34,7 @@ func TestWhitespaceHandling(t *testing.T) {
 	Version = 1.0`
 
 	*lang = "pt"
-	entry, err := parseDesktopEntry("id", strings.NewReader(whitespace))
+	entry, err := parseDesktopEntry("id", strings.NewReader(whitespace), "test.desktop")
 	if err != nil {
 		t.Fatal(err)
 	}

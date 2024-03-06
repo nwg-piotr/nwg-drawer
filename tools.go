@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/joshuarubin/go-sway"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"io/fs"
 	"net"
@@ -19,6 +17,9 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/joshuarubin/go-sway"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
@@ -571,7 +572,33 @@ func savePinned() {
 	}
 }
 
-func launch(command string, terminal bool) {
+func launchApp(entry *desktopEntry) {
+	if *uwsm {
+		launchUwsm(entry)
+	} else {
+		launchCommand(entry.Exec, entry.Terminal)
+	}
+
+	if *resident {
+		restoreStateAndHide()
+	} else {
+		gtk.MainQuit()
+	}
+}
+
+func launchUwsm(entry *desktopEntry) {
+	cmd := exec.Command("/usr/bin/uwsm", "app", "-a", entry.Name, entry.DesktopFile)
+
+	if cmd.Start() != nil {
+		log.Warn("Unable to launch", entry.Name)
+	} else {
+		// Collect the exit code of the child process to prevent zombies
+		// if the drawer runs in resident mode
+		go cmd.Wait()
+	}
+}
+
+func launchCommand(command string, terminal bool) {
 	// trim % and everything afterwards
 	if strings.Contains(command, "%") {
 		cutAt := strings.Index(command, "%")
@@ -662,12 +689,6 @@ func open(filePath string, xdgOpen bool) {
 		go func() {
 			_ = cmd.Wait()
 		}()
-	}
-
-	if *resident {
-		restoreStateAndHide()
-	} else {
-		gtk.MainQuit()
 	}
 }
 

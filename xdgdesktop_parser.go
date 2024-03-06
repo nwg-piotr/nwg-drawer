@@ -16,10 +16,11 @@ func parseDesktopEntryFile(id string, path string) (e desktopEntry, err error) {
 	}
 	defer o.Close()
 
-	return parseDesktopEntry(id, o)
+	return parseDesktopEntry(id, o, path)
 }
 
-func parseDesktopEntry(id string, in io.Reader) (entry desktopEntry, err error) {
+func parseDesktopEntry(id string, in io.Reader, path string) (entry desktopEntry, err error) {
+	entry.DesktopFile = path
 	cleanexec := strings.NewReplacer("\"", "", "'", "")
 	entry.DesktopID = id
 	localizedName := fmt.Sprintf("Name[%s]", strings.Split(*lang, "_")[0])
