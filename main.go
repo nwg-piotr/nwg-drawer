@@ -155,6 +155,8 @@ var targetOutput = flag.String("o", "", "name of the Output to display the drawe
 var displayVersion = flag.Bool("v", false, "display Version information")
 var keyboard = flag.Bool("k", false, "set GTK layer shell Keyboard interactivity to 'on-demand' mode")
 var overlay = flag.Bool("ovl", false, "use OVerLay layer")
+var flagDrawerOpen = flag.Bool("open", false, "open drawer on startup")
+var flagDrawerClose = flag.Bool("close", false, "close drawer on startup")
 var gtkTheme = flag.String("g", "", "GTK theme name")
 var gtkIconTheme = flag.String("i", "", "GTK icon theme name")
 var iconSize = flag.Int("is", 64, "Icon Size")
@@ -245,8 +247,16 @@ func main() {
 			if err == nil {
 				if *resident {
 					log.Warnf("Resident instance already running (PID %v)", i)
+          if *flagDrawerClose {
+            log.Infof("-close is set, ignore showing the running instance")
+            return
+          }
 				} else {
 					log.Infof("Showing resident instance (PID %v)", i)
+          if *flagDrawerOpen {
+					  log.Infof("-open is set, ignore killing the running instance")
+            return
+          }
 					err := syscall.Kill(i, syscall.SIGUSR1)
 					if err != nil {
 						return
