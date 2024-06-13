@@ -155,8 +155,8 @@ var targetOutput = flag.String("o", "", "name of the Output to display the drawe
 var displayVersion = flag.Bool("v", false, "display Version information")
 var keyboard = flag.Bool("k", false, "set GTK layer shell Keyboard interactivity to 'on-demand' mode")
 var overlay = flag.Bool("ovl", false, "use OVerLay layer")
-var flagDrawerOpen = flag.Bool("open", false, "open drawer on startup")
-var flagDrawerClose = flag.Bool("close", false, "close drawer on startup")
+var flagDrawerOpen = flag.Bool("open", false, "open drawer of existing instance")
+var flagDrawerClose = flag.Bool("close", false, "close drawer of existing instance")
 var gtkTheme = flag.String("g", "", "GTK theme name")
 var gtkIconTheme = flag.String("i", "", "GTK icon theme name")
 var iconSize = flag.Int("is", 64, "Icon Size")
@@ -203,7 +203,7 @@ func main() {
 	// v0.2: we also need to support SIGUSR from now on
 	showWindowChannel := make(chan interface{}, 1)
 	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, syscall.SIGTERM, syscall.SIGUSR1)
+	signal.Notify(signalChan, syscall.SIGTERM, syscall.SIGUSR1, syscall.SIGUSR2, syscall.SIGINT)
 
 	go func() {
 		for {
@@ -212,7 +212,8 @@ func main() {
 			case syscall.SIGTERM:
 				log.Info("SIGTERM received, bye bye")
 				gtk.MainQuit()
-			case syscall.SIGUSR1:
+				break
+				case syscall.SIGUSR1: // toggle drawer
 				if *resident {
 					// As win.Show() called from inside a goroutine randomly crashes GTK,
 					// let's just set e helper variable here. We'll be checking it with glib.TimeoutAdd.
@@ -224,7 +225,23 @@ func main() {
 						restoreStateAndHide()
 					}
 				} else {
-					log.Info("SIGUSR1 received, and I'm not resident, bye bye")
+					log.Info("A signal received, and I'm not resident, bye bye")
+					gtk.MainQuit()
+				}
+				case syscall.SIGUSR2: // open drawer
+				if *resident {
+					log.Debug("SIGUSR2 received, showing the window")
+					showWindowChannel <- struct{}{}
+				} else {
+					log.Info("A signal received, and I'm not resident, bye bye")
+					gtk.MainQuit()
+				}
+				case syscall.SIGINT:  // colse drawer
+				if *resident {
+					log.Debug("SIGINT received, hiding the window")
+					restoreStateAndHide()
+				} else {
+					log.Info("A signal received, and I'm not resident, bye bye")
 					gtk.MainQuit()
 				}
 			default:
@@ -247,17 +264,18 @@ func main() {
 			if err == nil {
 				if *resident {
 					log.Warnf("Resident instance already running (PID %v)", i)
-          if *flagDrawerClose {
-            log.Infof("-close is set, ignore showing the running instance")
-            return
-          }
 				} else {
-					log.Infof("Showing resident instance (PID %v)", i)
-          if *flagDrawerOpen {
-					  log.Infof("-open is set, ignore killing the running instance")
-            return
-          }
-					err := syscall.Kill(i, syscall.SIGUSR1)
+          var err error
+					if *flagDrawerClose {
+						log.Infof("Closing resident instance (PID %v)", i)
+						err = syscall.Kill(i, syscall.SIGINT)
+					} else if *flagDrawerOpen {
+						log.Infof("Showing resident instance (PID %v)", i)
+						err = syscall.Kill(i, syscall.SIGUSR2)
+					} else {
+						log.Infof("Togging resident instance (PID %v)", i)
+						err = syscall.Kill(i, syscall.SIGUSR1)
+					}
 					if err != nil {
 						return
 					}
@@ -484,7 +502,7 @@ func main() {
 	win.Connect("key-press-event", func(_ *gtk.Window, event *gdk.Event) bool {
 		key := &gdk.EventKey{Event: event}
 		switch key.KeyVal() {
-		case gdk.KEY_downarrow, gdk.KEY_Up, gdk.KEY_Down, gdk.KEY_Left, gdk.KEY_Right, gdk.KEY_Tab,
+			case gdk.KEY_downarrow, gdk.KEY_Up, gdk.KEY_Down, gdk.KEY_Left, gdk.KEY_Right, gdk.KEY_Tab,
 			gdk.KEY_Return, gdk.KEY_Page_Up, gdk.KEY_Page_Down, gdk.KEY_Home, gdk.KEY_End:
 			return false
 
@@ -497,9 +515,9 @@ func main() {
 	})
 
 	/*
-		In case someone REALLY needed to use X11 - for some stupid Zoom meeting or something, this allows
-		the drawer to behave properly on Openbox, and possibly somewhere else. For sure not on i3.
-		This feature is not really supported and will stay undocumented.
+	In case someone REALLY needed to use X11 - for some stupid Zoom meeting or something, this allows
+	the drawer to behave properly on Openbox, and possibly somewhere else. For sure not on i3.
+	This feature is not really supported and will stay undocumented.
 	*/
 	if !wayland() {
 		log.Info("Not Wayland, oh really?")
