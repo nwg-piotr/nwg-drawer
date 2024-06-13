@@ -203,8 +203,10 @@ func main() {
 	// v0.2: we also need to support SIGUSR from now on
 	showWindowChannel := make(chan interface{}, 1)
 	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, syscall.SIGTERM, syscall.SIGUSR1, syscall.SIGUSR2, syscall.SIGINT)
-
+  const (
+    SIG25 = syscall.Signal(0x25) // Which is SIGRTMIN+3 on Linux, it's not used by the system
+  )
+	signal.Notify(signalChan, syscall.SIGTERM, syscall.SIGUSR1, syscall.SIGUSR2, SIG25)
 	go func() {
 		for {
 			s := <-signalChan
@@ -212,7 +214,6 @@ func main() {
 			case syscall.SIGTERM:
 				log.Info("SIGTERM received, bye bye")
 				gtk.MainQuit()
-				break
 				case syscall.SIGUSR1: // toggle drawer
 				if *resident {
 					// As win.Show() called from inside a goroutine randomly crashes GTK,
@@ -236,9 +237,9 @@ func main() {
 					log.Info("A signal received, and I'm not resident, bye bye")
 					gtk.MainQuit()
 				}
-				case syscall.SIGINT:  // colse drawer
+				case SIG25:  // colse drawer
 				if *resident {
-					log.Debug("SIGINT received, hiding the window")
+					log.Debug("SIG25 received, hiding the window")
 					restoreStateAndHide()
 				} else {
 					log.Info("A signal received, and I'm not resident, bye bye")
@@ -268,7 +269,7 @@ func main() {
           var err error
 					if *flagDrawerClose {
 						log.Infof("Closing resident instance (PID %v)", i)
-						err = syscall.Kill(i, syscall.SIGINT)
+						err = syscall.Kill(i, SIG25)
 					} else if *flagDrawerOpen {
 						log.Infof("Showing resident instance (PID %v)", i)
 						err = syscall.Kill(i, syscall.SIGUSR2)
