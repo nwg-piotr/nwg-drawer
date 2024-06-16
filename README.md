@@ -54,6 +54,8 @@ $ nwg-drawer -h
 Usage of nwg-drawer:
   -c uint
     	number of Columns (default 6)
+  -close
+    	close drawer of existing instance
   -d	Turn on Debug messages
   -fm string
     	File Manager (default "thunar")
@@ -86,6 +88,8 @@ Usage of nwg-drawer:
     	Disable file search
   -o string
     	name of the Output to display the drawer on (sway & Hyprland only)
+  -open
+    	open drawer of existing instance
   -ovl
     	use OVerLay layer
   -pbexit string
@@ -106,7 +110,7 @@ Usage of nwg-drawer:
   -spacing uint
     	icon spacing (default 20)
   -term string
-    	Terminal emulator (default "foot")
+    	Terminal emulator (default "xterm-kitty")
   -v	display Version information
   -wm string
     	use swaymsg exec (with 'sway' argument) or hyprctl dispatch exec (with 'hyprland') to launch programs
@@ -136,6 +140,15 @@ this should be a little bit faster.
 
 Running a resident instance should speed up use of the drawer significantly. Pay attention to the fact, that you
 need to `pkill -f nwg-drawer` and reload the compositor to apply any new arguments!
+
+If you want to explicitly specify commands to open and close the resident instance, which can be helpful for touchpad gestures, please use the `-open` and `-close` parameters. Similarly, some signals can also be use: pkill -USR2 nwg-drawer to open and pkill -SIGRTMIN+3 nwg-drawer to close.
+
+For a MacOS-style three-finger pinch:
+
+```text
+bindgesture pinch:4:inward exec pkill -SIGUSR2 nwg-drawer
+bindgesture pinch:4:outward exec pkill -SIGRTMIN+3 nwg-drawer
+```
 
 ## Logging
 
