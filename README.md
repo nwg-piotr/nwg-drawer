@@ -110,7 +110,7 @@ Usage of nwg-drawer:
   -spacing uint
     	icon spacing (default 20)
   -term string
-    	Terminal emulator (default "xterm-kitty")
+    	Terminal emulator (default "foot")
   -v	display Version information
   -wm string
     	use swaymsg exec (with 'sway' argument) or hyprctl dispatch exec (with 'hyprland') to launch programs
