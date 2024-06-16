@@ -226,7 +226,7 @@ func main() {
 						restoreStateAndHide()
 					}
 				} else {
-					log.Info("A signal received, and I'm not resident, bye bye")
+					log.Info("SIGUSR1 received, and I'm not resident, bye bye")
 					gtk.MainQuit()
 				}
 				case syscall.SIGUSR2: // open drawer
@@ -234,13 +234,14 @@ func main() {
 					log.Debug("SIGUSR2 received, showing the window")
 					showWindowChannel <- struct{}{}
 				} else {
-					log.Info("A signal received, and I'm not resident, bye bye")
-					gtk.MainQuit()
+					log.Info("SIGUSR2 received, and I'm not resident but I'm still here, doing nothing")
 				}
 				case SIG25:  // colse drawer
-				if *resident {
-					log.Debug("SIG25 received, hiding the window")
-					restoreStateAndHide()
+        if *resident {
+          log.Debug("SIG25 received, hiding the window")
+          if win.IsVisible() {
+            restoreStateAndHide()
+          }
 				} else {
 					log.Info("A signal received, and I'm not resident, bye bye")
 					gtk.MainQuit()
