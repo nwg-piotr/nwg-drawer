@@ -236,7 +236,7 @@ func main() {
 				} else {
 					log.Info("SIGUSR2 received, and I'm not resident but I'm still here, doing nothing")
 				}
-			case SIG25: // colse drawer
+			case SIG25: // close drawer
 				if *resident {
 					log.Debug("SIG25 received, hiding the window")
 					if win.IsVisible() {
@@ -254,8 +254,8 @@ func main() {
 
 	// If running instance found, we want it to show the window. The new instance will send SIGUSR1 and die
 	// (equivalent of `pkill -USR1 nwg-drawer`).
-	// Otherwise the command may behave in two ways:
-	// 	1. kill the running non-residennt instance and exit;
+	// Otherwise, the command may behave in two ways:
+	// 	1. kill the running non-resident instance and exit;
 	// 	2. die if a resident instance found.
 	lockFilePath := path.Join(dataHome(), "nwg-drawer.lock")
 	lockFile, err := singleinstance.CreateLockFile(lockFilePath)
@@ -275,7 +275,7 @@ func main() {
 						log.Infof("Showing resident instance (PID %v)", i)
 						err = syscall.Kill(i, syscall.SIGUSR2)
 					} else {
-						log.Infof("Togging resident instance (PID %v)", i)
+						log.Infof("Toggling resident instance (PID %v)", i)
 						err = syscall.Kill(i, syscall.SIGUSR1)
 					}
 					if err != nil {
