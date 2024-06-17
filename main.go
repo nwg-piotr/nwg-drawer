@@ -21,7 +21,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-const version = "0.4.7"
+const version = "0.4.8"
 
 var (
 	appDirs          []string
@@ -203,9 +203,9 @@ func main() {
 	// v0.2: we also need to support SIGUSR from now on
 	showWindowChannel := make(chan interface{}, 1)
 	signalChan := make(chan os.Signal, 1)
-  const (
-    SIG25 = syscall.Signal(0x25) // Which is SIGRTMIN+3 on Linux, it's not used by the system
-  )
+	const (
+		SIG25 = syscall.Signal(0x25) // Which is SIGRTMIN+3 on Linux, it's not used by the system
+	)
 	signal.Notify(signalChan, syscall.SIGTERM, syscall.SIGUSR1, syscall.SIGUSR2, SIG25)
 	go func() {
 		for {
@@ -214,7 +214,7 @@ func main() {
 			case syscall.SIGTERM:
 				log.Info("SIGTERM received, bye bye")
 				gtk.MainQuit()
-				case syscall.SIGUSR1: // toggle drawer
+			case syscall.SIGUSR1: // toggle drawer
 				if *resident {
 					// As win.Show() called from inside a goroutine randomly crashes GTK,
 					// let's just set e helper variable here. We'll be checking it with glib.TimeoutAdd.
@@ -229,19 +229,19 @@ func main() {
 					log.Info("SIGUSR1 received, and I'm not resident, bye bye")
 					gtk.MainQuit()
 				}
-				case syscall.SIGUSR2: // open drawer
+			case syscall.SIGUSR2: // open drawer
 				if *resident {
 					log.Debug("SIGUSR2 received, showing the window")
 					showWindowChannel <- struct{}{}
 				} else {
 					log.Info("SIGUSR2 received, and I'm not resident but I'm still here, doing nothing")
 				}
-				case SIG25:  // colse drawer
-        if *resident {
-          log.Debug("SIG25 received, hiding the window")
-          if win.IsVisible() {
-            restoreStateAndHide()
-          }
+			case SIG25: // colse drawer
+				if *resident {
+					log.Debug("SIG25 received, hiding the window")
+					if win.IsVisible() {
+						restoreStateAndHide()
+					}
 				} else {
 					log.Info("A signal received, and I'm not resident, bye bye")
 					gtk.MainQuit()
@@ -267,7 +267,7 @@ func main() {
 				if *resident {
 					log.Warnf("Resident instance already running (PID %v)", i)
 				} else {
-          var err error
+					var err error
 					if *flagDrawerClose {
 						log.Infof("Closing resident instance (PID %v)", i)
 						err = syscall.Kill(i, SIG25)
@@ -504,7 +504,7 @@ func main() {
 	win.Connect("key-press-event", func(_ *gtk.Window, event *gdk.Event) bool {
 		key := &gdk.EventKey{Event: event}
 		switch key.KeyVal() {
-			case gdk.KEY_downarrow, gdk.KEY_Up, gdk.KEY_Down, gdk.KEY_Left, gdk.KEY_Right, gdk.KEY_Tab,
+		case gdk.KEY_downarrow, gdk.KEY_Up, gdk.KEY_Down, gdk.KEY_Left, gdk.KEY_Right, gdk.KEY_Tab,
 			gdk.KEY_Return, gdk.KEY_Page_Up, gdk.KEY_Page_Down, gdk.KEY_Home, gdk.KEY_End:
 			return false
 
@@ -517,9 +517,9 @@ func main() {
 	})
 
 	/*
-	In case someone REALLY needed to use X11 - for some stupid Zoom meeting or something, this allows
-	the drawer to behave properly on Openbox, and possibly somewhere else. For sure not on i3.
-	This feature is not really supported and will stay undocumented.
+		In case someone REALLY needed to use X11 - for some stupid Zoom meeting or something, this allows
+		the drawer to behave properly on Openbox, and possibly somewhere else. For sure not on i3.
+		This feature is not really supported and will stay undocumented.
 	*/
 	if !wayland() {
 		log.Info("Not Wayland, oh really?")
