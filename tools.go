@@ -181,7 +181,7 @@ func dataHome() string {
 		dir = path.Join(home, ".local/share/nwg-drawer")
 	}
 
-	log.Infof("Data home: %s", dir)
+	log.Debugf("Data home: %s", dir)
 	createDir(dir)
 
 	return dir
