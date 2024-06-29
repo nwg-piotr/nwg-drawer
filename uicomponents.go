@@ -298,19 +298,24 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	return button
 }
 
-func powerButton(iconPath, command string) *gtk.Button {
+func powerButton(iconPathOrName, command string) *gtk.Button {
 	button, _ := gtk.ButtonNew()
 	button.SetAlwaysShowImage(true)
 
 	var pixbuf *gdk.Pixbuf
 	var img *gtk.Image
 	var err error
-	pixbuf, err = gdk.PixbufNewFromFileAtSize(iconPath, *pbSize, *pbSize)
-	if err != nil {
-		pixbuf, _ = createPixbuf("unknown", *pbSize)
-		log.Warnf("Couldn't find icon %s", iconPath)
+	if !*pbUseIconTheme {
+		pixbuf, err = gdk.PixbufNewFromFileAtSize(iconPathOrName, *pbSize, *pbSize)
+		if err != nil {
+			pixbuf, _ = createPixbuf("unknown", *pbSize)
+			log.Warnf("Couldn't find icon %s", iconPathOrName)
+		}
+		img, _ = gtk.ImageNewFromPixbuf(pixbuf)
+	} else {
+		img, _ = gtk.ImageNewFromIconName(iconPathOrName, gtk.ICON_SIZE_DIALOG)
 	}
-	img, _ = gtk.ImageNewFromPixbuf(pixbuf)
+
 	button.SetImage(img)
 	button.SetImagePosition(gtk.POS_TOP)
 
