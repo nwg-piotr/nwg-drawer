@@ -182,7 +182,7 @@ var pbPoweroff = flag.String("pbpoweroff", "", "command for the Poweroff power b
 var pbReboot = flag.String("pbreboot", "", "command for the Reboot power bar icon")
 var pbSleep = flag.String("pbsleep", "", "command for the sleep power bar icon")
 var pbSize = flag.Int("pbsize", 64, "power bar icon size")
-var pbUseIconTheme = flag.Bool("pbuseicontheme", false, "use icon theme instead of built-in icons")
+var pbUseIconTheme = flag.Bool("pbuseicontheme", false, "use icon theme instead of built-in icons in power bar")
 var debug = flag.Bool("d", false, "Turn on Debug messages")
 
 func main() {
