@@ -101,9 +101,11 @@ Usage of nwg-drawer:
   -pbreboot string
     	command for the Reboot power bar icon
   -pbsize int
-    	power bar icon size (default 64)
+    	power bar icon size (only works w/ built-in icons) (default 64)
   -pbsleep string
     	command for the sleep power bar icon
+  -pbuseicontheme
+    	use icon theme instead of built-in icons in power bar
   -r	Leave the program resident in memory
   -s string
     	Styling: css file name (default "drawer.css")
