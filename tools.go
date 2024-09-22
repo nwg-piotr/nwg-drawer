@@ -611,6 +611,8 @@ func launch(command string, terminal bool) {
 		cmd = exec.Command("swaymsg", "exec", strings.Join(elements, " "))
 	} else if *wm == "hyprland" || *wm == "Hyprland" {
 		cmd = exec.Command("hyprctl", "dispatch", "exec", strings.Join(elements, " "))
+	} else if *wm == "river" {
+		cmd = exec.Command("riverctl", "spawn", strings.Join(elements, " "))
 	}
 
 	msg := fmt.Sprintf("command: %q; args: %q\n", cmd.Args[0], cmd.Args[1:])
