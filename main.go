@@ -438,7 +438,7 @@ func main() {
 		if *targetOutput != "" {
 			// We want to assign layershell to a monitor, but we only know the output name!
 			output2mon, err = mapOutputs()
-			fmt.Println(">>>", output2mon)
+			log.Debugf("output2mon: %s", output2mon)
 			if err == nil {
 				monitor := output2mon[*targetOutput]
 				layershell.SetMonitor(win, monitor)
