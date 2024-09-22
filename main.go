@@ -21,7 +21,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-const version = "0.4.9"
+const version = "0.5.0"
 
 var (
 	appDirs          []string
@@ -171,7 +171,7 @@ var itemSpacing = flag.Uint("spacing", 20, "icon spacing")
 var lang = flag.String("lang", "", "force lang, e.g. \"en\", \"pl\"")
 var fileManager = flag.String("fm", "thunar", "File Manager")
 var term = flag.String("term", defaultTermIfBlank(os.Getenv("TERM"), "foot"), "Terminal emulator")
-var wm = flag.String("wm", "", "use swaymsg exec (with 'sway' argument) or hyprctl dispatch exec (with 'hyprland') to launch programs")
+var wm = flag.String("wm", "", "use swaymsg exec (with 'sway' argument) or hyprctl dispatch exec (with 'hyprland') or riverctl spawn (with 'river') to launch programs")
 var nameLimit = flag.Int("fslen", 80, "File Search name LENgth Limit")
 var noCats = flag.Bool("nocats", false, "Disable filtering by category")
 var noFS = flag.Bool("nofs", false, "Disable file search")
@@ -419,7 +419,6 @@ func main() {
 	err = cssProvider.LoadFromPath(*cssFileName)
 	if err != nil {
 		log.Errorf("ERROR: %s css file not found or erroneous. Using GTK styling.", *cssFileName)
-		log.Errorf("%s", err)
 	} else {
 		log.Info(fmt.Sprintf("Using style from %s", *cssFileName))
 		screen, _ := gdk.ScreenGetDefault()
@@ -438,7 +437,7 @@ func main() {
 		if *targetOutput != "" {
 			// We want to assign layershell to a monitor, but we only know the output name!
 			output2mon, err = mapOutputs()
-			fmt.Println(">>>", output2mon)
+			log.Debugf("output2mon: %s", output2mon)
 			if err == nil {
 				monitor := output2mon[*targetOutput]
 				layershell.SetMonitor(win, monitor)
