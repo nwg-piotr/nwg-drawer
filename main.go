@@ -419,7 +419,6 @@ func main() {
 	err = cssProvider.LoadFromPath(*cssFileName)
 	if err != nil {
 		log.Errorf("ERROR: %s css file not found or erroneous. Using GTK styling.", *cssFileName)
-		log.Errorf("%s", err)
 	} else {
 		log.Info(fmt.Sprintf("Using style from %s", *cssFileName))
 		screen, _ := gdk.ScreenGetDefault()
