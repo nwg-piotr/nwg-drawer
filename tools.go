@@ -689,13 +689,8 @@ func mapOutputs() (map[string]*gdk.Monitor, error) {
 			num := display.GetNMonitors()
 			for i := 0; i < num; i++ {
 				mon, _ := display.GetMonitor(i)
-				geometry := mon.GetGeometry()
-				// assign output to monitor on the basis of the same x, y coordinates
-				for _, output := range hyprlandMonitors {
-					if int(output.X) == geometry.GetX() && int(output.Y) == geometry.GetY() {
-						result[output.Name] = mon
-					}
-				}
+				output := hyprlandMonitors[i]
+				result[output.Name] = mon
 			}
 		} else {
 			return nil, err
@@ -723,13 +718,8 @@ func mapOutputs() (map[string]*gdk.Monitor, error) {
 		num := display.GetNMonitors()
 		for i := 0; i < num; i++ {
 			mon, _ := display.GetMonitor(i)
-			geometry := mon.GetGeometry()
-			// assign output to monitor on the basis of the same x, y coordinates
-			for _, output := range outputs {
-				if int(output.Rect.X) == geometry.GetX() && int(output.Rect.Y) == geometry.GetY() {
-					result[output.Name] = mon
-				}
-			}
+			output := outputs[i]
+			result[output.Name] = mon
 		}
 	} else {
 		return nil, errors.New("output assignment only supported on sway and Hyprland")
@@ -756,7 +746,15 @@ func substring(s string, start int, end int) string {
 
 func hyprctl(cmd string) ([]byte, error) {
 	his := os.Getenv("HYPRLAND_INSTANCE_SIGNATURE")
-	socketFile := fmt.Sprintf("/tmp/hypr/%s/.socket.sock", his)
+	xdgRuntimeDir := os.Getenv("XDG_RUNTIME_DIR")
+	hyprDir := ""
+	if xdgRuntimeDir != "" {
+		hyprDir = fmt.Sprintf("%s/hypr", xdgRuntimeDir)
+	} else {
+		hyprDir = "/tmp/hypr"
+	}
+
+	socketFile := fmt.Sprintf("%s/%s/.socket.sock", hyprDir, his)
 	conn, err := net.Dial("unix", socketFile)
 	if err != nil {
 		return nil, err
