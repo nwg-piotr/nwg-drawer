@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/expr-lang/expr"
 	"os"
 	"os/signal"
 	"path"
@@ -21,7 +22,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-const version = "0.5.0"
+const version = "0.5.1"
 
 var (
 	appDirs          []string
@@ -493,12 +494,24 @@ func main() {
 				}
 			}
 			return true
+
 		} else if key.KeyVal() == gdk.KEY_Tab {
 			if firstPowerBtn != nil {
 				firstPowerBtn.ToWidget().GrabFocus()
 			}
+
+		} else if key.KeyVal() == gdk.KEY_Return {
+			s, _ := searchEntry.GetText()
+			if s != "" {
+				result, err := expr.Eval(s, nil)
+				if err == nil {
+					log.Debugf("Setting up mathemathical operation result window. Operation: %s, result: %v", s, result)
+					setUpOperationResultWindow(s, fmt.Sprintf("%v", result))
+				}
+			}
+			return true
 		}
-		return false
+		return true
 	})
 
 	win.Connect("key-press-event", func(_ *gtk.Window, event *gdk.Event) bool {
@@ -512,8 +525,8 @@ func main() {
 			if !searchEntry.IsFocus() {
 				searchEntry.GrabFocusWithoutSelecting()
 			}
-			return false
 		}
+		return false
 	})
 
 	/*

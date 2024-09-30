@@ -571,7 +571,7 @@ func savePinned() {
 	}
 }
 
-func launch(command string, terminal bool) {
+func launch(command string, terminal bool, terminate bool) {
 	// trim % and everything afterwards
 	if strings.Contains(command, "%") {
 		cutAt := strings.Index(command, "%")
@@ -615,7 +615,7 @@ func launch(command string, terminal bool) {
 		cmd = exec.Command("riverctl", "spawn", strings.Join(elements, " "))
 	}
 
-	msg := fmt.Sprintf("command: %q; args: %q\n", cmd.Args[0], cmd.Args[1:])
+	msg := fmt.Sprintf("Executing command: %q; args: %q\n", cmd.Args[0], cmd.Args[1:])
 	log.Info(msg)
 
 	cmd.SysProcAttr = &syscall.SysProcAttr{
@@ -632,10 +632,12 @@ func launch(command string, terminal bool) {
 		}()
 	}
 
-	if *resident {
-		restoreStateAndHide()
-	} else {
-		gtk.MainQuit()
+	if terminate {
+		if *resident {
+			restoreStateAndHide()
+		} else {
+			gtk.MainQuit()
+		}
 	}
 }
 
