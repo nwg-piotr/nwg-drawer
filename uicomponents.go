@@ -620,7 +620,7 @@ func setUpOperationResultWindow(operation string, result string) {
 	vBox.PackStart(lbl, true, true, 12)
 
 	mRefProvider, _ := gtk.CssProviderNew()
-	css := "window { background-color: rgba (0, 0, 0, 255); color: #fff; font-weight: bold; border: solid 1px grey}"
+	css := "window { background-color: rgba (0, 0, 0, 255); color: #fff; font-weight: bold; border: solid 1px grey; border-radius: 5px}"
 	err = mRefProvider.LoadFromData(css)
 	if err != nil {
 		log.Warn(err)
