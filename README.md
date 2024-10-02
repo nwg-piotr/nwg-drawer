@@ -206,6 +206,12 @@ You may want to exclude some paths inside your XDG user directories from searchi
 node_modules
 ```
 
+### Calculations in the search box
+
+If the search box is not empty, and you press Enter, the search box content will be evaluated as an arithmetic operation.
+If the result is not an error, it will be displayed in a small window, and copied to the clipboard with wl-copy.
+Press any key to close the window.
+
 ## Credits
 
 This program uses some great libraries:
@@ -217,3 +223,4 @@ Copyright (c) 2015-2018 gotk3 contributors
 - [go-singleinstance](github.com/allan-simon/go-singleinstance) Copyright (c) 2015 Allan Simon
 - [logrus](https://github.com/sirupsen/logrus) Copyright (c) 2014 Simon Eskildsen
 - [fsnotify](https://github.com/fsnotify/fsnotify) Copyright (c) 2012-2019 fsnotify Authors
+- [expr](https://github.com/expr-lang/expr) Copyright (c) 2018 Anton Medvedev
