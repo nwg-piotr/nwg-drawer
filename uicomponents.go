@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/dlasky/gotk3-layershell/layershell"
 	"io/fs"
 	"path/filepath"
 	"strings"
@@ -66,7 +67,7 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 			btn.Connect("button-release-event", func(row *gtk.Button, e *gdk.Event) bool {
 				btnEvent := gdk.EventButtonNewFromEvent(e)
 				if btnEvent.Button() == 1 {
-					launch(entry.Exec, entry.Terminal)
+					launch(entry.Exec, entry.Terminal, true)
 					return true
 				} else if btnEvent.Button() == 3 {
 					unpinItem(entry.DesktopID)
@@ -75,7 +76,7 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 				return false
 			})
 			btn.Connect("activate", func() {
-				launch(entry.Exec, entry.Terminal)
+				launch(entry.Exec, entry.Terminal, true)
 			})
 			btn.Connect("enter-notify-event", func() {
 				statusLabel.SetText(entry.CommentLoc)
@@ -274,7 +275,7 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 		btnEvent := gdk.EventButtonNewFromEvent(e)
 		if btnEvent.Button() == 1 {
 			if !beenScrolled {
-				launch(exec, terminal)
+				launch(exec, terminal, true)
 				return true
 			}
 		} else if btnEvent.Button() == 3 {
@@ -284,7 +285,7 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 		return false
 	})
 	button.Connect("activate", func() {
-		launch(exec, terminal)
+		launch(exec, terminal, true)
 	})
 	button.Connect("enter-notify-event", func() {
 		statusLabel.SetText(desc)
@@ -322,13 +323,13 @@ func powerButton(iconPathOrName, command string) *gtk.Button {
 	button.Connect("button-release-event", func(btn *gtk.Button, e *gdk.Event) bool {
 		btnEvent := gdk.EventButtonNewFromEvent(e)
 		if btnEvent.Button() == 1 {
-			launch(command, false)
+			launch(command, false, true)
 			return true
 		}
 		return false
 	})
 	button.Connect("activate", func() {
-		launch(command, false)
+		launch(command, false, true)
 	})
 	button.Connect("enter-notify-event", func() {
 		statusLabel.SetText(command)
@@ -583,4 +584,54 @@ func setUpUserFileSearchResultButton(fileName, filePath string) *gtk.Box {
 
 	box.PackStart(button, false, true, 0)
 	return box
+}
+
+func setUpOperationResultWindow(operation string, result string) {
+	win, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
+	if err != nil {
+		log.Fatal("Unable to create result window:", err)
+	}
+	win.SetModal(true)
+
+	if wayland() {
+		layershell.InitForWindow(win)
+		layershell.SetLayer(win, layershell.LAYER_SHELL_LAYER_OVERLAY)
+		layershell.SetKeyboardMode(win, layershell.LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE)
+	}
+
+	// any key to close the window
+	win.Connect("key-release-event", func(_ *gtk.Window, event *gdk.Event) bool {
+		win.Destroy()
+		return true
+	})
+
+	// any button to close the window
+	win.Connect("button-release-event", func(_ *gtk.Window, event *gdk.Event) bool {
+		win.Destroy()
+		return true
+	})
+
+	outerVBox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 6)
+	win.Add(outerVBox)
+
+	vBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 5)
+	outerVBox.PackStart(vBox, true, true, 6)
+	lbl, _ := gtk.LabelNew(fmt.Sprintf("%s = %s", operation, result))
+	vBox.PackStart(lbl, true, true, 12)
+
+	mRefProvider, _ := gtk.CssProviderNew()
+	css := "window { background-color: rgba (0, 0, 0, 255); color: #fff; font-weight: bold; border: solid 1px grey; border-radius: 5px}"
+	err = mRefProvider.LoadFromData(css)
+	if err != nil {
+		log.Warn(err)
+	}
+	ctx, _ := win.GetStyleContext()
+	ctx.AddProvider(mRefProvider, gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
+	win.ShowAll()
+
+	if wayland() {
+		cmd := fmt.Sprintf("wl-copy %v", result)
+		launch(cmd, false, false)
+	}
 }

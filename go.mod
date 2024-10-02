@@ -1,6 +1,6 @@
 module github.com/nwg-piotr/nwg-drawer
 
-go 1.22
+go 1.23
 
 require (
 	github.com/allan-simon/go-singleinstance v0.0.0-20210120080615-d0997106ab37
@@ -12,6 +12,7 @@ require (
 )
 
 require (
+	github.com/expr-lang/expr v1.16.9 // indirect
 	github.com/joshuarubin/lifecycle v1.1.4 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
