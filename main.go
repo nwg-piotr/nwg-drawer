@@ -503,6 +503,8 @@ func main() {
 		} else if key.KeyVal() == gdk.KEY_Return {
 			s, _ := searchEntry.GetText()
 			if s != "" {
+				// Check if the search box content is an arithmetic expression. If so, display the result
+				// and copy to the clipboard with wl-copy.
 				result, err := expr.Eval(s, nil)
 				if err == nil {
 					log.Debugf("Setting up mathemathical operation result window. Operation: %s, result: %v", s, result)

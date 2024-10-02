@@ -599,6 +599,7 @@ func setUpOperationResultWindow(operation string, result string) {
 		layershell.SetKeyboardMode(win, layershell.LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE)
 	}
 
+	// any key to close the window
 	win.Connect("key-release-event", func(_ *gtk.Window, event *gdk.Event) bool {
 		win.Destroy()
 		return true
