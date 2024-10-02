@@ -605,6 +605,12 @@ func setUpOperationResultWindow(operation string, result string) {
 		return true
 	})
 
+	// any button to close the window
+	win.Connect("button-release-event", func(_ *gtk.Window, event *gdk.Event) bool {
+		win.Destroy()
+		return true
+	})
+
 	outerVBox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 6)
 	win.Add(outerVBox)
 
