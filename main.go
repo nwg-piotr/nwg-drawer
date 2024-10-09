@@ -433,6 +433,7 @@ func main() {
 
 	if wayland() {
 		layershell.InitForWindow(win)
+		layershell.SetNamespace(win, "nwg-drawer")
 
 		var output2mon map[string]*gdk.Monitor
 		if *targetOutput != "" {
