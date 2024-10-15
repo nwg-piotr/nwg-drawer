@@ -172,7 +172,7 @@ Edit `~/.config/nwg-drawer/drawer.css` to your taste.
 When the search phrase is at least 3 characters long, your XDG user directories are being searched.
 
 Use the **left mouse button** to open a file with the `xdg-open` command. As configuring file associations for it is
-PITA, you may override them, by creating the `~/.config/nwg-panel/preferred-apps.json` file with your own definitions.
+PITA, you may override them, by creating the `~/.config/nwg-drawer/preferred-apps.json` file with your own definitions.
 
 ### Sample `preferred-apps.json` file content
 
@@ -199,7 +199,7 @@ I've noy yet tried other file managers.
 ### File search exclusions
 
 You may want to exclude some paths inside your XDG user directories from searching. If so, define exclusions in the
-`~/.config/nwg-panel/excluded-dirs` file, e.g. like this:
+`~/.config/nwg-drawer/excluded-dirs` file, e.g. like this:
 
 ```text
 # exclude all paths containing 'node_modules'
