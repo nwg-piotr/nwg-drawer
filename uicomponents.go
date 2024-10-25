@@ -617,10 +617,11 @@ func setUpOperationResultWindow(operation string, result string) {
 	vBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 5)
 	outerVBox.PackStart(vBox, true, true, 6)
 	lbl, _ := gtk.LabelNew(fmt.Sprintf("%s = %s", operation, result))
+	lbl.SetProperty("name", "math-label")
 	vBox.PackStart(lbl, true, true, 12)
 
 	mRefProvider, _ := gtk.CssProviderNew()
-	css := "window { background-color: rgba (0, 0, 0, 255); color: #fff; font-weight: bold; border: solid 1px grey; border-radius: 5px}"
+	css := "window { background-color: rgba (0, 0, 0, 255); color: #fff; border: solid 1px grey; border-radius: 5px}"
 	err = mRefProvider.LoadFromData(css)
 	if err != nil {
 		log.Warn(err)
