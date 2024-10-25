@@ -1,5 +1,5 @@
 window {
-    background-color: rgba (36, 47, 79, 0.95);
+    background-color: rgba(36, 47, 79, 0.95);
     color: #eeeeee
 }
 
@@ -31,4 +31,10 @@ button:hover {
     padding: 5px;
     border: 1px dotted gray;
     border-radius: 15px
+}
+
+/* math operation result label */
+#math-label {
+    font-weight: bold;
+    font-size: 16px
 }
