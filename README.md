@@ -212,6 +212,16 @@ If the search box is not empty, and you press Enter, the search box content will
 If the result is not an error, it will be displayed in a small window, and copied to the clipboard with wl-copy.
 Press any key to close the window.
 
+You may change the result label styling e.g. like this:
+
+```css
+/* math operation result label */
+#math-label {
+    font-weight: bold;
+    font-size: 16px
+}
+```
+
 ## Credits
 
 This program uses some great libraries:
