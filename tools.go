@@ -240,7 +240,8 @@ func dataDir() string {
 	}
 	for _, d := range strings.Split(xdgDataDirs, ":") {
 		p := filepath.Join(d, "nwg-drawer")
-		if pathExists(p) {
+		q := filepath.Join(p, "desktop-directories")
+		if pathExists(q) {
 			log.Infof("Data dir: %v", p)
 			return p
 		}
