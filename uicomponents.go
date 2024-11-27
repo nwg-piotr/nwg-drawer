@@ -475,6 +475,7 @@ func searchUserDir(dir string) {
 	if len(fileSearchResults) > 0 {
 		btn := setUpUserDirButton(fmt.Sprintf("folder-%s", dir), "", dir, userDirsMap)
 		fileSearchResultFlowBox.Add(btn)
+		btn.Parent().(*gtk.FlowBoxChild).SetCanFocus(false)
 
 		for _, path := range fileSearchResults {
 			log.Debugf("Path: %s", path)
