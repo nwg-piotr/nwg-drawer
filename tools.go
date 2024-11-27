@@ -579,19 +579,17 @@ func launch(command string, terminal bool, terminate bool) {
 		}
 	}
 
-	//themeToPrepend := ""
-	// add "GTK_THEME=<default_gtk_theme>" environment variable TODO fix
-	//if *forceTheme {
-	//	settings := gtk.SettingsGetDefault()
-	//	th, err := settings.GetProperty("gtk-theme-name")
-	//	if err == nil {
-	//		themeToPrepend = th.(string)
-	//	}
-	//}
-	//
-	//if themeToPrepend != "" {
-	//	command = fmt.Sprintf("GTK_THEME=%q %s", themeToPrepend, command)
-	//}
+	themeToPrepend := ""
+	//add "GTK_THEME=<default_gtk_theme>" environment variable
+	if *forceTheme {
+		settings := gtk.SettingsGetDefault()
+		th := settings.ObjectProperty("gtk-theme-name")
+		themeToPrepend = th.(string)
+	}
+
+	if themeToPrepend != "" {
+		command = fmt.Sprintf("GTK_THEME=%q %s", themeToPrepend, command)
+	}
 
 	var elements = []string{"/usr/bin/env", "-S", command}
 
