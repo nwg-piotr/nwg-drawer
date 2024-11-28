@@ -423,7 +423,7 @@ func parseDesktopFiles(desktopFiles []string) string {
 		assignToLists(entry.DesktopID, entry.Category)
 	}
 	sort.Slice(desktopEntries, func(i, j int) bool {
-		return desktopEntries[i].NameLoc < desktopEntries[j].NameLoc
+		return strings.ToLower(desktopEntries[i].NameLoc) < strings.ToLower(desktopEntries[j].NameLoc)
 	})
 	summary := fmt.Sprintf("%v entries (+%v hidden)", len(desktopEntries)-hidden, hidden)
 	log.Infof("Skipped %v duplicates; %v .desktop entries hidden by \"NoDisplay=true\"", skipped, hidden)
