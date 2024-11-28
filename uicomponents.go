@@ -529,6 +529,10 @@ func setUpUserDirButton(iconName, displayName, entryName string, userDirsMap map
 		return false
 	})
 
+	button.Connect("activate", func() {
+		open(userDirsMap[entryName], true)
+	})
+
 	box.PackStart(button, false, true, 0)
 	return box
 }
