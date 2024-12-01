@@ -1,11 +1,11 @@
 get:
-	go get github.com/gotk3/gotk3
-	go get github.com/gotk3/gotk3/gdk
-	go get github.com/gotk3/gotk3/glib
-	go get github.com/dlasky/gotk3-layershell/layershell
+	go get github.com/diamondburned/gotk4/pkg/gdk/v3
+	go get github.com/diamondburned/gotk4/pkg/glib/v2
+	go get github.com/diamondburned/gotk4/pkg/gtk/v3
+	go get github.com/diamondburned/gotk4-layer-shell/pkg/gtklayershell
 	go get github.com/joshuarubin/go-sway
 	go get github.com/allan-simon/go-singleinstance
-	go get "github.com/sirupsen/logrus"
+	go get github.com/sirupsen/logrus
 	go get github.com/fsnotify/fsnotify
 
 build:

@@ -2,22 +2,23 @@ package main
 
 import (
 	"fmt"
-	"github.com/dlasky/gotk3-layershell/layershell"
+	"github.com/diamondburned/gotk4-layer-shell/pkg/gtklayershell"
 	"io/fs"
 	"path/filepath"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/gotk3/gotk3/gdk"
-	"github.com/gotk3/gotk3/gtk"
+	"github.com/diamondburned/gotk4/pkg/gdk/v3"
+	"github.com/diamondburned/gotk4/pkg/gdkpixbuf/v2"
+	"github.com/diamondburned/gotk4/pkg/gtk/v3"
 )
 
 func setUpPinnedFlowBox() *gtk.FlowBox {
 	if pinnedFlowBox != nil {
 		pinnedFlowBox.Destroy()
 	}
-	flowBox, _ := gtk.FlowBoxNew()
+	flowBox := gtk.NewFlowBox()
 	if uint(len(pinned)) >= *columnsNumber {
 		flowBox.SetMaxChildrenPerLine(*columnsNumber)
 	} else if len(pinned) > 0 {
@@ -27,8 +28,8 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 	flowBox.SetColumnSpacing(*itemSpacing)
 	flowBox.SetRowSpacing(*itemSpacing)
 	flowBox.SetHomogeneous(true)
-	flowBox.SetProperty("name", "pinned-box")
-	flowBox.SetSelectionMode(gtk.SELECTION_NONE)
+	flowBox.SetObjectProperty("name", "pinned-box")
+	flowBox.SetSelectionMode(gtk.SelectionNone)
 
 	if len(pinned) > 0 {
 		for _, desktopID := range pinned {
@@ -38,19 +39,19 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 				continue
 			}
 
-			btn, _ := gtk.ButtonNew()
+			btn := gtk.NewButton()
 
 			var img *gtk.Image
 			if entry.Icon != "" {
 				pixbuf, _ := createPixbuf(entry.Icon, *iconSize)
-				img, _ = gtk.ImageNewFromPixbuf(pixbuf)
+				img = gtk.NewImageFromPixbuf(pixbuf)
 			} else {
-				img, _ = gtk.ImageNewFromIconName("image-missing", gtk.ICON_SIZE_INVALID)
+				img = gtk.NewImageFromIconName("image-missing", int(gtk.IconSizeInvalid))
 			}
 
 			btn.SetImage(img)
 			btn.SetAlwaysShowImage(true)
-			btn.SetImagePosition(gtk.POS_TOP)
+			btn.SetImagePosition(gtk.PosTop)
 
 			name := ""
 			if entry.NameLoc != "" {
@@ -60,12 +61,12 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 			}
 			if len(name) > 20 {
 				r := substring(name, 0, 17)
-				name = fmt.Sprintf("%s…", string(r))
+				name = fmt.Sprintf("%s…", r)
 			}
 			btn.SetLabel(name)
 
-			btn.Connect("button-release-event", func(row *gtk.Button, e *gdk.Event) bool {
-				btnEvent := gdk.EventButtonNewFromEvent(e)
+			btn.Connect("button-release-event", func(row *gtk.Button, event *gdk.Event) bool {
+				btnEvent := event.AsButton()
 				if btnEvent.Button() == 1 {
 					launch(entry.Exec, entry.Terminal, true)
 					return true
@@ -85,13 +86,9 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 				statusLabel.SetText(entry.CommentLoc)
 			})
 			flowBox.Add(btn)
+			btn.Parent().(*gtk.FlowBoxChild).SetCanFocus(false)
 		}
 		pinnedFlowBoxWrapper.PackStart(flowBox, true, false, 0)
-
-		//While moving focus with arrow keys we want buttons to get focus directly
-		flowBox.GetChildren().Foreach(func(item interface{}) {
-			item.(*gtk.Widget).SetCanFocus(false)
-		})
 	}
 	flowBox.ShowAll()
 
@@ -111,17 +108,17 @@ func setUpCategoriesButtonBox() *gtk.EventBox {
 		"other":                listOther,
 	}
 
-	eventBox, _ := gtk.EventBoxNew()
+	eventBox := gtk.NewEventBox()
 
-	hBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	hBox := gtk.NewBox(gtk.OrientationHorizontal, 0)
 	eventBox.Add(hBox)
-	button, _ := gtk.ButtonNewWithLabel("All")
-	button.SetProperty("name", "category-button")
+	button := gtk.NewButtonWithLabel("All")
+	button.SetObjectProperty("name", "category-button")
 	button.Connect("clicked", func(item *gtk.Button) {
 		searchEntry.SetText("")
 		appFlowBox = setUpAppsFlowBox(nil, "")
 		for _, btn := range catButtons {
-			btn.SetImagePosition(gtk.POS_LEFT)
+			btn.SetImagePosition(gtk.PosLeft)
 			btn.SetSizeRequest(0, 0)
 		}
 	})
@@ -129,8 +126,8 @@ func setUpCategoriesButtonBox() *gtk.EventBox {
 
 	for _, cat := range categories {
 		if isSupposedToShowUp(cat.Name) {
-			button, _ = gtk.ButtonNewFromIconName(cat.Icon, gtk.ICON_SIZE_MENU)
-			button.SetProperty("name", "category-button")
+			button = gtk.NewButtonFromIconName(cat.Icon, int(gtk.IconSizeMenu))
+			button.SetObjectProperty("name", "category-button")
 			catButtons = append(catButtons, button)
 			button.SetLabel(cat.DisplayName)
 			button.SetAlwaysShowImage(true)
@@ -139,13 +136,13 @@ func setUpCategoriesButtonBox() *gtk.EventBox {
 			b := *button
 			button.Connect("clicked", func(item *gtk.Button) {
 				searchEntry.SetText("")
-				// !!! since gotk3 FlowBox type does not implement set_filter_func, we need to rebuild appFlowBox
+				// One day or another we'll add SetFilterFunction here; it was impossible on the gotk3 library
 				appFlowBox = setUpAppsFlowBox(lists[name], "")
 				for _, btn := range catButtons {
-					btn.SetImagePosition(gtk.POS_LEFT)
+					btn.SetImagePosition(gtk.PosLeft)
 				}
-				w := b.GetAllocatedWidth()
-				b.SetImagePosition(gtk.POS_TOP)
+				w := b.AllocatedWidth()
+				b.SetImagePosition(gtk.PosTop)
 				b.SetSizeRequest(w, 0)
 				if fileSearchResultWrapper != nil {
 					fileSearchResultWrapper.Hide()
@@ -187,13 +184,13 @@ func setUpAppsFlowBox(categoryList []string, searchPhrase string) *gtk.FlowBox {
 	if appFlowBox != nil {
 		appFlowBox.Destroy()
 	}
-	flowBox, _ := gtk.FlowBoxNew()
+	flowBox := gtk.NewFlowBox()
 	flowBox.SetMinChildrenPerLine(*columnsNumber)
 	flowBox.SetMaxChildrenPerLine(*columnsNumber)
 	flowBox.SetColumnSpacing(*itemSpacing)
 	flowBox.SetRowSpacing(*itemSpacing)
 	flowBox.SetHomogeneous(true)
-	flowBox.SetSelectionMode(gtk.SELECTION_NONE)
+	flowBox.SetSelectionMode(gtk.SelectionNone)
 
 	for _, entry := range desktopEntries {
 		if searchPhrase == "" {
@@ -206,6 +203,7 @@ func setUpAppsFlowBox(categoryList []string, searchPhrase string) *gtk.FlowBox {
 				} else {
 					button := flowBoxButton(entry)
 					flowBox.Add(button)
+					button.Parent().(*gtk.FlowBoxChild).SetCanFocus(false)
 				}
 			}
 		} else {
@@ -215,26 +213,24 @@ func setUpAppsFlowBox(categoryList []string, searchPhrase string) *gtk.FlowBox {
 				strings.Contains(strings.ToLower(entry.Exec), strings.ToLower(searchPhrase))) {
 				button := flowBoxButton(entry)
 				flowBox.Add(button)
+				button.Parent().(*gtk.FlowBoxChild).SetCanFocus(false)
 			}
 		}
 	}
-	hWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	hWrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
 	appSearchResultWrapper.PackStart(hWrapper, false, false, 0)
 	hWrapper.PackStart(flowBox, true, false, 0)
-	// While moving focus with arrow keys we want buttons to get focus directly
-	flowBox.GetChildren().Foreach(func(item interface{}) {
-		item.(*gtk.Widget).SetCanFocus(false)
-	})
+
 	resultWindow.ShowAll()
 
 	return flowBox
 }
 
 func flowBoxButton(entry desktopEntry) *gtk.Button {
-	button, _ := gtk.ButtonNew()
+	button := gtk.NewButton()
 	button.SetAlwaysShowImage(true)
 
-	var pixbuf *gdk.Pixbuf
+	var pixbuf *gdkpixbuf.Pixbuf
 	var img *gtk.Image
 	var err error
 	if entry.Icon != "" {
@@ -246,14 +242,14 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	if err != nil {
 		pixbuf, _ = createPixbuf("unknown", *iconSize)
 	}
-	img, _ = gtk.ImageNewFromPixbuf(pixbuf)
+	img = gtk.NewImageFromPixbuf(pixbuf)
 
 	button.SetImage(img)
-	button.SetImagePosition(gtk.POS_TOP)
+	button.SetImagePosition(gtk.PosTop)
 	name := entry.NameLoc
 	if len(name) > 20 {
 		r := substring(name, 0, 17)
-		name = fmt.Sprintf("%s…", string(r))
+		name = fmt.Sprintf("%s…", r)
 	}
 	button.SetLabel(name)
 
@@ -263,7 +259,7 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	desc := entry.CommentLoc
 	if len(desc) > 120 {
 		r := substring(desc, 0, 117)
-		desc = fmt.Sprintf("%s…", string(r))
+		desc = fmt.Sprintf("%s…", r)
 	}
 
 	button.Connect("button-press-event", func() {
@@ -271,8 +267,8 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 		beenScrolled = false
 	})
 
-	button.Connect("button-release-event", func(btn *gtk.Button, e *gdk.Event) bool {
-		btnEvent := gdk.EventButtonNewFromEvent(e)
+	button.Connect("button-release-event", func(btn *gtk.Button, event *gdk.Event) bool {
+		btnEvent := event.AsButton()
 		if btnEvent.Button() == 1 {
 			if !beenScrolled {
 				launch(exec, terminal, true)
@@ -300,28 +296,28 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 }
 
 func powerButton(iconPathOrName, command string) *gtk.Button {
-	button, _ := gtk.ButtonNew()
+	button := gtk.NewButton()
 	button.SetAlwaysShowImage(true)
 
-	var pixbuf *gdk.Pixbuf
+	var pixbuf *gdkpixbuf.Pixbuf
 	var img *gtk.Image
 	var err error
 	if !*pbUseIconTheme {
-		pixbuf, err = gdk.PixbufNewFromFileAtSize(iconPathOrName, *pbSize, *pbSize)
+		pixbuf, err = gdkpixbuf.NewPixbufFromFileAtSize(iconPathOrName, *pbSize, *pbSize)
 		if err != nil {
 			pixbuf, _ = createPixbuf("unknown", *pbSize)
 			log.Warnf("Couldn't find icon %s", iconPathOrName)
 		}
-		img, _ = gtk.ImageNewFromPixbuf(pixbuf)
+		img = gtk.NewImageFromPixbuf(pixbuf)
 	} else {
-		img, _ = gtk.ImageNewFromIconName(iconPathOrName, gtk.ICON_SIZE_DIALOG)
+		img = gtk.NewImageFromIconName(iconPathOrName, int(gtk.IconSizeDialog))
 	}
 
 	button.SetImage(img)
-	button.SetImagePosition(gtk.POS_TOP)
+	button.SetImagePosition(gtk.PosTop)
 
-	button.Connect("button-release-event", func(btn *gtk.Button, e *gdk.Event) bool {
-		btnEvent := gdk.EventButtonNewFromEvent(e)
+	button.Connect("button-release-event", func(btn *gtk.Button, event *gdk.Event) bool {
+		btnEvent := event.AsButton()
 		if btnEvent.Button() == 1 {
 			launch(command, false, true)
 			return true
@@ -347,8 +343,8 @@ func setUpFileSearchResultContainer() *gtk.FlowBox {
 	if fileSearchResultFlowBox != nil {
 		fileSearchResultFlowBox.Destroy()
 	}
-	flowBox, _ := gtk.FlowBoxNew()
-	flowBox.SetProperty("orientation", gtk.ORIENTATION_VERTICAL)
+	flowBox := gtk.NewFlowBox()
+	flowBox.SetObjectProperty("orientation", gtk.OrientationVertical)
 	fileSearchResultWrapper.PackStart(flowBox, false, false, 10)
 
 	return flowBox
@@ -361,7 +357,7 @@ func walk(path string, d fs.DirEntry, e error) error {
 	// don't search leading part of the path, as e.g. '/home/user/Pictures'
 	toSearch := strings.Split(path, ignore)[1]
 
-	// Remaing part of the path (w/o file name) must be checked against being present in excluded dirs
+	// Remaining part of the path (w/o file name) must be checked against being present in excluded dirs
 	doSearch := true
 	parts := strings.Split(toSearch, "/")
 	remainingPart := ""
@@ -385,18 +381,15 @@ func walk(path string, d fs.DirEntry, e error) error {
 }
 
 func setUpSearchEntry() *gtk.SearchEntry {
-	searchEntry, _ := gtk.SearchEntryNew()
-	searchEntry.SetPlaceholderText("Type to search")
-	/*searchEntry.Connect("enter-notify-event", func() {
-		cancelClose()
-	})*/
-	searchEntry.Connect("search-changed", func() {
+	sEntry := gtk.NewSearchEntry()
+	sEntry.SetPlaceholderText("Type to search")
+	sEntry.Connect("search-changed", func() {
 		for _, btn := range catButtons {
-			btn.SetImagePosition(gtk.POS_LEFT)
+			btn.SetImagePosition(gtk.PosLeft)
 			btn.SetSizeRequest(0, 0)
 		}
 
-		phrase, _ = searchEntry.GetText()
+		phrase = sEntry.Text()
 		if len(phrase) > 0 {
 
 			// search apps
@@ -416,7 +409,7 @@ func setUpSearchEntry() *gtk.SearchEntry {
 						searchUserDir(key)
 					}
 				}
-				if fileSearchResultFlowBox.GetChildren().Length() == 0 {
+				if len(fileSearchResultFlowBox.Children()) == 0 {
 					fileSearchResultWrapper.Hide()
 					statusLabel.SetText("0 results")
 				}
@@ -430,25 +423,22 @@ func setUpSearchEntry() *gtk.SearchEntry {
 				}
 			}
 			// focus 1st search result #17
-			var w *gtk.Widget
+			var w *gtk.Button
 			if appFlowBox != nil {
-				b := appFlowBox.GetChildAtIndex(0)
+				b := appFlowBox.ChildAtIndex(0)
 				if b != nil {
-					button, err := b.GetChild()
-					if err == nil {
-						button.ToWidget().GrabFocus()
-						w = button.ToWidget()
-					}
+					button := b.Child().(*gtk.Button)
+					button.SetCanFocus(true)
+					button.GrabFocus()
+					w = button
 				}
 			}
 			if w == nil && fileSearchResultFlowBox != nil {
-				f := fileSearchResultFlowBox.GetChildAtIndex(0)
+				f := fileSearchResultFlowBox.ChildAtIndex(0)
 				if f != nil {
-					button, err := f.GetChild()
-					if err == nil {
-						button.ToWidget().SetCanFocus(true)
-						button.ToWidget().GrabFocus()
-					}
+					button := f.Child().(*gtk.Box)
+					button.SetCanFocus(true)
+					button.GrabFocus()
 				}
 			}
 		} else {
@@ -465,7 +455,7 @@ func setUpSearchEntry() *gtk.SearchEntry {
 		}
 	})
 
-	return searchEntry
+	return sEntry
 }
 
 func isExcluded(dir string) bool {
@@ -485,14 +475,16 @@ func searchUserDir(dir string) {
 	if len(fileSearchResults) > 0 {
 		btn := setUpUserDirButton(fmt.Sprintf("folder-%s", dir), "", dir, userDirsMap)
 		fileSearchResultFlowBox.Add(btn)
+		btn.Parent().(*gtk.FlowBoxChild).SetCanFocus(false)
 
 		for _, path := range fileSearchResults {
 			log.Debugf("Path: %s", path)
 			partOfPathToShow := strings.Split(path, userDirsMap[dir])[1]
 			if partOfPathToShow != "" {
 				if !(strings.HasPrefix(path, "#is_dir#") && isExcluded(path)) {
-					btn := setUpUserFileSearchResultButton(partOfPathToShow, path)
-					fileSearchResultFlowBox.Add(btn)
+					button := setUpUserFileSearchResultButton(partOfPathToShow, path)
+					fileSearchResultFlowBox.Add(button)
+					button.Parent().(*gtk.FlowBoxChild).SetCanFocus(false)
 				}
 
 			}
@@ -500,14 +492,11 @@ func searchUserDir(dir string) {
 		fileSearchResultFlowBox.Hide()
 
 		statusLabel.SetText(fmt.Sprintf("%v results | LMB: xdg-open | RMB: file manager",
-			fileSearchResultFlowBox.GetChildren().Length()))
-		num := uint(fileSearchResultFlowBox.GetChildren().Length() / *fsColumns)
+			len(fileSearchResultFlowBox.Children())))
+		num := uint(len(fileSearchResultFlowBox.Children())) / *fsColumns
 		fileSearchResultFlowBox.SetMinChildrenPerLine(num + 1)
 		fileSearchResultFlowBox.SetMaxChildrenPerLine(num + 1)
-		//While moving focus with arrow keys we want buttons to get focus directly
-		fileSearchResultFlowBox.GetChildren().Foreach(func(item interface{}) {
-			item.(*gtk.Widget).SetCanFocus(false)
-		})
+
 		fileSearchResultFlowBox.ShowAll()
 	}
 }
@@ -517,10 +506,10 @@ func setUpUserDirButton(iconName, displayName, entryName string, userDirsMap map
 		parts := strings.Split(userDirsMap[entryName], "/")
 		displayName = parts[(len(parts) - 1)]
 	}
-	box, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
-	button, _ := gtk.ButtonNew()
+	box := gtk.NewBox(gtk.OrientationHorizontal, 0)
+	button := gtk.NewButton()
 	button.SetAlwaysShowImage(true)
-	img, _ := gtk.ImageNewFromIconName(iconName, gtk.ICON_SIZE_MENU)
+	img := gtk.NewImageFromIconName(iconName, int(gtk.IconSizeMenu))
 	button.SetImage(img)
 
 	if len(displayName) > *nameLimit {
@@ -528,8 +517,8 @@ func setUpUserDirButton(iconName, displayName, entryName string, userDirsMap map
 	}
 	button.SetLabel(displayName)
 
-	button.Connect("button-release-event", func(btn *gtk.Button, e *gdk.Event) bool {
-		btnEvent := gdk.EventButtonNewFromEvent(e)
+	button.Connect("button-release-event", func(btn *gtk.Button, event *gdk.Event) bool {
+		btnEvent := event.AsButton()
 		if btnEvent.Button() == 1 {
 			open(userDirsMap[entryName], true)
 			return true
@@ -540,18 +529,22 @@ func setUpUserDirButton(iconName, displayName, entryName string, userDirsMap map
 		return false
 	})
 
+	button.Connect("activate", func() {
+		open(userDirsMap[entryName], true)
+	})
+
 	box.PackStart(button, false, true, 0)
 	return box
 }
 
 func setUpUserFileSearchResultButton(fileName, filePath string) *gtk.Box {
-	box, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
-	button, _ := gtk.ButtonNew()
+	box := gtk.NewBox(gtk.OrientationHorizontal, 0)
+	button := gtk.NewButton()
 
 	// in the walk function we've marked directories with the '#is_dir#' prefix
 	if strings.HasPrefix(filePath, "#is_dir#") {
 		filePath = filePath[8:]
-		img, _ := gtk.ImageNewFromIconName("folder", gtk.ICON_SIZE_MENU)
+		img := gtk.NewImageFromIconName("folder", int(gtk.IconSizeMenu))
 		button.SetAlwaysShowImage(true)
 		button.SetImage(img)
 	}
@@ -566,8 +559,8 @@ func setUpUserFileSearchResultButton(fileName, filePath string) *gtk.Box {
 		button.SetTooltipText(tooltipText)
 	}
 
-	button.Connect("button-release-event", func(btn *gtk.Button, e *gdk.Event) bool {
-		btnEvent := gdk.EventButtonNewFromEvent(e)
+	button.Connect("button-release-event", func(btn *gtk.Button, event *gdk.Event) bool {
+		btnEvent := event.AsButton()
 		if btnEvent.Button() == 1 {
 			open(filePath, true)
 			return true
@@ -581,55 +574,51 @@ func setUpUserFileSearchResultButton(fileName, filePath string) *gtk.Box {
 	button.Connect("activate", func() {
 		open(filePath, true)
 	})
-
 	box.PackStart(button, false, true, 0)
 	return box
 }
 
 func setUpOperationResultWindow(operation string, result string) {
-	win, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
-	if err != nil {
-		log.Fatal("Unable to create result window:", err)
-	}
-	win.SetModal(true)
+	window := gtk.NewWindow(gtk.WindowToplevel)
+	window.SetModal(true)
 
 	if wayland() {
-		layershell.InitForWindow(win)
-		layershell.SetLayer(win, layershell.LAYER_SHELL_LAYER_OVERLAY)
-		layershell.SetKeyboardMode(win, layershell.LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE)
+		gtklayershell.InitForWindow(window)
+		gtklayershell.SetLayer(window, gtklayershell.LayerShellLayerOverlay)
+		gtklayershell.SetKeyboardMode(window, gtklayershell.LayerShellKeyboardModeExclusive)
 	}
 
 	// any key to close the window
-	win.Connect("key-release-event", func(_ *gtk.Window, event *gdk.Event) bool {
-		win.Destroy()
+	window.Connect("key-release-event", func(_ *gtk.Window, event *gdk.Event) bool {
+		window.Destroy()
 		return true
 	})
 
 	// any button to close the window
-	win.Connect("button-release-event", func(_ *gtk.Window, event *gdk.Event) bool {
-		win.Destroy()
+	window.Connect("button-release-event", func(_ *gtk.Window, event *gdk.Event) bool {
+		window.Destroy()
 		return true
 	})
 
-	outerVBox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 6)
-	win.Add(outerVBox)
+	outerVBox := gtk.NewBox(gtk.OrientationVertical, 6)
+	window.Add(outerVBox)
 
-	vBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 5)
+	vBox := gtk.NewBox(gtk.OrientationHorizontal, 5)
 	outerVBox.PackStart(vBox, true, true, 6)
-	lbl, _ := gtk.LabelNew(fmt.Sprintf("%s = %s", operation, result))
-	lbl.SetProperty("name", "math-label")
+	lbl := gtk.NewLabel(fmt.Sprintf("%s = %s", operation, result))
+	lbl.SetObjectProperty("name", "math-label")
 	vBox.PackStart(lbl, true, true, 12)
 
-	mRefProvider, _ := gtk.CssProviderNew()
+	mRefProvider := gtk.NewCSSProvider()
 	css := "window { background-color: rgba (0, 0, 0, 255); color: #fff; border: solid 1px grey; border-radius: 5px}"
-	err = mRefProvider.LoadFromData(css)
+	err := mRefProvider.LoadFromData(css)
 	if err != nil {
 		log.Warn(err)
 	}
-	ctx, _ := win.GetStyleContext()
+	ctx := window.StyleContext()
 	ctx.AddProvider(mRefProvider, gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
-	win.ShowAll()
+	window.ShowAll()
 
 	if wayland() {
 		cmd := fmt.Sprintf("wl-copy %v", result)

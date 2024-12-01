@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/diamondburned/gotk4-layer-shell/pkg/gtklayershell"
 	"github.com/expr-lang/expr"
 	"os"
 	"os/signal"
@@ -13,16 +14,15 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/allan-simon/go-singleinstance"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/allan-simon/go-singleinstance"
-	"github.com/dlasky/gotk3-layershell/layershell"
-	"github.com/gotk3/gotk3/gdk"
-	"github.com/gotk3/gotk3/glib"
-	"github.com/gotk3/gotk3/gtk"
+	"github.com/diamondburned/gotk4/pkg/gdk/v3"
+	"github.com/diamondburned/gotk4/pkg/glib/v2"
+	"github.com/diamondburned/gotk4/pkg/gtk/v3"
 )
 
-const version = "0.5.2"
+const version = "0.6.0"
 
 var (
 	appDirs          []string
@@ -387,91 +387,79 @@ func main() {
 	}
 
 	// USER INTERFACE
-	gtk.Init(nil)
+	gtk.Init()
 
-	settings, _ := gtk.SettingsGetDefault()
+	settings := gtk.SettingsGetDefault()
 	if *gtkTheme != "" {
-		err = settings.SetProperty("gtk-theme-name", *gtkTheme)
-		if err != nil {
-			log.Error("Unable to set theme:", err)
-		} else {
-			log.Infof("User demanded theme: %s", *gtkTheme)
-		}
+		settings.SetObjectProperty("gtk-theme-name", *gtkTheme)
+		log.Infof("User demanded theme: %s", *gtkTheme)
 	} else {
-		err := settings.SetProperty("gtk-application-prefer-dark-theme", true)
-		if err != nil {
-			log.Error("Error setting 'gtk-application-prefer-dark-theme' property")
-			return
-		}
+		settings.SetObjectProperty("gtk-application-prefer-dark-theme", true)
 		log.Info("Preferring dark theme variants")
 	}
 
 	if *gtkIconTheme != "" {
-		err = settings.SetProperty("gtk-icon-theme-name", *gtkIconTheme)
-		if err != nil {
-			log.Error("Unable to set icon theme:", err)
-		} else {
-			log.Infof("User demanded icon theme: %s", *gtkIconTheme)
-		}
+		settings.SetObjectProperty("gtk-icon-theme-name", *gtkIconTheme)
+		log.Infof("User demanded icon theme: %s", *gtkIconTheme)
 	}
 
-	cssProvider, _ := gtk.CssProviderNew()
+	cssProvider := gtk.NewCSSProvider()
 
 	err = cssProvider.LoadFromPath(*cssFileName)
 	if err != nil {
 		log.Errorf("ERROR: %s css file not found or erroneous. Using GTK styling.", *cssFileName)
 	} else {
 		log.Info(fmt.Sprintf("Using style from %s", *cssFileName))
-		screen, _ := gdk.ScreenGetDefault()
-		gtk.AddProviderForScreen(screen, cssProvider, gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+		screen := gdk.ScreenGetDefault()
+		gtk.StyleContextAddProviderForScreen(screen, cssProvider, gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 	}
 
-	win, err = gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
+	win = gtk.NewWindow(gtk.WindowToplevel)
 	if err != nil {
 		log.Fatal("Unable to create window:", err)
 	}
 
 	if wayland() {
-		layershell.InitForWindow(win)
-		layershell.SetNamespace(win, "nwg-drawer")
+		gtklayershell.InitForWindow(win)
+		gtklayershell.SetNamespace(win, "nwg-drawer")
 
 		var output2mon map[string]*gdk.Monitor
 		if *targetOutput != "" {
 			// We want to assign layershell to a monitor, but we only know the output name!
 			output2mon, err = mapOutputs()
-			log.Debugf("output2mon: %s", output2mon)
+			log.Debugf("output2mon: %v", output2mon)
 			if err == nil {
-				monitor := output2mon[*targetOutput]
-				layershell.SetMonitor(win, monitor)
+				mon := output2mon[*targetOutput]
+				gtklayershell.SetMonitor(win, mon)
 
 			} else {
 				log.Errorf("%s", err)
 			}
 		}
 
-		layershell.SetAnchor(win, layershell.LAYER_SHELL_EDGE_BOTTOM, true)
-		layershell.SetAnchor(win, layershell.LAYER_SHELL_EDGE_TOP, true)
-		layershell.SetAnchor(win, layershell.LAYER_SHELL_EDGE_LEFT, true)
-		layershell.SetAnchor(win, layershell.LAYER_SHELL_EDGE_RIGHT, true)
+		gtklayershell.SetAnchor(win, gtklayershell.LayerShellEdgeBottom, true)
+		gtklayershell.SetAnchor(win, gtklayershell.LayerShellEdgeTop, true)
+		gtklayershell.SetAnchor(win, gtklayershell.LayerShellEdgeLeft, true)
+		gtklayershell.SetAnchor(win, gtklayershell.LayerShellEdgeRight, true)
 
 		if *overlay {
-			layershell.SetLayer(win, layershell.LAYER_SHELL_LAYER_OVERLAY)
-			layershell.SetExclusiveZone(win, -1)
+			gtklayershell.SetLayer(win, gtklayershell.LayerShellLayerOverlay)
+			gtklayershell.SetExclusiveZone(win, -1)
 		} else {
-			layershell.SetLayer(win, layershell.LAYER_SHELL_LAYER_TOP)
+			gtklayershell.SetLayer(win, gtklayershell.LayerShellLayerTop)
 		}
 
-		layershell.SetMargin(win, layershell.LAYER_SHELL_EDGE_TOP, *marginTop)
-		layershell.SetMargin(win, layershell.LAYER_SHELL_EDGE_LEFT, *marginLeft)
-		layershell.SetMargin(win, layershell.LAYER_SHELL_EDGE_RIGHT, *marginRight)
-		layershell.SetMargin(win, layershell.LAYER_SHELL_EDGE_BOTTOM, *marginBottom)
+		gtklayershell.SetMargin(win, gtklayershell.LayerShellEdgeTop, *marginTop)
+		gtklayershell.SetMargin(win, gtklayershell.LayerShellEdgeLeft, *marginLeft)
+		gtklayershell.SetMargin(win, gtklayershell.LayerShellEdgeRight, *marginRight)
+		gtklayershell.SetMargin(win, gtklayershell.LayerShellEdgeBottom, *marginBottom)
 
 		if *keyboard {
 			log.Info("Setting GTK layer shell keyboard mode to: on-demand")
-			layershell.SetKeyboardMode(win, layershell.LAYER_SHELL_KEYBOARD_MODE_ON_DEMAND)
+			gtklayershell.SetKeyboardMode(win, gtklayershell.LayerShellKeyboardModeOnDemand)
 		} else {
 			log.Info("Setting GTK layer shell keyboard mode to default: exclusive")
-			layershell.SetKeyboardMode(win, layershell.LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE)
+			gtklayershell.SetKeyboardMode(win, gtklayershell.LayerShellKeyboardModeExclusive)
 		}
 
 	}
@@ -481,9 +469,10 @@ func main() {
 	})
 
 	win.Connect("key-release-event", func(_ *gtk.Window, event *gdk.Event) bool {
-		key := &gdk.EventKey{Event: event}
-		if key.KeyVal() == gdk.KEY_Escape {
-			s, _ := searchEntry.GetText()
+		//key := &gdk.EventKey{Event: event}
+		key := event.AsKey()
+		if key.Keyval() == gdk.KEY_Escape {
+			s := searchEntry.Text()
 			if s != "" {
 				searchEntry.GrabFocus()
 				searchEntry.SetText("")
@@ -496,18 +485,18 @@ func main() {
 			}
 			return true
 
-		} else if key.KeyVal() == gdk.KEY_Tab {
+		} else if key.Keyval() == gdk.KEY_Tab {
 			if firstPowerBtn != nil {
-				firstPowerBtn.ToWidget().GrabFocus()
+				firstPowerBtn.GrabFocus()
 			}
 
-		} else if key.KeyVal() == gdk.KEY_Return {
-			s, _ := searchEntry.GetText()
+		} else if key.Keyval() == gdk.KEY_Return {
+			s := searchEntry.Text()
 			if s != "" {
 				// Check if the search box content is an arithmetic expression. If so, display the result
 				// and copy to the clipboard with wl-copy.
-				result, err := expr.Eval(s, nil)
-				if err == nil {
+				result, e := expr.Eval(s, nil)
+				if e == nil {
 					log.Debugf("Setting up mathemathical operation result window. Operation: %s, result: %v", s, result)
 					setUpOperationResultWindow(s, fmt.Sprintf("%v", result))
 				}
@@ -518,8 +507,9 @@ func main() {
 	})
 
 	win.Connect("key-press-event", func(_ *gtk.Window, event *gdk.Event) bool {
-		key := &gdk.EventKey{Event: event}
-		switch key.KeyVal() {
+		//key := &gdk.EventKey{Event: event}
+		key := event.AsKey()
+		switch key.Keyval() {
 		case gdk.KEY_downarrow, gdk.KEY_Up, gdk.KEY_Down, gdk.KEY_Left, gdk.KEY_Right, gdk.KEY_Tab,
 			gdk.KEY_Return, gdk.KEY_Page_Up, gdk.KEY_Page_Down, gdk.KEY_Home, gdk.KEY_End:
 			return false
@@ -544,10 +534,10 @@ func main() {
 	}
 
 	// Set up UI
-	outerVBox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
+	outerVBox := gtk.NewBox(gtk.OrientationVertical, 0)
 	win.Add(outerVBox)
 
-	searchBoxWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	searchBoxWrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
 	outerVBox.PackStart(searchBoxWrapper, false, false, 10)
 
 	searchEntry = setUpSearchEntry()
@@ -555,37 +545,38 @@ func main() {
 	searchBoxWrapper.PackStart(searchEntry, true, false, 0)
 
 	if !*noCats {
-		categoriesWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+		categoriesWrapper = gtk.NewBox(gtk.OrientationHorizontal, 0)
 		categoriesButtonBox := setUpCategoriesButtonBox()
 		categoriesWrapper.PackStart(categoriesButtonBox, true, false, 0)
 		outerVBox.PackStart(categoriesWrapper, false, false, 0)
 	}
 
-	pinnedWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	pinnedWrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
 	outerVBox.PackStart(pinnedWrapper, false, false, 0)
 
-	pinnedFlowBoxWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	pinnedFlowBoxWrapper = gtk.NewBox(gtk.OrientationHorizontal, 0)
 	outerVBox.PackStart(pinnedFlowBoxWrapper, false, false, 0)
 	pinnedFlowBox = setUpPinnedFlowBox()
 
-	resultWindow, _ = gtk.ScrolledWindowNew(nil, nil)
-	resultWindow.SetEvents(int(gdk.ALL_EVENTS_MASK))
-	resultWindow.SetPolicy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+	resultWindow = gtk.NewScrolledWindow(nil, nil)
+	resultWindow.SetEvents(int(gdk.AllEventsMask))
+	resultWindow.SetPolicy(gtk.PolicyAutomatic, gtk.PolicyAutomatic)
 
 	// On touch screen we don't want the button-release-event to launch the app if the user just wanted to scroll the
 	// window. Let's forbid doing so if the content has been scrolled. We will reset the value on button-press-event.
 	// Resolves https://github.com/nwg-piotr/nwg-drawer/issues/110
-	vAdj := resultWindow.GetVAdjustment()
+	vAdj := resultWindow.VAdjustment()
 	vAdj.Connect("value-changed", func() {
 		beenScrolled = true
 	})
-	hAdj := resultWindow.GetHAdjustment()
+	hAdj := resultWindow.HAdjustment()
 	hAdj.Connect("value-changed", func() {
 		beenScrolled = true
 	})
 
 	resultWindow.Connect("button-release-event", func(_ *gtk.ScrolledWindow, event *gdk.Event) bool {
-		btnEvent := gdk.EventButtonNewFromEvent(event)
+		//btnEvent := gdk.EventButtonNewFromEvent(event)
+		btnEvent := event.AsButton()
 		if btnEvent.Button() == 3 {
 			if !*resident {
 				gtk.MainQuit()
@@ -598,35 +589,35 @@ func main() {
 	})
 	outerVBox.PackStart(resultWindow, true, true, 10)
 
-	resultsWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
+	resultsWrapper := gtk.NewBox(gtk.OrientationVertical, 0)
 	resultWindow.Add(resultsWrapper)
 
-	appSearchResultWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
+	appSearchResultWrapper = gtk.NewBox(gtk.OrientationVertical, 0)
 	resultsWrapper.PackStart(appSearchResultWrapper, false, false, 0)
 	appFlowBox = setUpAppsFlowBox(nil, "")
 
 	// Focus 1st pinned item if any, otherwise focus 1st found app icon
-	var button gtk.IWidget
-	if pinnedFlowBox.GetChildren().Length() > 0 {
-		button, err = pinnedFlowBox.GetChildAtIndex(0).GetChild()
+	var button gtk.Widget
+	if len(pinnedFlowBox.Children()) > 0 {
+		button = pinnedFlowBox.ChildAtIndex(0).Widget
 	} else {
-		button, err = appFlowBox.GetChildAtIndex(0).GetChild()
+		button = appFlowBox.ChildAtIndex(0).Widget
 	}
 	if err == nil {
-		button.ToWidget().GrabFocus()
+		button.GrabFocus()
 	}
 
 	userDirsMap = mapXdgUserDirs()
 	log.Debugf("User dirs map: %s", userDirsMap)
 
-	placeholder, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
+	placeholder := gtk.NewBox(gtk.OrientationVertical, 0)
 	resultsWrapper.PackStart(placeholder, true, true, 0)
 	placeholder.SetSizeRequest(20, 20)
 
 	if !*noFS {
-		wrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
-		fileSearchResultWrapper, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
-		fileSearchResultWrapper.SetProperty("name", "files-box")
+		wrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
+		fileSearchResultWrapper = gtk.NewBox(gtk.OrientationHorizontal, 0)
+		fileSearchResultWrapper.SetObjectProperty("name", "files-box")
 		wrapper.PackStart(fileSearchResultWrapper, true, false, 0)
 		resultsWrapper.PackEnd(wrapper, false, false, 10)
 	}
@@ -634,13 +625,13 @@ func main() {
 	// Power Button Bar
 	if dataDirectory != "" {
 		if *pbExit != "" || *pbLock != "" || *pbPoweroff != "" || *pbReboot != "" || *pbSleep != "" {
-			powerBarWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+			powerBarWrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
 			outerVBox.PackStart(powerBarWrapper, false, false, 0)
-			powerButtonsWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+			powerButtonsWrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
 			powerBarWrapper.PackStart(powerButtonsWrapper, true, false, 12)
 
 			if *pbPoweroff != "" {
-				btn, _ := gtk.ButtonNew()
+				btn := gtk.NewButton()
 				if !*pbUseIconTheme {
 					btn = powerButton(filepath.Join(dataDirectory, "img/poweroff.svg"), *pbPoweroff)
 				} else {
@@ -650,7 +641,7 @@ func main() {
 				firstPowerBtn = btn
 			}
 			if *pbSleep != "" {
-				btn, _ := gtk.ButtonNew()
+				btn := gtk.NewButton()
 				if !*pbUseIconTheme {
 					btn = powerButton(filepath.Join(dataDirectory, "img/sleep.svg"), *pbSleep)
 				} else {
@@ -660,7 +651,7 @@ func main() {
 				firstPowerBtn = btn
 			}
 			if *pbReboot != "" {
-				btn, _ := gtk.ButtonNew()
+				btn := gtk.NewButton()
 				if !*pbUseIconTheme {
 					btn = powerButton(filepath.Join(dataDirectory, "img/reboot.svg"), *pbReboot)
 				} else {
@@ -670,7 +661,7 @@ func main() {
 				firstPowerBtn = btn
 			}
 			if *pbExit != "" {
-				btn, _ := gtk.ButtonNew()
+				btn := gtk.NewButton()
 				if !*pbUseIconTheme {
 					btn = powerButton(filepath.Join(dataDirectory, "img/exit.svg"), *pbExit)
 				} else {
@@ -680,7 +671,7 @@ func main() {
 				firstPowerBtn = btn
 			}
 			if *pbLock != "" {
-				btn, _ := gtk.ButtonNew()
+				btn := gtk.NewButton()
 				if !*pbUseIconTheme {
 					btn = powerButton(filepath.Join(dataDirectory, "img/lock.svg"), *pbLock)
 				} else {
@@ -694,21 +685,21 @@ func main() {
 		log.Warn("Couldn't find data dir, power bar icons unavailable")
 	}
 
-	statusLineWrapper, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
-	statusLineWrapper.SetProperty("name", "status-line-wrapper")
+	statusLineWrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
+	statusLineWrapper.SetObjectProperty("name", "status-line-wrapper")
 	outerVBox.PackStart(statusLineWrapper, false, false, 10)
-	statusLabel, _ = gtk.LabelNew(status)
-	statusLabel.SetProperty("name", "status-label")
+	statusLabel = gtk.NewLabel(status)
+	statusLabel.SetObjectProperty("name", "status-label")
 	statusLineWrapper.PackStart(statusLabel, true, false, 0)
 
 	win.ShowAll()
 
 	if !*noFS {
-		fileSearchResultWrapper.SetSizeRequest(appFlowBox.GetAllocatedWidth(), 1)
+		fileSearchResultWrapper.SetSizeRequest(appFlowBox.AllocatedWidth(), 1)
 		fileSearchResultWrapper.Hide()
 	}
 	if !*noCats {
-		categoriesWrapper.SetSizeRequest(1, categoriesWrapper.GetAllocatedHeight()*2)
+		categoriesWrapper.SetSizeRequest(1, categoriesWrapper.AllocatedHeight()*2)
 	}
 	if *resident {
 		win.Hide()
@@ -742,14 +733,14 @@ func main() {
 							fileSearchResultWrapper.Hide()
 						}
 						// focus 1st element
-						var button gtk.IWidget
-						if pinnedFlowBox.GetChildren().Length() > 0 {
-							button, err = pinnedFlowBox.GetChildAtIndex(0).GetChild()
+						var button gtk.Widget
+						if len(pinnedFlowBox.Children()) > 0 {
+							button = pinnedFlowBox.ChildAtIndex(0).Widget
 						} else {
-							button, err = appFlowBox.GetChildAtIndex(0).GetChild()
+							button = appFlowBox.ChildAtIndex(0).Widget
 						}
 						if err == nil {
-							button.ToWidget().GrabFocus()
+							button.GrabFocus()
 						}
 					}
 
@@ -782,16 +773,16 @@ func restoreStateAndHide() {
 	// clear search
 	searchEntry.SetText("")
 
-	// clear category filter (in gotk3 it means: rebuild, as we have no filtering here)
+	// One day or another we'll add SetFilterFunction here; it was impossible on the gotk3 library
 	appFlowBox = setUpAppsFlowBox(nil, "")
 	for _, btn := range catButtons {
-		btn.SetImagePosition(gtk.POS_LEFT)
+		btn.SetImagePosition(gtk.PosLeft)
 		btn.SetSizeRequest(0, 0)
 	}
 
 	// scroll to the top
 	if resultWindow != nil {
-		resultWindow.GetVAdjustment().SetValue(0)
+		resultWindow.VAdjustment().SetValue(0)
 	}
 
 	t := time.Now()

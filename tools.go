@@ -20,22 +20,20 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gotk3/gotk3/gdk"
-	"github.com/gotk3/gotk3/gtk"
+	"github.com/diamondburned/gotk4/pkg/gdk/v3"
+	"github.com/diamondburned/gotk4/pkg/gdkpixbuf/v2"
+	"github.com/diamondburned/gotk4/pkg/gtk/v3"
 )
 
 func wayland() bool {
 	return os.Getenv("WAYLAND_DISPLAY") != "" || os.Getenv("XDG_SESSION_TYPE") == "wayland"
 }
 
-func createPixbuf(icon string, size int) (*gdk.Pixbuf, error) {
-	iconTheme, err := gtk.IconThemeGetDefault()
-	if err != nil {
-		log.Fatal("Couldn't get default theme: ", err)
-	}
+func createPixbuf(icon string, size int) (*gdkpixbuf.Pixbuf, error) {
+	iconTheme := gtk.IconThemeGetDefault()
 
 	if strings.Contains(icon, "/") {
-		pixbuf, err := gdk.PixbufNewFromFileAtSize(icon, size, size)
+		pixbuf, err := gdkpixbuf.NewPixbufFromFileAtSize(icon, size, size)
 		if err != nil {
 			log.Errorf("%s", err)
 			return nil, err
@@ -47,18 +45,18 @@ func createPixbuf(icon string, size int) (*gdk.Pixbuf, error) {
 		icon = strings.Split(icon, ".")[0]
 	}
 
-	pixbuf, err := iconTheme.LoadIcon(icon, size, gtk.ICON_LOOKUP_FORCE_SIZE)
+	pixbuf, err := iconTheme.LoadIcon(icon, size, gtk.IconLookupForceSize)
 
 	if err != nil {
 		if strings.HasPrefix(icon, "/") {
-			pixbuf, err := gdk.PixbufNewFromFileAtSize(icon, size, size)
-			if err != nil {
-				return nil, err
+			pixbuf, e := gdkpixbuf.NewPixbufFromFileAtSize(icon, size, size)
+			if e != nil {
+				return nil, e
 			}
 			return pixbuf, nil
 		}
 
-		pixbuf, err := iconTheme.LoadIcon(icon, size, gtk.ICON_LOOKUP_FORCE_SIZE)
+		pixbuf, err := iconTheme.LoadIcon(icon, size, gtk.IconLookupForceSize)
 		if err != nil {
 			return nil, err
 		}
@@ -425,7 +423,7 @@ func parseDesktopFiles(desktopFiles []string) string {
 		assignToLists(entry.DesktopID, entry.Category)
 	}
 	sort.Slice(desktopEntries, func(i, j int) bool {
-		return desktopEntries[i].NameLoc < desktopEntries[j].NameLoc
+		return strings.ToLower(desktopEntries[i].NameLoc) < strings.ToLower(desktopEntries[j].NameLoc)
 	})
 	summary := fmt.Sprintf("%v entries (+%v hidden)", len(desktopEntries)-hidden, hidden)
 	log.Infof("Skipped %v duplicates; %v .desktop entries hidden by \"NoDisplay=true\"", skipped, hidden)
@@ -582,13 +580,11 @@ func launch(command string, terminal bool, terminate bool) {
 	}
 
 	themeToPrepend := ""
-	// add "GTK_THEME=<default_gtk_theme>" environment variable
+	//add "GTK_THEME=<default_gtk_theme>" environment variable
 	if *forceTheme {
-		settings, _ := gtk.SettingsGetDefault()
-		th, err := settings.GetProperty("gtk-theme-name")
-		if err == nil {
-			themeToPrepend = th.(string)
-		}
+		settings := gtk.SettingsGetDefault()
+		th := settings.ObjectProperty("gtk-theme-name")
+		themeToPrepend = th.(string)
 	}
 
 	if themeToPrepend != "" {
@@ -684,14 +680,11 @@ func mapOutputs() (map[string]*gdk.Monitor, error) {
 		err := listHyprlandMonitors()
 		if err == nil {
 
-			display, err := gdk.DisplayGetDefault()
-			if err != nil {
-				return nil, err
-			}
+			display := gdk.DisplayGetDefault()
 
-			num := display.GetNMonitors()
+			num := display.NMonitors()
 			for i := 0; i < num; i++ {
-				mon, _ := display.GetMonitor(i)
+				mon := display.Monitor(i)
 				output := hyprlandMonitors[i]
 				result[output.Name] = mon
 			}
@@ -713,14 +706,14 @@ func mapOutputs() (map[string]*gdk.Monitor, error) {
 			return nil, err
 		}
 
-		display, err := gdk.DisplayGetDefault()
+		display := gdk.DisplayGetDefault()
 		if err != nil {
 			return nil, err
 		}
 
-		num := display.GetNMonitors()
+		num := display.NMonitors()
 		for i := 0; i < num; i++ {
-			mon, _ := display.GetMonitor(i)
+			mon := display.Monitor(i)
 			output := outputs[i]
 			result[output.Name] = mon
 		}
