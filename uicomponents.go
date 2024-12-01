@@ -136,7 +136,7 @@ func setUpCategoriesButtonBox() *gtk.EventBox {
 			b := *button
 			button.Connect("clicked", func(item *gtk.Button) {
 				searchEntry.SetText("")
-				// !!! since gotk3 FlowBox type does not implement set_filter_func, we need to rebuild appFlowBox
+				// One day or another we'll add SetFilterFunction here; it was impossible on the gotk3 library
 				appFlowBox = setUpAppsFlowBox(lists[name], "")
 				for _, btn := range catButtons {
 					btn.SetImagePosition(gtk.PosLeft)

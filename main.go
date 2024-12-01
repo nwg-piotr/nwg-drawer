@@ -773,7 +773,7 @@ func restoreStateAndHide() {
 	// clear search
 	searchEntry.SetText("")
 
-	// clear category filter (in gotk3 it means: rebuild, as we have no filtering here)
+	// One day or another we'll add SetFilterFunction here; it was impossible on the gotk3 library
 	appFlowBox = setUpAppsFlowBox(nil, "")
 	for _, btn := range catButtons {
 		btn.SetImagePosition(gtk.PosLeft)
