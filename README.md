@@ -226,9 +226,7 @@ You may change the result label styling e.g. like this:
 
 This program uses some great libraries:
 
-- [gotk3](https://github.com/gotk3/gotk3) Copyright (c) 2013-2014 Conformal Systems LLC,
-Copyright (c) 2015-2018 gotk3 contributors
-- [gotk3-layershell](https://github.com/dlasky/gotk3-layershell) by [@dlasky](https://github.com/dlasky/gotk3-layershell/commits?author=dlasky) - many thanks for writing this software, and for patience with my requests!
+- [gotk4](https://github.com/diamondburned/gotk4) by [diamondburned](https://github.com/diamondburned) released under [GNU Affero General Public License v3.0](https://github.com/diamondburned/gotk4/blob/4/LICENSE.md)
 - [go-sway](https://github.com/joshuarubin/go-sway) Copyright (c) 2019 Joshua Rubin
 - [go-singleinstance](github.com/allan-simon/go-singleinstance) Copyright (c) 2015 Allan Simon
 - [logrus](https://github.com/sirupsen/logrus) Copyright (c) 2014 Simon Eskildsen
