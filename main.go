@@ -786,5 +786,5 @@ func restoreStateAndHide() {
 	}
 
 	t := time.Now()
-	log.Debugf(fmt.Sprintf("UI hidden and restored in the backgroud in %v ms", t.Sub(timeStart1).Milliseconds()))
+	log.Debugf(fmt.Sprintf("UI hidden and restored in the background in %v ms", t.Sub(timeStart1).Milliseconds()))
 }
