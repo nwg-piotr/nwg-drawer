@@ -184,6 +184,8 @@ var pbReboot = flag.String("pbreboot", "", "command for the Reboot power bar ico
 var pbSleep = flag.String("pbsleep", "", "command for the sleep power bar icon")
 var pbSize = flag.Int("pbsize", 64, "power bar icon size (only works w/ built-in icons)")
 var pbUseIconTheme = flag.Bool("pbuseicontheme", false, "use icon theme instead of built-in icons in power bar")
+var showCloseButton = flag.Bool("closebtn", false, "Show the close button")
+var closeButtonLeft = flag.Bool("closebtnleft", false, "Show the close button on the left")
 var debug = flag.Bool("d", false, "Turn on Debug messages")
 
 func main() {
@@ -533,9 +535,15 @@ func main() {
 		win.Maximize()
 	}
 
+
 	// Set up UI
 	outerVBox := gtk.NewBox(gtk.OrientationVertical, 0)
 	win.Add(outerVBox)
+
+  closeButtonBox := createCloseButtonBox(*showCloseButton, *closeButtonLeft)
+  if closeButtonBox != nil {
+    outerVBox.PackStart(closeButtonBox, false, false, 10)
+  }
 
 	searchBoxWrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
 	outerVBox.PackStart(searchBoxWrapper, false, false, 10)

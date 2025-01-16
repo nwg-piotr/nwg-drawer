@@ -339,6 +339,34 @@ func powerButton(iconPathOrName, command string) *gtk.Button {
 	return button
 }
 
+func createCloseButtonBox(show bool, alignLeft bool) *gtk.Box {
+  if (!show) {
+    return nil
+  }
+
+  buttonBox := gtk.NewBox(gtk.OrientationHorizontal, 0)
+  if alignLeft {
+    buttonBox.SetHAlign(gtk.AlignStart)
+  } else {
+    buttonBox.SetHAlign(gtk.AlignEnd)
+  }
+
+  closeButton := gtk.NewButtonFromIconName("window-close-symbolic", int(gtk.IconSizeMenu))
+  closeButton.SetRelief(gtk.ReliefNone)
+  closeButton.SetObjectProperty("name", "close-button")
+
+  closeButton.Connect("clicked", func() {
+      gtk.MainQuit()
+  })
+
+  if alignLeft {
+    buttonBox.PackStart(closeButton, false, false, 10)
+  } else {
+    buttonBox.PackEnd(closeButton, false, false, 10)
+  }  
+  return buttonBox
+}
+
 func setUpFileSearchResultContainer() *gtk.FlowBox {
 	if fileSearchResultFlowBox != nil {
 		fileSearchResultFlowBox.Destroy()
@@ -602,6 +630,10 @@ func setUpOperationResultWindow(operation string, result string) {
 
 	outerVBox := gtk.NewBox(gtk.OrientationVertical, 6)
 	window.Add(outerVBox)
+
+  // close button mainly for touch users
+  //closeButtonBox := createCloseButtonBox()
+  //outerVBox.PackStart(closeButtonBox, false, false, 10)
 
 	vBox := gtk.NewBox(gtk.OrientationHorizontal, 5)
 	outerVBox.PackStart(vBox, true, true, 6)
