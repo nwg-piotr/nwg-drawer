@@ -631,10 +631,6 @@ func setUpOperationResultWindow(operation string, result string) {
 	outerVBox := gtk.NewBox(gtk.OrientationVertical, 6)
 	window.Add(outerVBox)
 
-  // close button mainly for touch users
-  //closeButtonBox := createCloseButtonBox()
-  //outerVBox.PackStart(closeButtonBox, false, false, 10)
-
 	vBox := gtk.NewBox(gtk.OrientationHorizontal, 5)
 	outerVBox.PackStart(vBox, true, true, 6)
 	lbl := gtk.NewLabel(fmt.Sprintf("%s = %s", operation, result))
