@@ -122,6 +122,7 @@ var (
 	appFlowBox              *gtk.FlowBox
 	appSearchResultWrapper  *gtk.Box
 	fileSearchResultWrapper *gtk.Box
+	powerButtonsWrapper     *gtk.Box
 	pinnedFlowBox           *gtk.FlowBox
 	pinnedFlowBoxWrapper    *gtk.Box
 	categoriesWrapper       *gtk.Box
@@ -627,7 +628,7 @@ func main() {
 		if *pbExit != "" || *pbLock != "" || *pbPoweroff != "" || *pbReboot != "" || *pbSleep != "" {
 			powerBarWrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
 			outerVBox.PackStart(powerBarWrapper, false, false, 0)
-			powerButtonsWrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
+			powerButtonsWrapper = gtk.NewBox(gtk.OrientationHorizontal, 0)
 			powerBarWrapper.PackStart(powerButtonsWrapper, true, false, 12)
 
 			if *pbPoweroff != "" {
@@ -700,6 +701,9 @@ func main() {
 	}
 	if !*noCats {
 		categoriesWrapper.SetSizeRequest(1, categoriesWrapper.AllocatedHeight()*2)
+	}
+	if powerButtonsWrapper != nil {
+		powerButtonsWrapper.SetSizeRequest(300, 1)
 	}
 	if *resident {
 		win.Hide()
