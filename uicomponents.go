@@ -345,11 +345,6 @@ func createCloseButtonBox(show bool, alignLeft bool) *gtk.Box {
   }
 
   buttonBox := gtk.NewBox(gtk.OrientationHorizontal, 0)
-  if alignLeft {
-    buttonBox.SetHAlign(gtk.AlignStart)
-  } else {
-    buttonBox.SetHAlign(gtk.AlignEnd)
-  }
 
   closeButton := gtk.NewButtonFromIconName("window-close-symbolic", int(gtk.IconSizeMenu))
   closeButton.SetRelief(gtk.ReliefNone)
@@ -360,8 +355,10 @@ func createCloseButtonBox(show bool, alignLeft bool) *gtk.Box {
   })
 
   if alignLeft {
+    buttonBox.SetHAlign(gtk.AlignStart)
     buttonBox.PackStart(closeButton, false, false, 10)
   } else {
+    buttonBox.SetHAlign(gtk.AlignEnd)
     buttonBox.PackEnd(closeButton, false, false, 10)
   }  
   return buttonBox
