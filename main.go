@@ -495,12 +495,20 @@ func main() {
 		} else if key.Keyval() == gdk.KEY_Return {
 			s := searchEntry.Text()
 			if s != "" {
-				// Check if the search box content is an arithmetic expression. If so, display the result
-				// and copy to the clipboard with wl-copy.
-				result, e := expr.Eval(s, nil)
-				if e == nil {
-					log.Debugf("Setting up mathemathical operation result window. Operation: %s, result: %v", s, result)
-					setUpOperationResultWindow(s, fmt.Sprintf("%v", result))
+				// Check if execute command input
+				if s[0] == ':' {
+					// Make sure there's something to run
+					if len(s) > 1 {
+						launch(substring(s, 1, -1), false, true)
+					}
+				} else {
+					// Check if the search box content is an arithmetic expression. If so, display the result
+					// and copy to the clipboard with wl-copy.
+					result, e := expr.Eval(s, nil)
+					if e == nil {
+						log.Debugf("Setting up mathemathical operation result window. Operation: %s, result: %v", s, result)
+						setUpOperationResultWindow(s, fmt.Sprintf("%v", result))
+					}
 				}
 			}
 			return true

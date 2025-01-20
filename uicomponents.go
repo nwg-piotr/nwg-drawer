@@ -417,6 +417,28 @@ func setUpSearchEntry() *gtk.SearchEntry {
 		phrase = sEntry.Text()
 		if len(phrase) > 0 {
 
+			// Check if command input
+			if phrase[0] == ':' {
+				// Hide/Destroy everything except "execute command"
+				if appFlowBox != nil {
+					appFlowBox.Destroy()
+				}
+				if pinnedFlowBox.Visible() {
+					pinnedFlowBox.Hide()
+				}
+				if categoriesWrapper.Visible() {
+					categoriesWrapper.Hide()
+				}
+
+				if len(phrase) > 1 {
+					statusLabel.SetText("Execute \"" + substring(phrase, 1, -1) + "\"")
+				} else {
+					statusLabel.SetText("Execute a command")
+				}
+
+				return
+			}
+
 			// search apps
 			appFlowBox = setUpAppsFlowBox(nil, phrase)
 
@@ -476,6 +498,14 @@ func setUpSearchEntry() *gtk.SearchEntry {
 
 			if fileSearchResultWrapper != nil {
 				fileSearchResultWrapper.Hide()
+			}
+
+			if !pinnedFlowBox.Visible() {
+				pinnedFlowBox.ShowAll()
+			}
+
+			if !categoriesWrapper.Visible() {
+				categoriesWrapper.ShowAll()
 			}
 		}
 	})
