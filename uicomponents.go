@@ -339,6 +339,31 @@ func powerButton(iconPathOrName, command string) *gtk.Button {
 	return button
 }
 
+func createCloseButtonBox(show bool, alignLeft bool) *gtk.Box {
+  if (!show) {
+    return nil
+  }
+
+  buttonBox := gtk.NewBox(gtk.OrientationHorizontal, 0)
+
+  closeButton := gtk.NewButtonFromIconName("window-close-symbolic", int(gtk.IconSizeMenu))
+  closeButton.SetRelief(gtk.ReliefNone)
+  closeButton.SetObjectProperty("name", "close-button")
+
+  closeButton.Connect("clicked", func() {
+      gtk.MainQuit()
+  })
+
+  if alignLeft {
+    buttonBox.SetHAlign(gtk.AlignStart)
+    buttonBox.PackStart(closeButton, false, false, 10)
+  } else {
+    buttonBox.SetHAlign(gtk.AlignEnd)
+    buttonBox.PackEnd(closeButton, false, false, 10)
+  }  
+  return buttonBox
+}
+
 func setUpFileSearchResultContainer() *gtk.FlowBox {
 	if fileSearchResultFlowBox != nil {
 		fileSearchResultFlowBox.Destroy()
