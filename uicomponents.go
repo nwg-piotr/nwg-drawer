@@ -340,28 +340,28 @@ func powerButton(iconPathOrName, command string) *gtk.Button {
 }
 
 func createCloseButtonBox(show bool, alignLeft bool) *gtk.Box {
-  if (!show) {
-    return nil
-  }
+	if !show {
+		return nil
+	}
 
-  buttonBox := gtk.NewBox(gtk.OrientationHorizontal, 0)
+	buttonBox := gtk.NewBox(gtk.OrientationHorizontal, 0)
 
-  closeButton := gtk.NewButtonFromIconName("window-close-symbolic", int(gtk.IconSizeMenu))
-  closeButton.SetRelief(gtk.ReliefNone)
-  closeButton.SetObjectProperty("name", "close-button")
+	closeButton := gtk.NewButtonFromIconName("window-close-symbolic", int(gtk.IconSizeMenu))
+	closeButton.SetRelief(gtk.ReliefNone)
+	closeButton.SetObjectProperty("name", "close-button")
 
-  closeButton.Connect("clicked", func() {
-      gtk.MainQuit()
-  })
+	closeButton.Connect("clicked", func() {
+		gtk.MainQuit()
+	})
 
-  if alignLeft {
-    buttonBox.SetHAlign(gtk.AlignStart)
-    buttonBox.PackStart(closeButton, false, false, 10)
-  } else {
-    buttonBox.SetHAlign(gtk.AlignEnd)
-    buttonBox.PackEnd(closeButton, false, false, 10)
-  }  
-  return buttonBox
+	if alignLeft {
+		buttonBox.SetHAlign(gtk.AlignStart)
+		buttonBox.PackStart(closeButton, false, false, 10)
+	} else {
+		buttonBox.SetHAlign(gtk.AlignEnd)
+		buttonBox.PackEnd(closeButton, false, false, 10)
+	}
+	return buttonBox
 }
 
 func setUpFileSearchResultContainer() *gtk.FlowBox {
@@ -423,10 +423,10 @@ func setUpSearchEntry() *gtk.SearchEntry {
 				if appFlowBox != nil {
 					appFlowBox.Destroy()
 				}
-				if pinnedFlowBox.Visible() {
+				if pinnedFlowBox != nil && pinnedFlowBox.Visible() {
 					pinnedFlowBox.Hide()
 				}
-				if categoriesWrapper.Visible() {
+				if categoriesWrapper != nil && categoriesWrapper.Visible() {
 					categoriesWrapper.Hide()
 				}
 
