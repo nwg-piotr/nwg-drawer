@@ -22,7 +22,7 @@ import (
 	"github.com/diamondburned/gotk4/pkg/gtk/v3"
 )
 
-const version = "0.6.1"
+const version = "0.6.2"
 
 var (
 	appDirs          []string
@@ -543,15 +543,14 @@ func main() {
 		win.Maximize()
 	}
 
-
 	// Set up UI
 	outerVBox := gtk.NewBox(gtk.OrientationVertical, 0)
 	win.Add(outerVBox)
 
-  closeButtonBox := createCloseButtonBox((*closeBtn != "none"), (*closeBtn != "right"))
-  if closeButtonBox != nil {
-    outerVBox.PackStart(closeButtonBox, false, false, 10)
-  }
+	closeButtonBox := createCloseButtonBox((*closeBtn != "none"), (*closeBtn != "right"))
+	if closeButtonBox != nil {
+		outerVBox.PackStart(closeButtonBox, false, false, 10)
+	}
 
 	searchBoxWrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
 	outerVBox.PackStart(searchBoxWrapper, false, false, 10)
