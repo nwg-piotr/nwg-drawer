@@ -504,7 +504,7 @@ func setUpSearchEntry() *gtk.SearchEntry {
 				pinnedFlowBox.ShowAll()
 			}
 
-			if !categoriesWrapper.Visible() {
+			if categoriesWrapper != nil && !categoriesWrapper.Visible() {
 				categoriesWrapper.ShowAll()
 			}
 		}
