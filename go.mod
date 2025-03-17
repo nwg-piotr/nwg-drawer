@@ -6,7 +6,7 @@ require (
 	github.com/allan-simon/go-singleinstance v0.0.0-20210120080615-d0997106ab37
 	github.com/diamondburned/gotk4-layer-shell/pkg v0.0.0-20240109211357-6efa9f6dc438
 	github.com/diamondburned/gotk4/pkg v0.3.1
-	github.com/expr-lang/expr v1.16.9
+	github.com/expr-lang/expr v1.17.0
 	github.com/fsnotify/fsnotify v1.8.0
 	github.com/joshuarubin/go-sway v1.2.0
 	github.com/sirupsen/logrus v1.9.3
