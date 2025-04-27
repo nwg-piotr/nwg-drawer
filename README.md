@@ -232,3 +232,13 @@ This program uses some great libraries:
 - [logrus](https://github.com/sirupsen/logrus) Copyright (c) 2014 Simon Eskildsen
 - [fsnotify](https://github.com/fsnotify/fsnotify) Copyright (c) 2012-2019 fsnotify Authors
 - [expr](https://github.com/expr-lang/expr) Copyright (c) 2018 Anton Medvedev
+
+## License
+
+nwg-drawer is licensed under the GNU Affero General Public License v3.0 or later (AGPLv3+).  
+Copyright (C) 2001-2025 Piotr Miller & Contributors.
+
+You should have received a copy of the GNU Affero General Public License along with this program.  
+If not, see [https://www.gnu.org/licenses/agpl-3.0.html](https://www.gnu.org/licenses/agpl-3.0.html).
+
+See the [LICENSE](./LICENSE) file for full license text.

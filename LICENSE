@@ -1,6 +1,8 @@
                     GNU AFFERO GENERAL PUBLIC LICENSE
                        Version 3, 19 November 2007
 
+ Copyright (C) 2001-2025 Piotr Miller & Contributors
+
  Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
  Everyone is permitted to copy and distribute verbatim copies
  of this license document, but changing it is not allowed.
@@ -659,3 +661,6 @@ specific requirements.
 if any, to sign a "copyright disclaimer" for the program, if necessary.
 For more information on this, and how to apply and follow the GNU AGPL, see
 <https://www.gnu.org/licenses/>.
+
+  You can find the complete official text of the GNU Affero General Public License v3.0 at:
+https://www.gnu.org/licenses/agpl-3.0.txt
