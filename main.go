@@ -790,8 +790,10 @@ func main() {
 
 func restoreStateAndHide() {
 	timeStart1 := time.Now()
-	if win != nil {
+	if win != nil && win.Native() != 0 {
 		win.Hide()
+	} else {
+		log.Debugf("restoreStateAndHide: skipping Hide(); win=%v, native=%v", win, win.Native())
 	}
 
 	// clear search
