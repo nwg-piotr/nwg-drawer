@@ -19,6 +19,6 @@ require (
 	github.com/joshuarubin/lifecycle v1.1.4 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go4.org/unsafe/assume-no-moving-gc v0.0.0-20231121144256-b99613f794b6 // indirect
-	golang.org/x/sync v0.13.0 // indirect
-	golang.org/x/sys v0.32.0 // indirect
+	golang.org/x/sync v0.14.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
 )
