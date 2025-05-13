@@ -1,8 +1,7 @@
 // nwg-drawer
 // Copyright (C) 2021-2025 Piotr Miller & Contributors
 //
-// This file is part of nwg-drawer and is licensed under the GNU Affero General Public License v3.0 or later.
-// For more information, see: https://www.gnu.org/licenses/agpl-3.0.html
+// This program is licensed under the MIT License.
 
 package main
 
@@ -423,8 +422,10 @@ func main() {
 	}
 
 	win = gtk.NewWindow(gtk.WindowToplevel)
-	if err != nil {
-		log.Fatal("Unable to create window:", err)
+	if win != nil {
+		log.Debugf("win addr: %p native: %x", win, win.Native())
+	} else {
+		log.Panic("Failed creating window")
 	}
 
 	if wayland() {
@@ -472,8 +473,12 @@ func main() {
 
 	}
 
+	//win.Connect("destroy", func() {
+	//	gtk.MainQuit()
+	//})
 	win.Connect("destroy", func() {
-		gtk.MainQuit()
+		shuttingDown = true
+		win = nil
 	})
 
 	win.Connect("key-release-event", func(_ *gtk.Window, event *gdk.Event) bool {
@@ -638,6 +643,9 @@ func main() {
 	if !*noFS {
 		wrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
 		fileSearchResultWrapper = gtk.NewBox(gtk.OrientationHorizontal, 0)
+		if fileSearchResultWrapper != nil {
+			log.Debugf("fileSearchResultWrapper addr: %p native: %x", fileSearchResultWrapper, fileSearchResultWrapper.Native())
+		}
 		fileSearchResultWrapper.SetObjectProperty("name", "files-box")
 		wrapper.PackStart(fileSearchResultWrapper, true, false, 0)
 		resultsWrapper.PackEnd(wrapper, false, false, 10)
@@ -788,7 +796,14 @@ func main() {
 	gtk.Main()
 }
 
+var shuttingDown bool
+
 func restoreStateAndHide() {
+	if shuttingDown {
+		log.Warn("restoreStateAndHide skipped — shutting down")
+		return
+	}
+
 	defer func() {
 		if r := recover(); r != nil {
 			log.Errorf("restoreStateAndHide panic: %v", r)
@@ -797,52 +812,39 @@ func restoreStateAndHide() {
 
 	timeStart := time.Now()
 
-	// Hide the main window if it's still alive
-	if win != nil && win.Native() != 0 {
-		log.Debugf("Hiding win: native=%v", win.Native())
-		win.Hide()
-	} else {
-		log.Debugf("Skipping win.Hide(); win=%v native=%v", win, nativeOrZero(win))
+	// Hide the window via glib.IdleAdd to avoid calling Hide() outside the main thread
+	if win != nil {
+		winPtr := win
+		glib.IdleAdd(func() {
+			if shuttingDown || winPtr == nil {
+				log.Debug("IdleAdd: skip win.Hide() — win destroyed or shutting down")
+				return
+			}
+			log.Debugf("IdleAdd: hiding win: native=%x", winPtr.Native())
+			winPtr.Hide()
+		})
 	}
 
-	// Clear search entry
+	// Reset search entry
 	if searchEntry != nil && searchEntry.Native() != 0 {
 		searchEntry.SetText("")
-	} else {
-		log.Debugf("Skipping searchEntry.SetText(); native=%v", nativeOrZero(searchEntry))
 	}
 
-	// Reset app FlowBox
+	// Rebuild FlowBox
 	appFlowBox = setUpAppsFlowBox(nil, "")
 
-	// Restore the look of category buttons
-	for i, btn := range catButtons {
+	// Reset category buttons
+	for _, btn := range catButtons {
 		if btn != nil && btn.Native() != 0 {
 			btn.SetImagePosition(gtk.PosLeft)
 			btn.SetSizeRequest(0, 0)
-		} else {
-			log.Debugf("Skipping catButton[%d]; native=%v", i, nativeOrZero(btn))
 		}
 	}
 
-	// Scroll result up
+	// Scroll up
 	if resultWindow != nil && resultWindow.Native() != 0 {
 		resultWindow.VAdjustment().SetValue(0)
-	} else {
-		log.Debugf("Skipping resultWindow.VAdjustment().SetValue(); native=%v", nativeOrZero(resultWindow))
 	}
 
-	duration := time.Since(timeStart).Milliseconds()
-	log.Debugf("UI hidden and restored in the background in %v ms", duration)
-}
-
-// Auxiliary function for logging pointers without the risk of panic
-func nativeOrZero(w gtk.Widgetter) uintptr {
-	if w == nil {
-		return 0
-	}
-	if wdg, ok := w.(*gtk.Widget); ok {
-		return wdg.Native()
-	}
-	return 0
+	log.Debugf("UI hidden and restored in %d ms", time.Since(timeStart).Milliseconds())
 }

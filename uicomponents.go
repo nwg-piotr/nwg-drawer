@@ -1,8 +1,6 @@
 // nwg-drawer
 // Copyright (C) 2021-2025 Piotr Miller & Contributors
 //
-// This file is part of nwg-drawer and is licensed under the GNU Affero General Public License v3.0 or later.
-// For more information, see: https://www.gnu.org/licenses/agpl-3.0.html
 
 package main
 
@@ -187,8 +185,11 @@ func notEmpty(listCategory []string) bool {
 }
 
 func setUpAppsFlowBox(categoryList []string, searchPhrase string) *gtk.FlowBox {
-	if appFlowBox != nil {
+	if appFlowBox != nil && appFlowBox.Widget.Native() != 0 {
+		log.Debug("Destroying old appFlowBox")
 		appFlowBox.Destroy()
+	} else {
+		log.Debug("Skipping appFlowBox.Destroy(); already invalid")
 	}
 	flowBox := gtk.NewFlowBox()
 	flowBox.SetMinChildrenPerLine(*columnsNumber)

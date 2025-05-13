@@ -1,8 +1,5 @@
 // nwg-drawer
 // Copyright (C) 2021-2025 Piotr Miller & Contributors
-//
-// This file is part of nwg-drawer and is licensed under the GNU Affero General Public License v3.0 or later.
-// For more information, see: https://www.gnu.org/licenses/agpl-3.0.html
 
 package main
 
