@@ -21,6 +21,7 @@ import (
 func setUpPinnedFlowBox() *gtk.FlowBox {
 	if pinnedFlowBox != nil {
 		pinnedFlowBox.Destroy()
+		pinnedFlowBox = nil
 	}
 	flowBox := gtk.NewFlowBox()
 	if uint(len(pinned)) >= *columnsNumber {
@@ -185,9 +186,10 @@ func notEmpty(listCategory []string) bool {
 }
 
 func setUpAppsFlowBox(categoryList []string, searchPhrase string) *gtk.FlowBox {
-	if appFlowBox != nil && appFlowBox.Widget.Native() != 0 {
+	if appFlowBox != nil {
 		log.Debug("Destroying old appFlowBox")
 		appFlowBox.Destroy()
+		appFlowBox = nil
 	} else {
 		log.Debug("Skipping appFlowBox.Destroy(); already invalid")
 	}
@@ -374,6 +376,7 @@ func createCloseButtonBox(show bool, alignLeft bool) *gtk.Box {
 func setUpFileSearchResultContainer() *gtk.FlowBox {
 	if fileSearchResultFlowBox != nil {
 		fileSearchResultFlowBox.Destroy()
+		fileSearchResultFlowBox = nil
 	}
 	flowBox := gtk.NewFlowBox()
 	flowBox.SetObjectProperty("orientation", gtk.OrientationVertical)
@@ -429,6 +432,7 @@ func setUpSearchEntry() *gtk.SearchEntry {
 				// Hide/Destroy everything except "execute command"
 				if appFlowBox != nil {
 					appFlowBox.Destroy()
+					appFlowBox = nil
 				}
 				if pinnedFlowBox != nil && pinnedFlowBox.Visible() {
 					pinnedFlowBox.Hide()
@@ -453,6 +457,7 @@ func setUpSearchEntry() *gtk.SearchEntry {
 			if !*noFS && len(phrase) > 2 {
 				if fileSearchResultFlowBox != nil {
 					fileSearchResultFlowBox.Destroy()
+					fileSearchResultFlowBox = nil
 				}
 
 				fileSearchResultFlowBox = setUpFileSearchResultContainer()
@@ -471,6 +476,7 @@ func setUpSearchEntry() *gtk.SearchEntry {
 				// search phrase too short
 				if fileSearchResultFlowBox != nil {
 					fileSearchResultFlowBox.Destroy()
+					fileSearchResultFlowBox = nil
 				}
 				if fileSearchResultWrapper != nil {
 					fileSearchResultWrapper.Hide()
@@ -501,6 +507,7 @@ func setUpSearchEntry() *gtk.SearchEntry {
 
 			if fileSearchResultFlowBox != nil {
 				fileSearchResultFlowBox.Destroy()
+				fileSearchResultFlowBox = nil
 			}
 
 			if fileSearchResultWrapper != nil {
@@ -652,15 +659,15 @@ func setUpOperationResultWindow(operation string, result string) {
 
 	// any key to close the window
 	window.Connect("key-release-event", func(_ *gtk.Window, event *gdk.Event) bool {
-		window.Destroy()
-		window = nil
+		resultWindow.Destroy()
+		resultWindow = nil
 		return true
 	})
 
 	// any button to close the window
 	window.Connect("button-release-event", func(_ *gtk.Window, event *gdk.Event) bool {
-		window.Destroy()
-		window = nil
+		resultWindow.Destroy()
+		resultWindow = nil
 		return true
 	})
 
