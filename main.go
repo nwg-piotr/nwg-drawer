@@ -725,7 +725,7 @@ func main() {
 	if powerButtonsWrapper != nil {
 		powerButtonsWrapper.SetSizeRequest(300, 1)
 	}
-	if *resident {
+	if *resident && win.IsVisible() {
 		win.Hide()
 	}
 
@@ -789,28 +789,60 @@ func main() {
 }
 
 func restoreStateAndHide() {
-	timeStart1 := time.Now()
+	defer func() {
+		if r := recover(); r != nil {
+			log.Errorf("restoreStateAndHide panic: %v", r)
+		}
+	}()
+
+	timeStart := time.Now()
+
+	// Hide the main window if it's still alive
 	if win != nil && win.Native() != 0 {
+		log.Debugf("Hiding win: native=%v", win.Native())
 		win.Hide()
 	} else {
-		log.Debugf("restoreStateAndHide: skipping Hide(); win=%v, native=%v", win, win.Native())
+		log.Debugf("Skipping win.Hide(); win=%v native=%v", win, nativeOrZero(win))
 	}
 
-	// clear search
-	searchEntry.SetText("")
+	// Clear search entry
+	if searchEntry != nil && searchEntry.Native() != 0 {
+		searchEntry.SetText("")
+	} else {
+		log.Debugf("Skipping searchEntry.SetText(); native=%v", nativeOrZero(searchEntry))
+	}
 
-	// One day or another we'll add SetFilterFunction here; it was impossible on the gotk3 library
+	// Reset app FlowBox
 	appFlowBox = setUpAppsFlowBox(nil, "")
-	for _, btn := range catButtons {
-		btn.SetImagePosition(gtk.PosLeft)
-		btn.SetSizeRequest(0, 0)
+
+	// Restore the look of category buttons
+	for i, btn := range catButtons {
+		if btn != nil && btn.Native() != 0 {
+			btn.SetImagePosition(gtk.PosLeft)
+			btn.SetSizeRequest(0, 0)
+		} else {
+			log.Debugf("Skipping catButton[%d]; native=%v", i, nativeOrZero(btn))
+		}
 	}
 
-	// scroll to the top
-	if resultWindow != nil {
+	// Scroll result up
+	if resultWindow != nil && resultWindow.Native() != 0 {
 		resultWindow.VAdjustment().SetValue(0)
+	} else {
+		log.Debugf("Skipping resultWindow.VAdjustment().SetValue(); native=%v", nativeOrZero(resultWindow))
 	}
 
-	t := time.Now()
-	log.Debugf(fmt.Sprintf("UI hidden and restored in the background in %v ms", t.Sub(timeStart1).Milliseconds()))
+	duration := time.Since(timeStart).Milliseconds()
+	log.Debugf("UI hidden and restored in the background in %v ms", duration)
+}
+
+// Auxiliary function for logging pointers without the risk of panic
+func nativeOrZero(w gtk.Widgetter) uintptr {
+	if w == nil {
+		return 0
+	}
+	if wdg, ok := w.(*gtk.Widget); ok {
+		return wdg.Native()
+	}
+	return 0
 }

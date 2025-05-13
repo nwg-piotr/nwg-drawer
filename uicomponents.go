@@ -652,12 +652,14 @@ func setUpOperationResultWindow(operation string, result string) {
 	// any key to close the window
 	window.Connect("key-release-event", func(_ *gtk.Window, event *gdk.Event) bool {
 		window.Destroy()
+		window = nil
 		return true
 	})
 
 	// any button to close the window
 	window.Connect("button-release-event", func(_ *gtk.Window, event *gdk.Event) bool {
 		window.Destroy()
+		window = nil
 		return true
 	})
 
