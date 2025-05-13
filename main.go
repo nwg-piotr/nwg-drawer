@@ -27,7 +27,7 @@ import (
 	"github.com/diamondburned/gotk4/pkg/gtk/v3"
 )
 
-const version = "0.6.6"
+const version = "0.7.0"
 
 var (
 	appDirs          []string
