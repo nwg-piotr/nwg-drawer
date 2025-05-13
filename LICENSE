@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2025 Piotr Miller
+Copyright (c) 2021-2025 Piotr Miller & Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +19,15 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+This project includes the use of the `gotk4` library by @diamondburned,
+available at https://github.com/diamondburned/gotk4.
+
+`gotk4/pkg` is licensed under the Mozilla Public License 2.0 (MPL-2.0).
+You may obtain a copy of the MPL-2.0 license at:
+
+    https://www.mozilla.org/MPL/2.0/
+
+In accordance with the MPL-2.0, the source code of the `gotk4` library
+is made available at the above URL.
+No modifications to `gotk4` have been made as part of this project.
