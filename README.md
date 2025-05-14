@@ -154,14 +154,17 @@ bindgesture pinch:4:outward exec pkill -SIGRTMIN+3 nwg-drawer
 
 ## Logging
 
-In case you encounter an issue, you may need debug messages. If you use the resident instance, you'll see nothing
-in the terminal. Please edit your sway config file:
+Over the last few years, I've become certain that the program will never be 100% stable, due to the imperfect working 
+of GTK3 bindings in golang. Random crashes will always happen. In case you encounter a __repeatable issue__, please attach 
+a log to the bug report. If you use the resident instance, you'll see nothing in the terminal. Please edit your sway 
+config file:
 
 ```text
 exec nwg-drawer -r -d 2> ~/drawer.log
 ```
 
-exit sway, launch it again and include the `drawer.log` content in the GitHub issue. Do not use `exec_always` here: it'll destroy the log file content on sway reload.
+exit sway, launch it again and include the `drawer.log` content in the GitHub issue. Do not use `exec_always` here: 
+it'll destroy the log file content on sway reload.
 
 ## Styling
 
