@@ -120,6 +120,7 @@ var (
 	win                     *gtk.Window
 	resultWindow            *gtk.ScrolledWindow
 	fileSearchResults       []string
+	mathResultWindow        *gtk.Window
 	searchEntry             *gtk.SearchEntry
 	phrase                  string
 	fileSearchResultFlowBox *gtk.FlowBox
@@ -519,7 +520,7 @@ func main() {
 					result, e := expr.Eval(s, nil)
 					if e == nil {
 						log.Debugf("Setting up mathemathical operation result window. Operation: %s, result: %v", s, result)
-						setUpOperationResultWindow(s, fmt.Sprintf("%v", result))
+						mathResultWindow = setUpOperationResultWindow(s, fmt.Sprintf("%v", result))
 					}
 				}
 			}
@@ -819,6 +820,11 @@ func restoreStateAndHide() {
 	}()
 
 	timeStart := time.Now()
+
+	if mathResultWindow != nil {
+		mathResultWindow.Destroy()
+		mathResultWindow = nil
+	}
 
 	// Hide the window via glib.IdleAdd to avoid calling Hide() outside the main thread
 	if win != nil {

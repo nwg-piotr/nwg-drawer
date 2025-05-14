@@ -663,7 +663,7 @@ func setUpUserFileSearchResultButton(fileName, filePath string) *gtk.Box {
 	return box
 }
 
-func setUpOperationResultWindow(operation string, result string) {
+func setUpOperationResultWindow(operation string, result string) *gtk.Window {
 	window := gtk.NewWindow(gtk.WindowToplevel)
 	window.SetModal(true)
 
@@ -711,4 +711,5 @@ func setUpOperationResultWindow(operation string, result string) {
 		cmd := fmt.Sprintf("wl-copy %v", result)
 		launch(cmd, false, false)
 	}
+	return window
 }
