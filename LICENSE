@@ -23,7 +23,7 @@ SOFTWARE.
 This project includes the use of the `gotk4` library by @diamondburned,
 available at https://github.com/diamondburned/gotk4.
 
-`gotk4/pkg` is licensed under the Mozilla Public License 2.0 (MPL-2.0).
+gotk4/pkg is licensed under the Mozilla Public License 2.0 (MPL-2.0).
 You may obtain a copy of the MPL-2.0 license at:
 
     https://www.mozilla.org/MPL/2.0/

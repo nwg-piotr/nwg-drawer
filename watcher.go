@@ -1,7 +1,3 @@
-// nwg-drawer
-// Copyright (C) 2021-2025 Piotr Miller & Contributors
-//
-
 package main
 
 import (

@@ -1,5 +1,6 @@
-// nwg-drawer
+// Application drawer for wlroots-based Wayland compositors
 // Copyright (C) 2021-2025 Piotr Miller & Contributors
+// https://github.com/nwg-piotr/nwg-drawer
 //
 // This program is licensed under the MIT License.
 
