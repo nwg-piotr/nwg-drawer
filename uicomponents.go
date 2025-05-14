@@ -186,12 +186,13 @@ func notEmpty(listCategory []string) bool {
 }
 
 func setUpAppsFlowBox(categoryList []string, searchPhrase string) *gtk.FlowBox {
-	if appFlowBox != nil {
-		log.Debug("Destroying old appFlowBox")
+	if appFlowBox != nil && appFlowBox.Widget.Native() != 0 {
+		log.Debugf("Destroying appFlowBox (native=%x)", appFlowBox.Widget.Native())
 		appFlowBox.Destroy()
 		appFlowBox = nil
 	} else {
-		log.Debug("Skipping appFlowBox.Destroy(); already invalid")
+		log.Debugf("Skipping appFlowBox.Destroy(); already invalid or nil")
+		appFlowBox = nil // to make sure
 	}
 	flowBox := gtk.NewFlowBox()
 	flowBox.SetMinChildrenPerLine(*columnsNumber)
@@ -242,16 +243,19 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	var pixbuf *gdkpixbuf.Pixbuf
 	var img *gtk.Image
 	var err error
+
 	if entry.Icon != "" {
 		pixbuf, err = createPixbuf(entry.Icon, *iconSize)
+		if err != nil || pixbuf == nil {
+			log.Warnf("Cannot load icon %q for %q: %v", entry.Icon, entry.Name, err)
+			img = gtk.NewImageFromIconName("image-missing", int(gtk.IconSizeDialog))
+		} else {
+			img = gtk.NewImageFromPixbuf(pixbuf)
+		}
 	} else {
 		log.Warnf("Undefined icon for %s", entry.Name)
-		pixbuf, err = createPixbuf("image-missing", *iconSize)
+		img = gtk.NewImageFromIconName("image-missing", int(gtk.IconSizeDialog))
 	}
-	if err != nil {
-		pixbuf, _ = createPixbuf("unknown", *iconSize)
-	}
-	img = gtk.NewImageFromPixbuf(pixbuf)
 
 	button.SetImage(img)
 	button.SetImagePosition(gtk.PosTop)
@@ -430,8 +434,12 @@ func setUpSearchEntry() *gtk.SearchEntry {
 			// Check if command input
 			if phrase[0] == ':' {
 				// Hide/Destroy everything except "execute command"
-				if appFlowBox != nil {
+				if appFlowBox != nil && appFlowBox.Widget.Native() != 0 {
+					log.Debugf("Destroying appFlowBox (native=%x)", appFlowBox.Widget.Native())
 					appFlowBox.Destroy()
+					appFlowBox = nil
+				} else {
+					log.Debugf("Skipping appFlowBox.Destroy(); already invalid or nil")
 					appFlowBox = nil
 				}
 				if pinnedFlowBox != nil && pinnedFlowBox.Visible() {
@@ -552,7 +560,9 @@ func searchUserDir(dir string) {
 			if partOfPathToShow != "" {
 				if !(strings.HasPrefix(path, "#is_dir#") && isExcluded(path)) {
 					button := setUpUserFileSearchResultButton(partOfPathToShow, path)
-					fileSearchResultFlowBox.Add(button)
+					if button != nil {
+						fileSearchResultFlowBox.Add(button)
+					}
 					button.Parent().(*gtk.FlowBoxChild).SetCanFocus(false)
 				}
 
@@ -623,6 +633,12 @@ func setUpUserFileSearchResultButton(fileName, filePath string) *gtk.Box {
 		tooltipText = fileName
 		fileName = fmt.Sprintf("%s…", fileName[:*nameLimit-3])
 	}
+
+	if button == nil || button.Native() == 0 {
+		log.Warn("Failed to create button or native pointer invalid")
+		return nil
+	}
+
 	button.SetLabel(fileName)
 	if tooltipText != "" {
 		button.SetTooltipText(tooltipText)

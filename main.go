@@ -137,6 +137,7 @@ var (
 	ignore                  string
 	desktopTrigger          bool
 	pinnedItemsChanged      chan interface{} = make(chan interface{}, 1)
+	inRestore               bool
 )
 
 func defaultTermIfBlank(s, fallback string) string {
@@ -799,6 +800,13 @@ func main() {
 var shuttingDown bool
 
 func restoreStateAndHide() {
+	if inRestore {
+		log.Warn("restoreStateAndHide already in progress")
+		return
+	}
+	inRestore = true
+	defer func() { inRestore = false }()
+
 	if shuttingDown {
 		log.Warn("restoreStateAndHide skipped — shutting down")
 		return
