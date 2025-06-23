@@ -56,6 +56,8 @@ Usage of nwg-drawer:
     	number of Columns (default 6)
   -close
     	close drawer of existing instance
+  -closebtn string
+    	close button position: 'left' or 'right', 'none' by default (default "none")
   -d	Turn on Debug messages
   -fm string
     	File Manager (default "thunar")
@@ -114,8 +116,8 @@ Usage of nwg-drawer:
   -term string
     	Terminal emulator (default "foot")
   -v	display Version information
-  -wm string
-    	use swaymsg exec (with 'sway' argument) or hyprctl dispatch exec (with 'hyprland') to launch programs
+  -wm swaymsg exec
+    	use `swaymsg exec` (with 'sway' argument) or `hyprctl dispatch exec` (with 'hyprland') or `riverctl spawn` (with 'river') or `uwsm app --` (with 'uwsm' for Universal Wayland Session Manager) to launch programs
   ```
 
   *NOTE: the `$TERM` environment variable overrides the `-term` argument.*

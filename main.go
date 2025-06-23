@@ -28,7 +28,7 @@ import (
 	"github.com/diamondburned/gotk4/pkg/gtk/v3"
 )
 
-const version = "0.7.0"
+const version = "0.7.1"
 
 var (
 	appDirs          []string
@@ -181,7 +181,7 @@ var itemSpacing = flag.Uint("spacing", 20, "icon spacing")
 var lang = flag.String("lang", "", "force lang, e.g. \"en\", \"pl\"")
 var fileManager = flag.String("fm", "thunar", "File Manager")
 var term = flag.String("term", defaultTermIfBlank(os.Getenv("TERM"), "foot"), "Terminal emulator")
-var wm = flag.String("wm", "", "use swaymsg exec (with 'sway' argument) or hyprctl dispatch exec (with 'hyprland') or riverctl spawn (with 'river') to launch programs")
+var wm = flag.String("wm", "", "use swaymsg exec (with 'sway' argument) or hyprctl dispatch exec (with 'hyprland') or riverctl spawn (with 'river') or uwsm app -- (with 'uwsm' for Universal Wayland Session Manager) to launch programs")
 var nameLimit = flag.Int("fslen", 80, "File Search name LENgth Limit")
 var noCats = flag.Bool("nocats", false, "Disable filtering by category")
 var noFS = flag.Bool("nofs", false, "Disable file search")
