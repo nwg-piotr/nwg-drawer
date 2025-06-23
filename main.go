@@ -153,9 +153,9 @@ func defaultTermIfBlank(s, fallback string) string {
 }
 
 func validateWm() {
-	if !(*wm == "sway" || *wm == "hyprland" || *wm == "Hyprland") && *wm != "" {
+	if !(*wm == "sway" || *wm == "hyprland" || *wm == "Hyprland" || *wm == "uwsm") && *wm != "" {
 		*wm = ""
-		log.Warn("-wm argument supports only 'sway' or 'hyprland' string.")
+		log.Warn("-wm argument supports only 'sway', 'hyprland' or 'uwsm' string.")
 	}
 }
 
