@@ -610,6 +610,16 @@ func launch(command string, terminal bool, terminate bool) {
 		cmd = exec.Command("hyprctl", "dispatch", "exec", strings.Join(elements, " "))
 	} else if *wm == "river" {
 		cmd = exec.Command("riverctl", "spawn", strings.Join(elements, " "))
+	} else if *wm == "uwsm" {
+		var commandArgs []string
+		words := strings.Fields(command)
+		for _, word := range words {
+			commandArgs = append(commandArgs, word)
+		}
+		cmd = exec.Command("uwsm", "app", "--")
+		if commandArgs != nil && len(commandArgs) > 0 {
+			cmd.Args = append(cmd.Args, commandArgs...)
+		}
 	}
 
 	msg := fmt.Sprintf("Executing command: %q; args: %q\n", cmd.Args[0], cmd.Args[1:])
