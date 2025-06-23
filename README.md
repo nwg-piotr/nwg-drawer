@@ -55,6 +55,11 @@ Usage of nwg-drawer:
   -c uint
     	number of Columns (default 6)
   -close
+[piotr@archlinux nwg-drawer]$ nwg-drawer -h
+Usage of nwg-drawer:
+  -c uint
+    	number of Columns (default 6)
+  -close
     	close drawer of existing instance
   -closebtn string
     	close button position: 'left' or 'right', 'none' by default (default "none")
@@ -66,7 +71,7 @@ Usage of nwg-drawer:
   -fslen int
     	File Search name LENgth Limit (default 80)
   -ft
-    	Force Theme for libadwaita apps, by adding 'GTK_THEME=<default-gtk-theme>' env var
+    	Force Theme for libadwaita apps, by adding 'GTK_THEME=<default-gtk-theme>' env var; ignored if wm argument == 'uwsm'
   -g string
     	GTK theme name
   -i string
@@ -116,8 +121,8 @@ Usage of nwg-drawer:
   -term string
     	Terminal emulator (default "foot")
   -v	display Version information
-  -wm swaymsg exec
-    	use `swaymsg exec` (with 'sway' argument) or `hyprctl dispatch exec` (with 'hyprland') or `riverctl spawn` (with 'river') or `uwsm app --` (with 'uwsm' for Universal Wayland Session Manager) to launch programs
+  -wm string
+    	use swaymsg exec (with 'sway' argument) or hyprctl dispatch exec (with 'hyprland') or riverctl spawn (with 'river') or uwsm app -- (with 'uwsm' for Universal Wayland Session Manager) to launch programs
   ```
 
   *NOTE: the `$TERM` environment variable overrides the `-term` argument.*
