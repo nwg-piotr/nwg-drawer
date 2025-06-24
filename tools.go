@@ -613,7 +613,9 @@ func launch(command string, terminal bool, terminate bool) {
 	} else if *wm == "river" {
 		cmd = exec.Command("riverctl", "spawn", strings.Join(elements, " "))
 	} else if *wm == "uwsm" {
-		cmd = exec.Command("uwsm", append([]string{"app", "--"}, elements...)...)
+		if _, err := exec.LookPath("uwsm"); err == nil { // check if uwsm actually installed first
+			cmd = exec.Command("uwsm", append([]string{"app", "--"}, elements...)...)
+		}
 	}
 
 	msg := fmt.Sprintf("Executing command: %q; args: %q\n", cmd.Args[0], cmd.Args[1:])
