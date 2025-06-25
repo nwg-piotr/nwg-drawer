@@ -591,6 +591,10 @@ func launch(command string, terminal bool, terminate bool) {
 		if themeToPrepend != "" {
 			command = fmt.Sprintf("GTK_THEME=%q %s", themeToPrepend, command)
 		}
+	} else {
+		if *forceTheme {
+			log.Warn("We can't force GTK_THEME= while running a command through uwsm")
+		}
 	}
 
 	var elements = []string{"/usr/bin/env", "-S", command}
@@ -607,14 +611,31 @@ func launch(command string, terminal bool, terminate bool) {
 		}
 		cmd = exec.Command(prefixCommand, args...)
 	} else if *wm == "sway" {
-		cmd = exec.Command("swaymsg", "exec", strings.Join(elements, " "))
+		if _, ok := os.LookupEnv("SWAYSOCK"); ok {
+			cmd = exec.Command("swaymsg", "exec", strings.Join(elements, " "))
+		} else {
+			log.Warn("Unable to find SWAYSOCK, running command directly")
+		}
 	} else if *wm == "hyprland" || *wm == "Hyprland" {
-		cmd = exec.Command("hyprctl", "dispatch", "exec", strings.Join(elements, " "))
+		if _, ok := os.LookupEnv("HYPRLAND_INSTANCE_SIGNATURE"); ok {
+			cmd = exec.Command("hyprctl", "dispatch", "exec", strings.Join(elements, " "))
+		} else {
+			log.Warn("Unable to find HYPRLAND_INSTANCE_SIGNATURE, running command directly")
+		}
 	} else if *wm == "river" {
+		// a check if we're actually on river would be of use here, but we have none
 		cmd = exec.Command("riverctl", "spawn", strings.Join(elements, " "))
+	} else if *wm == "niri" {
+		if os.Getenv("XDG_CURRENT_DESKTOP") == "niri" {
+			cmd = exec.Command("niri", append([]string{"msg", "action", "spawn", "--"}, elements...)...)
+		} else {
+			log.Warn("$XDG_CURRENT_DESKTOP != 'niri', running command directly")
+		}
 	} else if *wm == "uwsm" {
-		if _, err := exec.LookPath("uwsm"); err == nil { // check if uwsm actually installed first
+		if _, err := exec.LookPath("uwsm"); err == nil {
 			cmd = exec.Command("uwsm", append([]string{"app", "--"}, elements...)...)
+		} else {
+			log.Warn("Unable to find uwsm, running command directly")
 		}
 	}
 
