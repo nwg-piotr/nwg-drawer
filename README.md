@@ -50,12 +50,6 @@ confirmed to work well with the program. Also see **Files** below.
 ## Command line arguments
 
 ```text
-$ nwg-drawer -h
-Usage of nwg-drawer:
-  -c uint
-    	number of Columns (default 6)
-  -close
-[piotr@archlinux nwg-drawer]$ nwg-drawer -h
 Usage of nwg-drawer:
   -c uint
     	number of Columns (default 6)
@@ -122,10 +116,25 @@ Usage of nwg-drawer:
     	Terminal emulator (default "foot")
   -v	display Version information
   -wm string
-    	use swaymsg exec (with 'sway' argument) or hyprctl dispatch exec (with 'hyprland') or riverctl spawn (with 'river') or uwsm app -- (with 'uwsm' for Universal Wayland Session Manager) to launch programs
+    	use swaymsg exec (with 'sway' argument) or hyprctl dispatch exec (with 'hyprland') or riverctl spawn (with 'river') or niri msg action spawn -- (with 'niri') or uwsm app -- (with 'uwsm' for Universal Wayland Session Manager) to launch programs
   ```
 
   *NOTE: the `$TERM` environment variable overrides the `-term` argument.*
+
+### About the `-wm` argument
+
+If you want to run commands through the compositor or through the Universal Wayland Session Manager, use the `-wm` flag.
+
+| Flag value | Will run command with      |
+| ---------- |----------------------------|
+| sway       | `swaymsg exec`             |
+| hyprland   | `hyprctl dispatch exec`    |
+| river      | `riverctl spawn`           |
+| niri       | `niri msg action spawn --` |
+| uwsm       | `uwsm app --`              |
+
+Nwg-drawer will check if it's actually running on the given compositor, or if `uwsm` is installed. If not, it will run 
+the command directly. The only exception is `-wm river`, as I have no idea how to confirm it's running.
 
 ## Running
 
