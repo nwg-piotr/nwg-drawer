@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/diamondburned/gotk4-layer-shell/pkg/gtklayershell"
 	"io/fs"
 	"path/filepath"
 	"strings"
+
+	"github.com/diamondburned/gotk4-layer-shell/pkg/gtklayershell"
 
 	log "github.com/sirupsen/logrus"
 
@@ -181,6 +182,20 @@ func notEmpty(listCategory []string) bool {
 	return false
 }
 
+func subsequenceMatch(needle, haystack string) bool {
+	needle = strings.ToLower(strings.TrimSpace(needle))
+	haystack = strings.ToLower(haystack)
+
+	n, h := 0, 0
+	for n < len(needle) && h < len(haystack) {
+		if needle[n] == haystack[h] {
+			n++
+		}
+		h++
+	}
+	return n == len(needle)
+}
+
 func setUpAppsFlowBox(categoryList []string, searchPhrase string) *gtk.FlowBox {
 	if appFlowBox != nil && appFlowBox.Widget.Native() != 0 {
 		log.Debugf("Destroying appFlowBox (native=%x)", appFlowBox.Widget.Native())
@@ -213,7 +228,8 @@ func setUpAppsFlowBox(categoryList []string, searchPhrase string) *gtk.FlowBox {
 				}
 			}
 		} else {
-			if !entry.NoDisplay && (strings.Contains(strings.ToLower(entry.NameLoc), strings.ToLower(searchPhrase)) ||
+			needle := strings.ToLower(searchPhrase)
+			if !entry.NoDisplay && (subsequenceMatch(needle, strings.ToLower(entry.NameLoc)) ||
 				strings.Contains(strings.ToLower(entry.CommentLoc), strings.ToLower(searchPhrase)) ||
 				strings.Contains(strings.ToLower(entry.Comment), strings.ToLower(searchPhrase)) ||
 				strings.Contains(strings.ToLower(entry.Exec), strings.ToLower(searchPhrase))) {
