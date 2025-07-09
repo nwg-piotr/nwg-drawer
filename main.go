@@ -506,7 +506,7 @@ func main() {
 				firstPowerBtn.GrabFocus()
 			}
 
-		} else if key.Keyval() == gdk.KEY_Return {
+		} else if key.Keyval() == gdk.KEY_Return || key.Keyval() == gdk.KEY_KP_Enter {
 			s := searchEntry.Text()
 			if s != "" {
 				// Check if execute command input
