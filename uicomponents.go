@@ -687,15 +687,19 @@ func setUpOperationResultWindow(operation string, result string) *gtk.Window {
 
 	// any key to close the window
 	window.Connect("key-release-event", func(_ *gtk.Window, event *gdk.Event) bool {
-		resultWindow.Destroy()
-		resultWindow = nil
+		key := event.AsKey()
+		if key.Keyval() == gdk.KEY_Escape {
+			searchEntry.SetText("")
+		}
+		mathResultWindow.Destroy()
+		mathResultWindow = nil
 		return true
 	})
 
 	// any button to close the window
 	window.Connect("button-release-event", func(_ *gtk.Window, event *gdk.Event) bool {
-		resultWindow.Destroy()
-		resultWindow = nil
+		mathResultWindow.Destroy()
+		mathResultWindow = nil
 		return true
 	})
 
