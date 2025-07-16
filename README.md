@@ -254,7 +254,7 @@ This program uses some great libraries:
 
 ## License
 
-nwg-drawer is licensed under the MIT License. Copyright (C) 2001-2025 Piotr Miller & Contributors.
+nwg-drawer is licensed under the MIT License. Copyright (C) 2021-2025 Piotr Miller & Contributors.
 
 You should have received a copy of the GNU Affero General Public License along with this program.  
 If not, see [https://www.gnu.org/licenses/agpl-3.0.html](https://www.gnu.org/licenses/agpl-3.0.html).
