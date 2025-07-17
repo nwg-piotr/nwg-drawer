@@ -23,6 +23,7 @@ import (
 	"github.com/diamondburned/gotk4/pkg/gdk/v3"
 	"github.com/diamondburned/gotk4/pkg/gdkpixbuf/v2"
 	"github.com/diamondburned/gotk4/pkg/gtk/v3"
+	"github.com/google/shlex"
 )
 
 func wayland() bool {
@@ -633,7 +634,8 @@ func launch(command string, terminal bool, terminate bool) {
 		}
 	} else if *wm == "uwsm" {
 		if _, err := exec.LookPath("uwsm"); err == nil {
-			cmd = exec.Command("uwsm", append([]string{"app", "--"}, elements...)...)
+			cParts, _ := shlex.Split(command)
+			cmd = exec.Command("uwsm", append([]string{"app", "--"}, cParts...)...)
 		} else {
 			log.Warn("Unable to find uwsm, running command directly")
 		}

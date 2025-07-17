@@ -10,6 +10,7 @@ require (
 	github.com/diamondburned/gotk4/pkg v0.3.1
 	github.com/expr-lang/expr v1.17.5
 	github.com/fsnotify/fsnotify v1.9.0
+	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/joshuarubin/go-sway v1.2.0
 	github.com/sirupsen/logrus v1.9.3
 )
