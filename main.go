@@ -195,6 +195,7 @@ var pbSize = flag.Int("pbsize", 64, "power bar icon size (only works w/ built-in
 var pbUseIconTheme = flag.Bool("pbuseicontheme", false, "use icon theme instead of built-in icons in power bar")
 var closeBtn = flag.String("closebtn", "none", "close button position: 'left' or 'right', 'none' by default")
 var debug = flag.Bool("d", false, "Turn on Debug messages")
+var disableFirstItemFocus = flag.Bool("df", false, "Disables automatic Focusing of the first searched item")
 
 func main() {
 	timeStart := time.Now()
