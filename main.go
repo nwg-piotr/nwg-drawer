@@ -9,8 +9,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/diamondburned/gotk4-layer-shell/pkg/gtklayershell"
-	"github.com/expr-lang/expr"
 	"os"
 	"os/signal"
 	"path"
@@ -19,6 +17,9 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/diamondburned/gotk4-layer-shell/pkg/gtklayershell"
+	"github.com/expr-lang/expr"
 
 	"github.com/allan-simon/go-singleinstance"
 	log "github.com/sirupsen/logrus"
@@ -627,14 +628,16 @@ func main() {
 	appFlowBox = setUpAppsFlowBox(nil, "")
 
 	// Focus 1st pinned item if any, otherwise focus 1st found app icon
-	var button gtk.Widget
-	if len(pinnedFlowBox.Children()) > 0 {
-		button = pinnedFlowBox.ChildAtIndex(0).Widget
-	} else {
-		button = appFlowBox.ChildAtIndex(0).Widget
-	}
-	if err == nil {
-		button.GrabFocus()
+	if !*disableFirstItemFocus {
+		var button gtk.Widget
+		if len(pinnedFlowBox.Children()) > 0 {
+			button = pinnedFlowBox.ChildAtIndex(0).Widget
+		} else {
+			button = appFlowBox.ChildAtIndex(0).Widget
+		}
+		if err == nil {
+			button.GrabFocus()
+		}
 	}
 
 	userDirsMap = mapXdgUserDirs()
@@ -769,14 +772,16 @@ func main() {
 							fileSearchResultWrapper.Hide()
 						}
 						// focus 1st element
-						var button gtk.Widget
-						if len(pinnedFlowBox.Children()) > 0 {
-							button = pinnedFlowBox.ChildAtIndex(0).Widget
-						} else {
-							button = appFlowBox.ChildAtIndex(0).Widget
-						}
-						if err == nil {
-							button.GrabFocus()
+						if !*disableFirstItemFocus {
+							var button gtk.Widget
+							if len(pinnedFlowBox.Children()) > 0 {
+								button = pinnedFlowBox.ChildAtIndex(0).Widget
+							} else {
+								button = appFlowBox.ChildAtIndex(0).Widget
+							}
+							if err == nil {
+								button.GrabFocus()
+							}
 						}
 					}
 
