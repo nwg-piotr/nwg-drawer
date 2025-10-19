@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/joshuarubin/go-sway"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"io/fs"
 	"net"
@@ -19,6 +17,9 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/joshuarubin/go-sway"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/diamondburned/gotk4/pkg/gdk/v3"
 	"github.com/diamondburned/gotk4/pkg/gdkpixbuf/v2"
@@ -66,6 +67,15 @@ func createPixbuf(icon string, size int) (*gdkpixbuf.Pixbuf, error) {
 	return pixbuf, nil
 }
 
+func extractXDGUserDir(s string) string {
+	re := regexp.MustCompile(`_([^_]+)_`)
+	matches := re.FindStringSubmatch(s)
+	if len(matches) > 1 {
+		return matches[1]
+	}
+	return ""
+}
+
 func mapXdgUserDirs() map[string]string {
 	result := make(map[string]string)
 	home := os.Getenv("HOME")
@@ -101,7 +111,14 @@ func mapXdgUserDirs() map[string]string {
 			}
 			if strings.HasPrefix(l, "XDG_VIDEOS_DIR") {
 				result["videos"] = getUserDir(home, l)
+				continue
 			}
+			if extractXDGUserDir(l) != "" {
+				key := extractXDGUserDir(l)
+				log.Info(fmt.Sprintf("Found additional XDG user dir: %s", key))
+				result[key] = getUserDir(home, l)
+			}
+
 		}
 	} else {
 		log.Warnf("userDirsFile %s not found, using defaults", userDirsFile)
