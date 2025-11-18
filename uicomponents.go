@@ -1,13 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"io/fs"
-	"path/filepath"
 	"strings"
 
 	"github.com/diamondburned/gotk4-layer-shell/pkg/gtklayershell"
-
 	log "github.com/sirupsen/logrus"
 
 	"github.com/diamondburned/gotk4/pkg/gdk/v3"
@@ -401,40 +399,14 @@ func setUpFileSearchResultContainer() *gtk.FlowBox {
 	return flowBox
 }
 
-func walk(path string, d fs.DirEntry, e error) error {
-	if e != nil {
-		return e
-	}
-	// don't search leading part of the path, as e.g. '/home/user/Pictures'
-	toSearch := strings.Split(path, ignore)[1]
-
-	// Remaining part of the path (w/o file name) must be checked against being present in excluded dirs
-	doSearch := true
-	parts := strings.Split(toSearch, "/")
-	remainingPart := ""
-	if len(parts) > 1 {
-		remainingPart = strings.Join(parts[:len(parts)-1], "/")
-	}
-	if remainingPart != "" && isExcluded(remainingPart) {
-		doSearch = false
-	}
-
-	if doSearch && strings.Contains(strings.ToLower(toSearch), strings.ToLower(phrase)) {
-		// mark directories
-		if d.IsDir() {
-			fileSearchResults = append(fileSearchResults, fmt.Sprintf("#is_dir#%s", path))
-		} else {
-			fileSearchResults = append(fileSearchResults, path)
-		}
-	}
-
-	return nil
-}
-
 func setUpSearchEntry() *gtk.SearchEntry {
 	sEntry := gtk.NewSearchEntry()
 	sEntry.SetPlaceholderText("Type to search")
 	sEntry.Connect("search-changed", func() {
+		if fileSearchContextCancel != nil {
+			(*fileSearchContextCancel)()
+		}
+
 		for _, btn := range catButtons {
 			btn.SetImagePosition(gtk.PosLeft)
 			btn.SetSizeRequest(0, 0)
@@ -473,25 +445,12 @@ func setUpSearchEntry() *gtk.SearchEntry {
 			// search apps
 			appFlowBox = setUpAppsFlowBox(nil, phrase)
 
+			ctx, cancel := context.WithCancel(context.Background())
+			fileSearchContextCancel = &cancel
+
 			// search files
 			if !*noFS && len(phrase) > 2 {
-				if fileSearchResultFlowBox != nil {
-					fileSearchResultFlowBox.Destroy()
-					fileSearchResultFlowBox = nil
-				}
-
-				fileSearchResultFlowBox = setUpFileSearchResultContainer()
-
-				for key := range userDirsMap {
-					if key != "home" {
-						fileSearchResults = nil
-						searchUserDir(key)
-					}
-				}
-				if len(fileSearchResultFlowBox.Children()) == 0 {
-					fileSearchResultWrapper.Hide()
-					statusLabel.SetText("0 results")
-				}
+				go searchFs(ctx)
 			} else {
 				// search phrase too short
 				if fileSearchResultFlowBox != nil {
@@ -554,42 +513,6 @@ func isExcluded(dir string) bool {
 		}
 	}
 	return false
-}
-
-func searchUserDir(dir string) {
-	fileSearchResults = nil
-	ignore = userDirsMap[dir]
-	filepath.WalkDir(userDirsMap[dir], walk)
-
-	if len(fileSearchResults) > 0 {
-		btn := setUpUserDirButton(fmt.Sprintf("folder-%s", dir), "", dir, userDirsMap)
-		fileSearchResultFlowBox.Add(btn)
-		btn.Parent().(*gtk.FlowBoxChild).SetCanFocus(false)
-
-		for _, path := range fileSearchResults {
-			log.Debugf("Path: %s", path)
-			partOfPathToShow := strings.Split(path, userDirsMap[dir])[1]
-			if partOfPathToShow != "" {
-				if !(strings.HasPrefix(path, "#is_dir#") && isExcluded(path)) {
-					button := setUpUserFileSearchResultButton(partOfPathToShow, path)
-					if button != nil {
-						fileSearchResultFlowBox.Add(button)
-					}
-					button.Parent().(*gtk.FlowBoxChild).SetCanFocus(false)
-				}
-
-			}
-		}
-		fileSearchResultFlowBox.Hide()
-
-		statusLabel.SetText(fmt.Sprintf("%v results | LMB: xdg-open | RMB: file manager",
-			len(fileSearchResultFlowBox.Children())))
-		num := uint(len(fileSearchResultFlowBox.Children())) / *fsColumns
-		fileSearchResultFlowBox.SetMinChildrenPerLine(num + 1)
-		fileSearchResultFlowBox.SetMaxChildrenPerLine(num + 1)
-
-		fileSearchResultFlowBox.ShowAll()
-	}
 }
 
 func setUpUserDirButton(iconName, displayName, entryName string, userDirsMap map[string]string) *gtk.Box {

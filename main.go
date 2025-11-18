@@ -7,18 +7,21 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
-	"github.com/diamondburned/gotk4-layer-shell/pkg/gtklayershell"
-	"github.com/expr-lang/expr"
 	"os"
 	"os/signal"
 	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
+
+	"github.com/diamondburned/gotk4-layer-shell/pkg/gtklayershell"
+	"github.com/expr-lang/expr"
 
 	"github.com/allan-simon/go-singleinstance"
 	log "github.com/sirupsen/logrus"
@@ -118,28 +121,29 @@ var desktopEntries []desktopEntry
 
 // UI elements
 var (
-	win                     *gtk.Window
-	resultWindow            *gtk.ScrolledWindow
-	fileSearchResults       []string
-	mathResultWindow        *gtk.Window
-	searchEntry             *gtk.SearchEntry
-	phrase                  string
-	fileSearchResultFlowBox *gtk.FlowBox
-	userDirsMap             map[string]string
-	appFlowBox              *gtk.FlowBox
-	appSearchResultWrapper  *gtk.Box
-	fileSearchResultWrapper *gtk.Box
-	powerButtonsWrapper     *gtk.Box
-	pinnedFlowBox           *gtk.FlowBox
-	pinnedFlowBoxWrapper    *gtk.Box
-	categoriesWrapper       *gtk.Box
-	catButtons              []*gtk.Button
-	statusLabel             *gtk.Label
-	status                  string
-	ignore                  string
-	desktopTrigger          bool
-	pinnedItemsChanged      chan interface{} = make(chan interface{}, 1)
-	inRestore               bool
+	win                         *gtk.Window
+	resultWindow                *gtk.ScrolledWindow
+	mathResultWindow            *gtk.Window
+	searchEntry                 *gtk.SearchEntry
+	phrase                      string
+	fileSearchResultFlowBox     *gtk.FlowBox
+	fileSearchResultFlowBoxLock *sync.Mutex = &sync.Mutex{}
+	fileSearchContextCancel     *context.CancelFunc
+	userDirsMap                 map[string]string
+	appFlowBox                  *gtk.FlowBox
+	appSearchResultWrapper      *gtk.Box
+	fileSearchResultWrapper     *gtk.Box
+	powerButtonsWrapper         *gtk.Box
+	pinnedFlowBox               *gtk.FlowBox
+	pinnedFlowBoxWrapper        *gtk.Box
+	categoriesWrapper           *gtk.Box
+	catButtons                  []*gtk.Button
+	statusLabel                 *gtk.Label
+	status                      string
+	ignore                      string
+	desktopTrigger              bool
+	pinnedItemsChanged          chan interface{} = make(chan interface{}, 1)
+	inRestore                   bool
 )
 
 func defaultTermIfBlank(s, fallback string) string {
