@@ -320,7 +320,7 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	return button
 }
 
-func powerButton(iconPathOrName, command string) *gtk.Button {
+func powerButton(iconPathOrName, command, label string) *gtk.Button {
 	button := gtk.NewButton()
 	button.SetAlwaysShowImage(true)
 
@@ -353,13 +353,21 @@ func powerButton(iconPathOrName, command string) *gtk.Button {
 		launch(command, false, true)
 	})
 	button.Connect("enter-notify-event", func() {
-		statusLabel.SetText(command)
+		if label != "" {
+			statusLabel.SetText(label)
+		} else {
+			statusLabel.SetText(command)
+		}
 	})
 	button.Connect("leave-notify-event", func() {
 		statusLabel.SetText("")
 	})
 	button.Connect("focus-in-event", func() {
-		statusLabel.SetText(command)
+		if label != "" {
+			statusLabel.SetText(label)
+		} else {
+			statusLabel.SetText(command)
+		}
 	})
 	return button
 }

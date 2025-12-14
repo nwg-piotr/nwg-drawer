@@ -187,10 +187,15 @@ var noCats = flag.Bool("nocats", false, "Disable filtering by category")
 var noFS = flag.Bool("nofs", false, "Disable file search")
 var resident = flag.Bool("r", false, "Leave the program resident in memory")
 var pbExit = flag.String("pbexit", "", "command for the Exit power bar icon")
+var pbExitLabel = flag.String("pbexitlabel", "", "label for the Exit power bar icon")
 var pbLock = flag.String("pblock", "", "command for the Lock power bar icon")
+var pbLockLabel = flag.String("pblocklabel", "", "label for the Lock power bar icon")
 var pbPoweroff = flag.String("pbpoweroff", "", "command for the Poweroff power bar icon")
+var pbPoweroffLabel = flag.String("pbpowerofflabel", "", "label for the Poweroff power bar icon")
 var pbReboot = flag.String("pbreboot", "", "command for the Reboot power bar icon")
+var pbRebootLabel = flag.String("pbrebootlabel", "", "label for the Reboot power bar icon")
 var pbSleep = flag.String("pbsleep", "", "command for the sleep power bar icon")
+var pbSleepLabel = flag.String("pbsleeplabel", "", "label for the sleep power bar icon")
 var pbSize = flag.Int("pbsize", 64, "power bar icon size (only works w/ built-in icons)")
 var pbUseIconTheme = flag.Bool("pbuseicontheme", false, "use icon theme instead of built-in icons in power bar")
 var closeBtn = flag.String("closebtn", "none", "close button position: 'left' or 'right', 'none' by default")
@@ -665,9 +670,9 @@ func main() {
 			if *pbPoweroff != "" {
 				btn := gtk.NewButton()
 				if !*pbUseIconTheme {
-					btn = powerButton(filepath.Join(dataDirectory, "img/poweroff.svg"), *pbPoweroff)
+					btn = powerButton(filepath.Join(dataDirectory, "img/poweroff.svg"), *pbPoweroff, *pbPoweroffLabel)
 				} else {
-					btn = powerButton("system-shutdown-symbolic", *pbPoweroff)
+					btn = powerButton("system-shutdown-symbolic", *pbPoweroff, *pbPoweroffLabel)
 				}
 				powerButtonsWrapper.PackEnd(btn, true, false, 0)
 				firstPowerBtn = btn
@@ -675,9 +680,9 @@ func main() {
 			if *pbSleep != "" {
 				btn := gtk.NewButton()
 				if !*pbUseIconTheme {
-					btn = powerButton(filepath.Join(dataDirectory, "img/sleep.svg"), *pbSleep)
+					btn = powerButton(filepath.Join(dataDirectory, "img/sleep.svg"), *pbSleep, *pbSleepLabel)
 				} else {
-					btn = powerButton("face-yawn-symbolic", *pbSleep)
+					btn = powerButton("face-yawn-symbolic", *pbSleep, *pbSleepLabel)
 				}
 				powerButtonsWrapper.PackEnd(btn, true, false, 0)
 				firstPowerBtn = btn
@@ -685,9 +690,9 @@ func main() {
 			if *pbReboot != "" {
 				btn := gtk.NewButton()
 				if !*pbUseIconTheme {
-					btn = powerButton(filepath.Join(dataDirectory, "img/reboot.svg"), *pbReboot)
+					btn = powerButton(filepath.Join(dataDirectory, "img/reboot.svg"), *pbReboot, *pbRebootLabel)
 				} else {
-					btn = powerButton("system-reboot-symbolic", *pbReboot)
+					btn = powerButton("system-reboot-symbolic", *pbReboot, *pbRebootLabel)
 				}
 				powerButtonsWrapper.PackEnd(btn, true, false, 0)
 				firstPowerBtn = btn
@@ -695,9 +700,9 @@ func main() {
 			if *pbExit != "" {
 				btn := gtk.NewButton()
 				if !*pbUseIconTheme {
-					btn = powerButton(filepath.Join(dataDirectory, "img/exit.svg"), *pbExit)
+					btn = powerButton(filepath.Join(dataDirectory, "img/exit.svg"), *pbExit, *pbExitLabel)
 				} else {
-					btn = powerButton("system-log-out-symbolic", *pbExit)
+					btn = powerButton("system-log-out-symbolic", *pbExit, *pbExitLabel)
 				}
 				powerButtonsWrapper.PackEnd(btn, true, false, 0)
 				firstPowerBtn = btn
@@ -705,9 +710,9 @@ func main() {
 			if *pbLock != "" {
 				btn := gtk.NewButton()
 				if !*pbUseIconTheme {
-					btn = powerButton(filepath.Join(dataDirectory, "img/lock.svg"), *pbLock)
+					btn = powerButton(filepath.Join(dataDirectory, "img/lock.svg"), *pbLock, *pbLockLabel)
 				} else {
-					btn = powerButton("system-lock-screen-symbolic", *pbLock)
+					btn = powerButton("system-lock-screen-symbolic", *pbLock, *pbLockLabel)
 				}
 				powerButtonsWrapper.PackEnd(btn, true, false, 0)
 				firstPowerBtn = btn
