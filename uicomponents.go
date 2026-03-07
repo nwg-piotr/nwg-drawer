@@ -30,7 +30,6 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 	flowBox.SetColumnSpacing(*itemSpacing)
 	flowBox.SetRowSpacing(*itemSpacing)
 	flowBox.SetHomogeneous(true)
-	flowBox.SetObjectProperty("name", "pinned-box")
 	flowBox.SetSelectionMode(gtk.SelectionNone)
 
 	if len(pinned) > 0 {
@@ -42,6 +41,7 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 			}
 
 			btn := gtk.NewButton()
+			btn.SetObjectProperty("name", "pinned-button")
 
 			var img *gtk.Image
 			if entry.Icon != "" {
@@ -251,6 +251,7 @@ func setUpAppsFlowBox(categoryList []string, searchPhrase string) *gtk.FlowBox {
 func flowBoxButton(entry desktopEntry) *gtk.Button {
 	button := gtk.NewButton()
 	button.SetAlwaysShowImage(true)
+	button.SetObjectProperty("name", "app-button")
 
 	var pixbuf *gdkpixbuf.Pixbuf
 	var img *gtk.Image
@@ -631,6 +632,7 @@ func setUpUserDirButton(iconName, displayName, entryName string, userDirsMap map
 func setUpUserFileSearchResultButton(fileName, filePath string) *gtk.Box {
 	box := gtk.NewBox(gtk.OrientationHorizontal, 0)
 	button := gtk.NewButton()
+	button.SetObjectProperty("name", "file-button")
 
 	// in the walk function we've marked directories with the '#is_dir#' prefix
 	if strings.HasPrefix(filePath, "#is_dir#") {

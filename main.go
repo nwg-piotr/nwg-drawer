@@ -567,14 +567,17 @@ func main() {
 	}
 
 	searchBoxWrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
+	searchBoxWrapper.SetObjectProperty("name", "search-box")
 	outerVBox.PackStart(searchBoxWrapper, false, false, 10)
 
 	searchEntry = setUpSearchEntry()
+	searchEntry.SetObjectProperty("name", "search")
 	searchEntry.SetMaxWidthChars(30)
 	searchBoxWrapper.PackStart(searchEntry, true, false, 0)
 
 	if !*noCats {
 		categoriesWrapper = gtk.NewBox(gtk.OrientationHorizontal, 0)
+		categoriesWrapper.SetObjectProperty("name", "categories-box")
 		categoriesButtonBox := setUpCategoriesButtonBox()
 		categoriesWrapper.PackStart(categoriesButtonBox, true, false, 0)
 		outerVBox.PackStart(categoriesWrapper, false, false, 0)
@@ -584,10 +587,12 @@ func main() {
 	outerVBox.PackStart(pinnedWrapper, false, false, 0)
 
 	pinnedFlowBoxWrapper = gtk.NewBox(gtk.OrientationHorizontal, 0)
+	pinnedFlowBoxWrapper.SetObjectProperty("name", "pinned-box")
 	outerVBox.PackStart(pinnedFlowBoxWrapper, false, false, 0)
 	pinnedFlowBox = setUpPinnedFlowBox()
 
 	resultWindow = gtk.NewScrolledWindow(nil, nil)
+	resultWindow.SetObjectProperty("name", "result-box")
 	resultWindow.SetEvents(int(gdk.AllEventsMask))
 	resultWindow.SetPolicy(gtk.PolicyAutomatic, gtk.PolicyAutomatic)
 
