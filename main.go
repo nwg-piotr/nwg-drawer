@@ -142,6 +142,41 @@ var (
 	inRestore               bool
 )
 
+// CSS name compatibly replacer
+var stripSpecial = strings.NewReplacer(
+	" ",	"-",
+	"~",	"",
+	"!",	"",
+	"@",	"",
+	"$",	"",
+	"%",	"",
+	"^",	"",
+	"&",	"",
+	"*",	"",
+	"(",	"",		
+	")",	"",
+	"+",	"",
+	"=",	"",
+	",",	"",
+	".",	"_",
+	"/",	"-",
+	"'",	"",
+	";",	"",
+	":",	"",
+	"\"",	"",
+	"?",	"",
+	">",	"",
+	"<",	"",
+	"[",	"",
+	"]",	"",
+	"\\",	"-",
+	"{",	"",
+	"}",	"",
+	"|",	"",
+	"`",	"",
+	"#",	"",
+)
+
 func defaultTermIfBlank(s, fallback string) string {
 	s = strings.TrimSpace(s)
 	// os.Getenv("TERM") returns "linux" instead of empty string, if program has been started
@@ -427,6 +462,7 @@ func main() {
 	win = gtk.NewWindow(gtk.WindowToplevel)
 	if win != nil {
 		log.Debugf("win addr: %p native: %x", win, win.Native())
+		win.SetObjectProperty("name", "nwg-drawer")
 	} else {
 		log.Panic("Failed creating window")
 	}
@@ -559,6 +595,7 @@ func main() {
 
 	// Set up UI
 	outerVBox := gtk.NewBox(gtk.OrientationVertical, 0)
+	outerVBox.SetObjectProperty("name", "main-box")
 	win.Add(outerVBox)
 
 	closeButtonBox := createCloseButtonBox((*closeBtn != "none"), (*closeBtn != "right"))
@@ -584,6 +621,7 @@ func main() {
 	}
 
 	pinnedWrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
+	pinnedWrapper.SetObjectProperty("name", "pinned-seperator")
 	outerVBox.PackStart(pinnedWrapper, false, false, 0)
 
 	pinnedFlowBoxWrapper = gtk.NewBox(gtk.OrientationHorizontal, 0)
@@ -624,9 +662,11 @@ func main() {
 	outerVBox.PackStart(resultWindow, true, true, 10)
 
 	resultsWrapper := gtk.NewBox(gtk.OrientationVertical, 0)
+	resultsWrapper.SetObjectProperty("name", "result-content")
 	resultWindow.Add(resultsWrapper)
 
 	appSearchResultWrapper = gtk.NewBox(gtk.OrientationVertical, 0)
+	appSearchResultWrapper.SetObjectProperty("name", "app-box")
 	resultsWrapper.PackStart(appSearchResultWrapper, false, false, 0)
 	appFlowBox = setUpAppsFlowBox(nil, "")
 
@@ -645,6 +685,7 @@ func main() {
 	log.Debugf("User dirs map: %s", userDirsMap)
 
 	placeholder := gtk.NewBox(gtk.OrientationVertical, 0)
+	placeholder.SetObjectProperty("name", "result-content-gutters")
 	resultsWrapper.PackStart(placeholder, true, true, 0)
 	placeholder.SetSizeRequest(20, 20)
 
@@ -663,6 +704,7 @@ func main() {
 	if dataDirectory != "" {
 		if *pbExit != "" || *pbLock != "" || *pbPoweroff != "" || *pbReboot != "" || *pbSleep != "" {
 			powerBarWrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
+			powerBarWrapper.SetObjectProperty("name", "power-bar")
 			outerVBox.PackStart(powerBarWrapper, false, false, 0)
 			powerButtonsWrapper = gtk.NewBox(gtk.OrientationHorizontal, 0)
 			powerBarWrapper.PackStart(powerButtonsWrapper, true, false, 12)
