@@ -205,6 +205,14 @@ func setUpAppsFlowBox(categoryList []string, searchPhrase string) *gtk.FlowBox {
 		log.Debugf("Skipping appFlowBox.Destroy(); already invalid or nil")
 		appFlowBox = nil // to make sure
 	}
+	if  appHWrapper != nil && appHWrapper.Widget.Native() != 0 {
+		log.Debugf("Destroying appHWrapper (native=%x)", appHWrapper.Widget.Native())
+		appHWrapper.Destroy()
+		appHWrapper = nil
+	} else {
+		log.Debugf("Skipping appHWrapper.Destroy(); already invalid or nil")
+		appHWrapper = nil
+	}
 	flowBox := gtk.NewFlowBox()
 	flowBox.SetMinChildrenPerLine(*columnsNumber)
 	flowBox.SetMaxChildrenPerLine(*columnsNumber)
@@ -239,10 +247,9 @@ func setUpAppsFlowBox(categoryList []string, searchPhrase string) *gtk.FlowBox {
 			}
 		}
 	}
-	hWrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
-	hWrapper.SetObjectProperty("name", "broken") // temporary for debugging in another branch
-	appSearchResultWrapper.PackStart(hWrapper, false, false, 0)
-	hWrapper.PackStart(flowBox, true, false, 0)
+	appHWrapper = gtk.NewBox(gtk.OrientationHorizontal, 0)
+	appSearchResultWrapper.PackStart(appHWrapper, false, false, 0)
+	appHWrapper.PackStart(flowBox, true, false, 0)
 
 	resultWindow.ShowAll()
 
