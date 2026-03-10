@@ -604,7 +604,7 @@ func main() {
 	}
 
 	searchBoxWrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
-	searchBoxWrapper.SetObjectProperty("name", "search-box")
+	searchBoxWrapper.SetObjectProperty("name", "search-wrapper")
 	outerVBox.PackStart(searchBoxWrapper, false, false, 10)
 
 	searchEntry = setUpSearchEntry()
@@ -614,23 +614,23 @@ func main() {
 
 	if !*noCats {
 		categoriesWrapper = gtk.NewBox(gtk.OrientationHorizontal, 0)
-		categoriesWrapper.SetObjectProperty("name", "categories-box")
+		categoriesWrapper.SetObjectProperty("name", "category-wrapper")
 		categoriesButtonBox := setUpCategoriesButtonBox()
 		categoriesWrapper.PackStart(categoriesButtonBox, true, false, 0)
 		outerVBox.PackStart(categoriesWrapper, false, false, 0)
 	}
 
 	pinnedWrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
-	pinnedWrapper.SetObjectProperty("name", "pinned-seperator")
+	pinnedWrapper.SetObjectProperty("name", "pinned-separator")
 	outerVBox.PackStart(pinnedWrapper, false, false, 0)
 
 	pinnedFlowBoxWrapper = gtk.NewBox(gtk.OrientationHorizontal, 0)
-	pinnedFlowBoxWrapper.SetObjectProperty("name", "pinned-box")
+	pinnedFlowBoxWrapper.SetObjectProperty("name", "pinned-wrapper")
 	outerVBox.PackStart(pinnedFlowBoxWrapper, false, false, 0)
 	pinnedFlowBox = setUpPinnedFlowBox()
 
 	resultWindow = gtk.NewScrolledWindow(nil, nil)
-	resultWindow.SetObjectProperty("name", "result-box")
+	resultWindow.SetObjectProperty("name", "result-wrapper")
 	resultWindow.SetEvents(int(gdk.AllEventsMask))
 	resultWindow.SetPolicy(gtk.PolicyAutomatic, gtk.PolicyAutomatic)
 
@@ -662,11 +662,11 @@ func main() {
 	outerVBox.PackStart(resultWindow, true, true, 10)
 
 	resultsWrapper := gtk.NewBox(gtk.OrientationVertical, 0)
-	resultsWrapper.SetObjectProperty("name", "result-content")
+	resultsWrapper.SetObjectProperty("name", "result-box")
 	resultWindow.Add(resultsWrapper)
 
 	appSearchResultWrapper = gtk.NewBox(gtk.OrientationVertical, 0)
-	appSearchResultWrapper.SetObjectProperty("name", "app-box")
+	appSearchResultWrapper.SetObjectProperty("name", "app-wrapper")
 	resultsWrapper.PackStart(appSearchResultWrapper, false, false, 0)
 	appFlowBox = setUpAppsFlowBox(nil, "")
 
@@ -685,12 +685,13 @@ func main() {
 	log.Debugf("User dirs map: %s", userDirsMap)
 
 	placeholder := gtk.NewBox(gtk.OrientationVertical, 0)
-	placeholder.SetObjectProperty("name", "result-content-gutters")
+	placeholder.SetObjectProperty("name", "result-box-gutters")
 	resultsWrapper.PackStart(placeholder, true, true, 0)
 	placeholder.SetSizeRequest(20, 20)
 
 	if !*noFS {
 		wrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
+		wrapper.SetObjectProperty("name", "files-wrapper")
 		fileSearchResultWrapper = gtk.NewBox(gtk.OrientationHorizontal, 0)
 		if fileSearchResultWrapper != nil {
 			log.Debugf("fileSearchResultWrapper addr: %p native: %x", fileSearchResultWrapper, fileSearchResultWrapper.Native())
