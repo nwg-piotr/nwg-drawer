@@ -685,7 +685,7 @@ func main() {
 	log.Debugf("User dirs map: %s", userDirsMap)
 
 	placeholder := gtk.NewBox(gtk.OrientationVertical, 0)
-	placeholder.SetObjectProperty("name", "result-box-gutters")
+	placeholder.SetObjectProperty("name", "result-box-spanner")
 	resultsWrapper.PackStart(placeholder, true, true, 0)
 	placeholder.SetSizeRequest(20, 20)
 
