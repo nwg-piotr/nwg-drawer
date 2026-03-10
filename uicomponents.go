@@ -63,11 +63,7 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 			} else {
 				name = entry.Name
 			}
-			if strings.ContainsAny(name, " ~!@$%^&*()+=,./';:\"?><[]\\{}|`#") != true {
-				cssName = strings.ToLower(name)
-			} else {
-				cssName = strings.ToLower(stripSpecial.Replace(name))
-			}
+			cssName = strings.ToLower(stripSpecial.Replace(name))
 			if len(name) > 20 {
 				r := substring(name, 0, 17)
 				name = fmt.Sprintf("%s…", r)
@@ -290,11 +286,7 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 	} else {
 		name = entry.Name
 	}
-	if strings.ContainsAny(name, " ~!@$%^&*()+=,./';:\"?><[]\\{}|`#") != true {
-		cssName = strings.ToLower(name)
-	} else {
-		cssName = strings.ToLower(stripSpecial.Replace(name))
-	}
+	cssName = strings.ToLower(stripSpecial.Replace(name))
 	if len(name) > 20 {
 		r := substring(name, 0, 17)
 		name = fmt.Sprintf("%s…", r)
