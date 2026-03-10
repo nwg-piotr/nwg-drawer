@@ -138,12 +138,12 @@ func setUpCategoriesButtonBox() *gtk.EventBox {
 	for _, cat := range categories {
 		if isSupposedToShowUp(cat.Name) {
 			button = gtk.NewButtonFromIconName(cat.Icon, int(gtk.IconSizeMenu))
+			button.SetObjectProperty("name", "category-button")
 			catButtons = append(catButtons, button)
 			button.SetLabel(cat.DisplayName)
 			button.SetAlwaysShowImage(true)
 			hBox.PackStart(button, false, false, 0)
 			name := cat.Name
-			button.SetObjectProperty("name", "category-button")
 			button.StyleContext().AddClass(name)
 			b := *button
 			button.Connect("clicked", func(item *gtk.Button) {
