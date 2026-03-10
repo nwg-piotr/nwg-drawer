@@ -1,0 +1,382 @@
+/******************************************************************************
+Remember: The "C" in CSS stands for "cascading"
+Later changes override previous ones
+
+Overview:
+
+#nwg-drawer
+└── #main-box
+    ├── #close-button
+    ├── #search-wrapper
+    │   └── #search
+    ├── #category-wrapper
+    │   └── #category-button
+    ├── #pinned-separator
+    │   └── #pinned-wrapper
+    │       └── #pinned-box
+    │           └── #app-button.[name (1)]
+    ├── #result-wrapper
+    │   └── #result-box
+    │       ├── #result-box-spanner
+    │       ├── #app-wrapper
+    │       │   └── #app-box
+    │       │       └── #app-button.[name (1)]
+    │       └── #file-wrapper
+    │           └── #files-box
+    │               └── #files-box-inner
+    │                   ├── #userdir-button.[name (lower case)]
+    │                   ├── #folder-result.[directory (2)]
+    │                   └── #file-result.[file name (2)]
+    ├── #status-line-wrapper
+    │   └── #status-label
+    └── #math-label
+
+
+1:  Lowercase. Periods are replaced with underscores
+    Spaces and backslashes are replaced with hyphens
+    The following special characters have been trimmed entirely:
+        ~!@$%^&*()+=,/';:"?><[]\\{}|`#
+    eg. "LibreOffice Draw" becomes "libreoffice-draw"
+    eg. "[name] (bin)" becomes "[name]-bin"
+
+2:  Same as (1) but file and and folder case is preserved.
+    eg. "Documents/file.png" becomes "Documents-file_png"
+    eg. "Documents/Templates" becomes "Documents-Templates"
+
+
+Buttons have the following structure:
+
+button
+└── box
+    ├── image
+    └── label
+
+
+Element border ledgend:
+··· Dotted borders are items not identified in this CSS
+--- Dashed borders are generally container elements
+─── Solid borders with rounded corners are typical display elements
+═══ Double line borders and caution background indicate bugged elements
+
+******************************************************************************/
+
+/* hiearchy colors */
+@define-color depth0           #fff;
+@define-color depth0-dark      #000;
+
+@define-color depth1           #98b8fe; /* blue */
+@define-color depth1-dark      #192236;
+
+@define-color depth2           #a5c77a; /* green */
+@define-color depth2-dark      #1a2613;
+
+@define-color depth3           #f69ba6; /* red */
+@define-color depth3-dark      #331b1c;
+
+@define-color depth4           #c3a9f4; /* purple */
+@define-color depth4-dark      #251e32;
+
+@define-color depth5           #e0b066; /* gold */
+@define-color depth5-dark      #311e0d;
+
+@define-color depth6           #62d0b7; /* teal */
+@define-color depth6-dark      #072922;
+
+@define-color depth7           #ff8cd2; /* pink */
+@define-color depth7-dark      #321a23;
+
+@define-color depth8           @depth1;
+@define-color depth8-dark      @depth1-dark;
+
+/* element type colors */
+@define-color containers        rgba(78%,72%,60%,0.45);
+@define-color display           rgba(78%,72%,80%,0.45);
+
+/* feature test colors */
+@define-color highlight1        #21aff5;
+@define-color highlight2        #5885a2;
+
+/* debug colors */
+@define-color undefined1        rgba(50%,50%,50%,0.45);
+@define-color undefined2        rgba(75%,75%,75%,0.45);
+@define-color broken1           rgba(255,64,12,0.2);
+@define-color broken2           rgba(255,250,248,0.33);
+
+
+/* global test style. catches all unstyled elements */
+* { min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    color: @undefined2;
+    background: none;
+    background-color: @undefined1;
+    border: 1.5pt dotted @undefined2;
+    outline: none;
+    box-shadow: none;
+    font-size: 10pt;
+    font-family: monospace;
+    opacity: 1;
+    border-radius: 0; }
+
+/* containers by gtk ids */
+window, bin, box, buttonbox, hbox, hbuttonbox, vbox, vbuttonbox, eventbox,
+fixed, flowbox, container, widget, flowboxchild, grid, layout, listbox,
+overlay, paned, revealer, scrolledwindow, sizegroup, stack, table, toolbar,
+toolitem, toolpalette, viewport, vpaned, vscale, contents, placessidebar
+    { min-width: 2pt; margin: 4pt; border-style: dashed;
+    background-color: @containers; }
+
+/* display elements by gtk ids */
+window, button, image, label, entry, scrollbar, spinbutton, expander,
+frame, iconview, infobar, popover, progressbar, radiobuttion, range,
+searchbar, separator, spinner, statusbar, statusicon, switch, textbuffer,
+togglebutton, toolbutton, tooltip, vscrollbar, vseparator, slider, trough,
+headerbar
+    { min-width: 4pt; min-height: 4pt; margin: 2pt; padding: 1pt;
+    border-style: solid; border-radius: 6pt; background-color: @display;}
+
+
+/* all statically named styles */
+#nwg-drawer {
+    /* doesn't accept min-width, min-height, padding, or margins */
+    color: @depth0;
+    background-color: @depth0-dark;
+    border-color: @depth0; }
+
+#main-box {
+    color: @depth1;
+    background-color: @depth1-dark;
+    border-color: @depth1; }
+
+#close-button {
+    color: @depth2;
+    background-color: @depth2-dark;
+    border-color: @depth2; }
+
+#search-wrapper {
+    color: @depth2;
+    background-color: @depth2-dark;
+    border-color: @depth2; }
+
+#search {
+    color: @depth3;
+    background-color: @depth3-dark;
+    border-color: @depth3; }
+
+#search image {
+    color: @depth4;
+    background-color: @depth4-dark;
+    border-color: @depth4; }
+
+#category-wrapper {
+    min-width: 0;
+    color: @depth2;
+    background-color: @depth2-dark;
+    border-color: @depth2; }
+
+#category-button {
+    color: @depth3;
+    background-color: @depth3-dark;
+    border-color: @depth3; }
+
+#category-button image,
+#category-button label {
+    color: @depth4;
+    background-color: @depth4-dark;
+    border-color: @depth4; }
+
+#pinned-separator {
+    color: @depth2;
+    background-color: @depth2-dark;
+    border-color: @depth2; }
+
+#pinned-wrapper {
+    color: @depth2;
+    background-color: @depth2-dark;
+    border-color: @depth2; }
+
+#pinned-box {
+    color: @depth3;
+    background-color: @depth3-dark;
+    border-color: @depth3; }
+
+#pinned-box #app-button {
+    color: @depth4;
+    background-color: @depth4-dark;
+    border-color: @depth4; }
+
+#pinned-box #app-button image,
+#pinned-box #app-button label {
+    color: @depth5;
+    background-color: @depth5-dark;
+    border-color: @depth5; }
+
+#result-wrapper {
+    color: @depth2;
+    background-color: @depth2-dark;
+    border-color: @depth2; }
+
+#result-box {
+    color: @depth2;
+    background-color: @depth3-dark;
+    border-color: @depth3; }
+
+#result-box-spanner {
+    color: @depth4;
+    background-color: @depth4-dark;
+    border-color: @depth4; }
+
+#app-wrapper {
+    color: @depth4;
+    background-color: @depth4-dark;
+    border-color: @depth4; }
+
+#app-box {
+    color: @depth5;
+    background-color: @depth5-dark;
+    border-color: @depth5; }
+
+#app-box #app-button {
+    color: @depth6;
+    background-color: @depth6-dark;
+    border-color: @depth6; }
+
+#app-box #app-button image,
+#app-box #app-button label {
+    color: @depth7;
+    background-color: @depth7-dark;
+    border-color: @depth7; }
+
+#files-wrapper {
+    color: @depth4;
+    background-color: @depth4-dark;
+    border-color: @depth4; }
+
+#files-box {
+    color: @depth5;
+    background-color: @depth5-dark;
+    border-color: @depth5; }
+
+#files-box-inner {
+    color: @depth6;
+    background-color: @depth6-dark;
+    border-color: @depth6; }
+
+#userdir-button {
+    color: @depth7;
+    background-color: @depth7-dark;
+    border-color: @depth7; }
+
+#userdir-button image,
+#userdir-button label {
+    color: @depth8;
+    background-color: @depth8-dark;
+    border-color: @depth8; }
+
+#folder-result {
+    color: @depth7;
+    background-color: @depth7-dark;
+    border-color: @depth7; }
+
+#folder-result image,
+#folder-result label {
+    color: @depth8;
+    background-color: @depth8-dark;
+    border-color: @depth8; }
+
+#file-result {
+    color: @depth7;
+    background-color: @depth7-dark;
+    border-color: @depth7; }
+
+#file-result label {
+    color: @depth8;
+    background-color: @depth8-dark;
+    border-color: @depth8; }
+
+#power-bar {
+    color: @depth2;
+    background-color: @depth2-dark;
+    border-color: @depth2; }
+
+#power-bar button {
+    color: @depth3;
+    background-color: @depth3-dark;
+    border-color: @depth3; }
+
+#power-bar button image,
+#power-bar button label {
+    color: @depth4;
+    background-color: @depth4-dark;
+    border-color: @depth4; }
+
+#status-line-wrapper {
+    color: @depth2;
+    background-color: @depth2-dark;
+    border-color: @depth2; }
+
+#status-label {
+    color: @depth3;
+    background-color: @depth3-dark;
+    border-color: @depth3; }
+
+
+/* button style names and tests */
+
+/* all rendered categories */
+/* All */                   #category-button.button#all           {}
+/* Accessories */           #category-button.utility              { background: @highlight2; border-color: @highlight1; }
+/* Programming */           #category-button.development          {}
+/* Games */                 #category-button.game                 {}
+/* Graphics */              #category-button.graphics             {}
+/* Internet and Network */  #category-button.internet-and-network {}
+/* Office */                #category-button.office               { background: @highlight2; border-color: @highlight1; }
+/* Sound and Video */       #category-button.audio-video          {}
+/* System Tools */          #category-button.system-tools         {}
+/* Other */                 #category-button.other                {}
+
+/* example applications */
+#app-button.dolphin,
+#app-button.discord,
+#app-button.telegram,
+#app-button.signal,
+#app-button.steam,
+#app-button.librewolf-bin,
+
+/* example userdir */
+#userdir-button.documents,
+
+/* example files and folders */
+#file-result.Documents-todo_md,
+#folder-result.Documents-Templates
+{ background: @highlight2; border-color: @highlight1; }
+
+
+
+        /* /`) (`\ *\          
+MUNCH   \_/  / \  \_/   
+ CRUNCH     (.–.)      CRUNCH
+         .~(@) (@)~.  MUNCH     
+        (  \_>M<_/  )        
+       (\_)>._,~.<(_/) 
+      (\_)>|DEBUG|<(_/) 
+\****~-\__)>_____<(__/-~****/
+
+#broken, :indeterminate {
+    background: repeating-linear-gradient(
+        35deg,
+        @broken1,
+        @broken1 12pt,
+        @broken2 14pt,
+        @broken2 24pt);
+    border: 4pt double @broken2; }
+
+/* highlights all of the original named elements */
+/*#files-box,
+#status-line-wrapper,
+#status-label,
+#pinned-box,
+#category-button,
+#close-button,
+#math-label { border-color: @highlight1; }*/
