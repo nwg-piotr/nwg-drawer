@@ -240,6 +240,7 @@ func setUpAppsFlowBox(categoryList []string, searchPhrase string) *gtk.FlowBox {
 		}
 	}
 	hWrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
+	hWrapper.SetObjectProperty("name", "broken") // temporary for debugging in another branch
 	appSearchResultWrapper.PackStart(hWrapper, false, false, 0)
 	hWrapper.PackStart(flowBox, true, false, 0)
 

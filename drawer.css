@@ -38,3 +38,5 @@ button:hover {
     font-weight: bold;
     font-size: 16px
 }
+
+#broken { padding: 1pt; border: 2pt solid red; }
