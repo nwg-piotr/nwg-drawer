@@ -3,6 +3,9 @@ window {
     color: #eeeeee
 }
 
+/* old default support */
+window#math-modal { background-color: rgba (0, 0, 0, 255); color: #fff; border: solid 1px grey; border-radius: 5px}
+
 /* search entry */
 entry {
     background-color: rgba(0, 0, 0, 0.2)

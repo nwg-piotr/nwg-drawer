@@ -703,6 +703,7 @@ func setUpUserFileSearchResultButton(fileName, filePath string) *gtk.Box {
 
 func setUpOperationResultWindow(operation string, result string) *gtk.Window {
 	window := gtk.NewWindow(gtk.WindowToplevel)
+	window.SetObjectProperty("name", "math-modal")
 	window.SetModal(true)
 
 	if wayland() {
@@ -738,10 +739,13 @@ func setUpOperationResultWindow(operation string, result string) *gtk.Window {
 	lbl.SetObjectProperty("name", "math-label")
 	vBox.PackStart(lbl, true, true, 12)
 
+	// load from cssFileName and added original style as the default #math-modal to drawer CSS and fallback on err
+	// will find alternative solution if this breaks any user configs or creates other issues
 	mRefProvider := gtk.NewCSSProvider()
-	css := "window { background-color: rgba (0, 0, 0, 255); color: #fff; border: solid 1px grey; border-radius: 5px}"
-	err := mRefProvider.LoadFromData(css)
+	err := mRefProvider.LoadFromPath(*cssFileName)
 	if err != nil {
+		css := "window { background-color: rgba (0, 0, 0, 255); color: #fff; border: solid 1px grey; border-radius: 5px}"
+		mRefProvider.LoadFromData(css)
 		log.Warn(err)
 	}
 	ctx := window.StyleContext()
