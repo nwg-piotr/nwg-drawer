@@ -5,30 +5,31 @@ Later changes override previous ones
 Overview:
 
 #nwg-drawer
-└── #main-box
-    ├── #close-button
-    ├── #search-wrapper
-    │   └── #search
-    ├── #category-wrapper
-    │   └── #category-button
-    ├── #pinned-separator
-    │   └── #pinned-wrapper
-    │       └── #pinned-box
-    │           └── #app-button.[name (1)]
-    ├── #result-wrapper
-    │   └── #result-box
-    │       ├── #result-box-spanner
-    │       ├── #app-wrapper
-    │       │   └── #app-box
-    │       │       └── #app-button.[name (1)]
-    │       └── #file-wrapper
-    │           └── #files-box
-    │               └── #files-box-inner
-    │                   ├── #userdir-button.[name (lower case)]
-    │                   ├── #folder-result.[directory (2)]
-    │                   └── #file-result.[file name (2)]
-    ├── #status-line-wrapper
-    │   └── #status-label
+├── #main-box
+│   ├── #close-button
+│   ├── #search-wrapper
+│   │   └── #search
+│   ├── #category-wrapper
+│   │   └── #category-button
+│   ├── #pinned-separator
+│   │   └── #pinned-wrapper
+│   │       └── #pinned-box
+│   │           └── #app-button.[name (1)]
+│   ├── #result-wrapper
+│   │   └── #result-box
+│   │       ├── #result-box-spanner
+│   │       ├── #app-wrapper
+│   │       │   └── #app-box
+│   │       │       └── #app-button.[name (1)]
+│   │       └── #file-wrapper
+│   │           └── #files-box
+│   │               └── #files-box-inner
+│   │                   ├── #userdir-button.[name (lower case)]
+│   │                   ├── #folder-result.[directory (2)]
+│   │                   └── #file-result.[file name (2)]
+│   └── #status-line-wrapper
+│       └── #status-label
+└── #math-modal
     └── #math-label
 
 
@@ -123,13 +124,14 @@ Element border ledgend:
 window, bin, box, buttonbox, hbox, hbuttonbox, vbox, vbuttonbox, eventbox,
 fixed, flowbox, container, widget, flowboxchild, grid, layout, listbox,
 overlay, paned, revealer, scrolledwindow, sizegroup, stack, table, toolbar,
-toolitem, toolpalette, viewport, vpaned, vscale, contents, placessidebar
+toolitem, toolpalette, viewport, vpaned, vscale, contents, placessidebar,
+modal, frame
     { min-width: 2pt; margin: 4pt; border-style: dashed;
     background-color: @containers; }
 
 /* display elements by gtk ids */
-window, button, image, label, entry, scrollbar, spinbutton, expander,
-frame, iconview, infobar, popover, progressbar, radiobuttion, range,
+button, image, label, entry, scrollbar, spinbutton, expander,
+iconview, infobar, popover, progressbar, radiobuttion, range,
 searchbar, separator, spinner, statusbar, statusicon, switch, textbuffer,
 togglebutton, toolbutton, tooltip, vscrollbar, vseparator, slider, trough,
 headerbar
@@ -144,6 +146,16 @@ headerbar
     background-color: @depth0-dark;
     border-color: @depth0; }
 
+#math-modal {
+    color: @depth1;
+    background-color: @depth1-dark;
+    border-color: @depth1; }
+
+#math-label {
+    color: @depth2;
+    background-color: @depth3-dark;
+    border-color: @depth2; }
+
 #main-box {
     color: @depth1;
     background-color: @depth1-dark;
@@ -153,6 +165,12 @@ headerbar
     color: @depth2;
     background-color: @depth2-dark;
     border-color: @depth2; }
+
+/* may tint button */
+#close-button image {
+    color: @depth3;
+    background-color: @depth3-dark;
+    border-color: @depth3; }
 
 #search-wrapper {
     color: @depth2;
