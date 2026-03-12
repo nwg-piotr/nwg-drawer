@@ -119,6 +119,7 @@ var desktopEntries []desktopEntry
 // UI elements
 var (
 	win                     *gtk.Window
+	outerVBox               *gtk.Box
 	resultWindow            *gtk.ScrolledWindow
 	fileSearchResults       []string
 	mathResultWindow        *gtk.Window
@@ -187,6 +188,7 @@ var wm = flag.String("wm", "", "use swaymsg exec (with 'sway' argument) or hyprc
 var nameLimit = flag.Int("fslen", 80, "File Search name LENgth Limit")
 var noCats = flag.Bool("nocats", false, "Disable filtering by category")
 var noFS = flag.Bool("nofs", false, "Disable file search")
+var pinsDynamic = flag.Bool("pdynamic", false, "pinned area fits to width")
 var resident = flag.Bool("r", false, "Leave the program resident in memory")
 var pbExit = flag.String("pbexit", "", "command for the Exit power bar icon")
 var pbLock = flag.String("pblock", "", "command for the Lock power bar icon")
@@ -585,7 +587,12 @@ func main() {
 	pinnedWrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
 	outerVBox.PackStart(pinnedWrapper, false, false, 0)
 
-	pinnedFlowBoxWrapper = gtk.NewBox(gtk.OrientationHorizontal, 0)
+	if !*pinsDynamic {
+		pinnedFlowBoxWrapper = gtk.NewBox(gtk.OrientationHorizontal, 0)
+
+	} else {
+		pinnedFlowBoxWrapper = gtk.NewBox(gtk.OrientationVertical, 0)
+	}
 	outerVBox.PackStart(pinnedFlowBoxWrapper, false, false, 0)
 	pinnedFlowBox = setUpPinnedFlowBox()
 
