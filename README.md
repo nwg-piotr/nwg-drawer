@@ -95,16 +95,26 @@ Usage of nwg-drawer:
     	use OVerLay layer
   -pbexit string
     	command for the Exit power bar icon
+  -pbexitlabel string
+    	label for the Exit power bar icon
   -pblock string
     	command for the Lock power bar icon
+  -pblocklabel string
+    	label for the Lock power bar icon
   -pbpoweroff string
     	command for the Poweroff power bar icon
+  -pbpowerofflabel string
+    	label for the Poweroff power bar icon
   -pbreboot string
     	command for the Reboot power bar icon
+  -pbrebootlabel string
+    	label for the Reboot power bar icon
   -pbsize int
     	power bar icon size (only works w/ built-in icons) (default 64)
   -pbsleep string
     	command for the sleep power bar icon
+  -pbsleeplabel string
+    	label for the sleep power bar icon
   -pbuseicontheme
     	use icon theme instead of built-in icons in power bar
   -r	Leave the program resident in memory
