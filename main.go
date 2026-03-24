@@ -128,6 +128,7 @@ var (
 	fileSearchResultFlowBox *gtk.FlowBox
 	userDirsMap             map[string]string
 	appFlowBox              *gtk.FlowBox
+	appHWrapper             *gtk.Box
 	appSearchResultWrapper  *gtk.Box
 	fileSearchResultWrapper *gtk.Box
 	powerButtonsWrapper     *gtk.Box
