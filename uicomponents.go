@@ -127,6 +127,9 @@ func setUpCategoriesButtonBox() *gtk.EventBox {
 		for _, btn := range catButtons {
 			btn.SetImagePosition(gtk.PosLeft)
 			btn.SetSizeRequest(0, 0)
+			if fileSearchResultWrapper != nil {
+				fileSearchResultWrapper.Hide()
+			}
 		}
 	})
 	hBox.PackStart(button, false, false, 0)
