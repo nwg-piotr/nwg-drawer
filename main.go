@@ -144,6 +144,41 @@ var (
 	inRestore               bool
 )
 
+// CSS name compatibly replacer
+var stripSpecial = strings.NewReplacer(
+	" ",	"-",
+	"~",	"",
+	"!",	"",
+	"@",	"",
+	"$",	"",
+	"%",	"",
+	"^",	"",
+	"&",	"",
+	"*",	"",
+	"(",	"",		
+	")",	"",
+	"+",	"",
+	"=",	"",
+	",",	"",
+	".",	"_",
+	"/",	"-",
+	"'",	"",
+	";",	"",
+	":",	"",
+	"\"",	"",
+	"?",	"",
+	">",	"",
+	"<",	"",
+	"[",	"",
+	"]",	"",
+	"\\",	"-",
+	"{",	"",
+	"}",	"",
+	"|",	"",
+	"`",	"",
+	"#",	"",
+)
+
 func defaultTermIfBlank(s, fallback string) string {
 	s = strings.TrimSpace(s)
 	// os.Getenv("TERM") returns "linux" instead of empty string, if program has been started
@@ -429,6 +464,7 @@ func main() {
 	win = gtk.NewWindow(gtk.WindowToplevel)
 	if win != nil {
 		log.Debugf("win addr: %p native: %x", win, win.Native())
+		win.SetObjectProperty("name", "nwg-drawer")
 	} else {
 		log.Panic("Failed creating window")
 	}
@@ -561,6 +597,7 @@ func main() {
 
 	// Set up UI
 	outerVBox := gtk.NewBox(gtk.OrientationVertical, 0)
+	outerVBox.SetObjectProperty("name", "main-box")
 	win.Add(outerVBox)
 
 	closeButtonBox := createCloseButtonBox((*closeBtn != "none"), (*closeBtn != "right"))
@@ -569,27 +606,33 @@ func main() {
 	}
 
 	searchBoxWrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
+	searchBoxWrapper.SetObjectProperty("name", "search-wrapper")
 	outerVBox.PackStart(searchBoxWrapper, false, false, 10)
 
 	searchEntry = setUpSearchEntry()
+	searchEntry.SetObjectProperty("name", "search")
 	searchEntry.SetMaxWidthChars(30)
 	searchBoxWrapper.PackStart(searchEntry, true, false, 0)
 
 	if !*noCats {
 		categoriesWrapper = gtk.NewBox(gtk.OrientationHorizontal, 0)
+		categoriesWrapper.SetObjectProperty("name", "category-wrapper")
 		categoriesButtonBox := setUpCategoriesButtonBox()
 		categoriesWrapper.PackStart(categoriesButtonBox, true, false, 0)
 		outerVBox.PackStart(categoriesWrapper, false, false, 0)
 	}
 
 	pinnedWrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
+	pinnedWrapper.SetObjectProperty("name", "pinned-separator")
 	outerVBox.PackStart(pinnedWrapper, false, false, 0)
 
 	pinnedFlowBoxWrapper = gtk.NewBox(gtk.OrientationHorizontal, 0)
+	pinnedFlowBoxWrapper.SetObjectProperty("name", "pinned-wrapper")
 	outerVBox.PackStart(pinnedFlowBoxWrapper, false, false, 0)
 	pinnedFlowBox = setUpPinnedFlowBox()
 
 	resultWindow = gtk.NewScrolledWindow(nil, nil)
+	resultWindow.SetObjectProperty("name", "result-wrapper")
 	resultWindow.SetEvents(int(gdk.AllEventsMask))
 	resultWindow.SetPolicy(gtk.PolicyAutomatic, gtk.PolicyAutomatic)
 
@@ -621,9 +664,11 @@ func main() {
 	outerVBox.PackStart(resultWindow, true, true, 10)
 
 	resultsWrapper := gtk.NewBox(gtk.OrientationVertical, 0)
+	resultsWrapper.SetObjectProperty("name", "result-box")
 	resultWindow.Add(resultsWrapper)
 
 	appSearchResultWrapper = gtk.NewBox(gtk.OrientationVertical, 0)
+	appSearchResultWrapper.SetObjectProperty("name", "app-wrapper")
 	resultsWrapper.PackStart(appSearchResultWrapper, false, false, 0)
 	appFlowBox = setUpAppsFlowBox(nil, "")
 
@@ -642,11 +687,13 @@ func main() {
 	log.Debugf("User dirs map: %s", userDirsMap)
 
 	placeholder := gtk.NewBox(gtk.OrientationVertical, 0)
+	placeholder.SetObjectProperty("name", "result-box-spanner")
 	resultsWrapper.PackStart(placeholder, true, true, 0)
 	placeholder.SetSizeRequest(20, 20)
 
 	if !*noFS {
 		wrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
+		wrapper.SetObjectProperty("name", "files-wrapper")
 		fileSearchResultWrapper = gtk.NewBox(gtk.OrientationHorizontal, 0)
 		if fileSearchResultWrapper != nil {
 			log.Debugf("fileSearchResultWrapper addr: %p native: %x", fileSearchResultWrapper, fileSearchResultWrapper.Native())
@@ -660,6 +707,7 @@ func main() {
 	if dataDirectory != "" {
 		if *pbExit != "" || *pbLock != "" || *pbPoweroff != "" || *pbReboot != "" || *pbSleep != "" {
 			powerBarWrapper := gtk.NewBox(gtk.OrientationHorizontal, 0)
+			powerBarWrapper.SetObjectProperty("name", "power-bar")
 			outerVBox.PackStart(powerBarWrapper, false, false, 0)
 			powerButtonsWrapper = gtk.NewBox(gtk.OrientationHorizontal, 0)
 			powerBarWrapper.PackStart(powerButtonsWrapper, true, false, 12)
