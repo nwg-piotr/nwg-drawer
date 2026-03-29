@@ -250,9 +250,13 @@ func setUpAppsFlowBox(categoryList []string, searchPhrase string) *gtk.FlowBox {
 			}
 		}
 	}
-	appHWrapper = gtk.NewBox(gtk.OrientationHorizontal, 0)
-	appSearchResultWrapper.PackStart(appHWrapper, false, false, 0)
-	appHWrapper.PackStart(flowBox, true, false, 0)
+	if !*columnsDynamic {
+		appHWrapper = gtk.NewBox(gtk.OrientationHorizontal, 0)
+		appSearchResultWrapper.PackStart(appHWrapper, false, false, 0)
+		appHWrapper.PackStart(flowBox, true, false, 0)
+	} else {
+		appSearchResultWrapper.PackStart(flowBox, true, false, 0)
+	}
 
 	resultWindow.ShowAll()
 
