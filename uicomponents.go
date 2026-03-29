@@ -42,6 +42,7 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 			}
 
 			btn := gtk.NewButton()
+			btn.SetObjectProperty("name", "app-button")
 
 			var img *gtk.Image
 			if entry.Icon != "" {
@@ -56,15 +57,18 @@ func setUpPinnedFlowBox() *gtk.FlowBox {
 			btn.SetImagePosition(gtk.PosTop)
 
 			name := ""
+			cssName := ""
 			if entry.NameLoc != "" {
 				name = entry.NameLoc
 			} else {
 				name = entry.Name
 			}
+			cssName = strings.ToLower(stripSpecial.Replace(name))
 			if len(name) > 20 {
 				r := substring(name, 0, 17)
 				name = fmt.Sprintf("%s…", r)
 			}
+			btn.StyleContext().AddClass(cssName)
 			btn.SetLabel(name)
 
 			btn.Connect("button-release-event", func(row *gtk.Button, event *gdk.Event) bool {
@@ -116,6 +120,7 @@ func setUpCategoriesButtonBox() *gtk.EventBox {
 	eventBox.Add(hBox)
 	button := gtk.NewButtonWithLabel("All")
 	button.SetObjectProperty("name", "category-button")
+	button.StyleContext().AddClass("all")
 	button.Connect("clicked", func(item *gtk.Button) {
 		searchEntry.SetText("")
 		appFlowBox = setUpAppsFlowBox(nil, "")
@@ -138,6 +143,7 @@ func setUpCategoriesButtonBox() *gtk.EventBox {
 			button.SetAlwaysShowImage(true)
 			hBox.PackStart(button, false, false, 0)
 			name := cat.Name
+			button.StyleContext().AddClass(name)
 			b := *button
 			button.Connect("clicked", func(item *gtk.Button) {
 				searchEntry.SetText("")
@@ -222,6 +228,7 @@ func setUpAppsFlowBox(categoryList []string, searchPhrase string) *gtk.FlowBox {
 	flowBox.SetColumnSpacing(*itemSpacing)
 	flowBox.SetRowSpacing(*itemSpacing)
 	flowBox.SetHomogeneous(true)
+	flowBox.SetObjectProperty("name", "app-box")
 	flowBox.SetSelectionMode(gtk.SelectionNone)
 
 	for _, entry := range desktopEntries {
@@ -261,6 +268,7 @@ func setUpAppsFlowBox(categoryList []string, searchPhrase string) *gtk.FlowBox {
 
 func flowBoxButton(entry desktopEntry) *gtk.Button {
 	button := gtk.NewButton()
+	button.SetObjectProperty("name", "app-button")
 	button.SetAlwaysShowImage(true)
 
 	var pixbuf *gdkpixbuf.Pixbuf
@@ -282,11 +290,19 @@ func flowBoxButton(entry desktopEntry) *gtk.Button {
 
 	button.SetImage(img)
 	button.SetImagePosition(gtk.PosTop)
-	name := entry.NameLoc
+	name := ""
+	cssName := ""
+	if entry.NameLoc != "" {
+		name = entry.NameLoc
+	} else {
+		name = entry.Name
+	}
+	cssName = strings.ToLower(stripSpecial.Replace(name))
 	if len(name) > 20 {
 		r := substring(name, 0, 17)
 		name = fmt.Sprintf("%s…", r)
 	}
+	button.StyleContext().AddClass(cssName)
 	button.SetLabel(name)
 
 	ID := entry.DesktopID
@@ -406,6 +422,7 @@ func setUpFileSearchResultContainer() *gtk.FlowBox {
 		fileSearchResultFlowBox = nil
 	}
 	flowBox := gtk.NewFlowBox()
+	flowBox.SetObjectProperty("name", "files-box-inner")
 	flowBox.SetObjectProperty("orientation", gtk.OrientationVertical)
 	fileSearchResultWrapper.PackStart(flowBox, false, false, 10)
 
@@ -610,6 +627,7 @@ func setUpUserDirButton(iconName, displayName, entryName string, userDirsMap map
 	}
 	box := gtk.NewBox(gtk.OrientationHorizontal, 0)
 	button := gtk.NewButton()
+	button.SetObjectProperty("name", "userdir-button")
 	button.SetAlwaysShowImage(true)
 	img := gtk.NewImageFromIconName(iconName, int(gtk.IconSizeMenu))
 	button.SetImage(img)
@@ -618,6 +636,7 @@ func setUpUserDirButton(iconName, displayName, entryName string, userDirsMap map
 		displayName = fmt.Sprintf("%s…", displayName[:*nameLimit-3])
 	}
 	button.SetLabel(displayName)
+	button.StyleContext().AddClass(strings.ToLower(displayName))
 
 	button.Connect("button-release-event", func(btn *gtk.Button, event *gdk.Event) bool {
 		btnEvent := event.AsButton()
@@ -642,9 +661,16 @@ func setUpUserDirButton(iconName, displayName, entryName string, userDirsMap map
 func setUpUserFileSearchResultButton(fileName, filePath string) *gtk.Box {
 	box := gtk.NewBox(gtk.OrientationHorizontal, 0)
 	button := gtk.NewButton()
+	button.SetObjectProperty("name", "file-result")
+
+	// build CSS name, skip root, home, and user
+	r := strings.Split(filePath, "/")
+	cssName := stripSpecial.Replace(strings.Join(r[3:], "-"))
+	button.StyleContext().AddClass(cssName)
 
 	// in the walk function we've marked directories with the '#is_dir#' prefix
 	if strings.HasPrefix(filePath, "#is_dir#") {
+		button.SetObjectProperty("name", "folder-result")
 		filePath = filePath[8:]
 		img := gtk.NewImageFromIconName("folder", int(gtk.IconSizeMenu))
 		button.SetAlwaysShowImage(true)
@@ -688,6 +714,7 @@ func setUpUserFileSearchResultButton(fileName, filePath string) *gtk.Box {
 
 func setUpOperationResultWindow(operation string, result string) *gtk.Window {
 	window := gtk.NewWindow(gtk.WindowToplevel)
+	window.SetObjectProperty("name", "math-modal")
 	window.SetModal(true)
 
 	if wayland() {
@@ -723,10 +750,13 @@ func setUpOperationResultWindow(operation string, result string) *gtk.Window {
 	lbl.SetObjectProperty("name", "math-label")
 	vBox.PackStart(lbl, true, true, 12)
 
+	// load from cssFileName and added original style as the default #math-modal to drawer CSS and fallback on err
+	// will find alternative solution if this breaks any user configs or creates other issues
 	mRefProvider := gtk.NewCSSProvider()
-	css := "window { background-color: rgba (0, 0, 0, 255); color: #fff; border: solid 1px grey; border-radius: 5px}"
-	err := mRefProvider.LoadFromData(css)
+	err := mRefProvider.LoadFromPath(*cssFileName)
 	if err != nil {
+		css := "window { background-color: rgba (0, 0, 0, 255); color: #fff; border: solid 1px grey; border-radius: 5px}"
+		mRefProvider.LoadFromData(css)
 		log.Warn(err)
 	}
 	ctx := window.StyleContext()
