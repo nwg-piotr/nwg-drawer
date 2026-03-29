@@ -197,6 +197,7 @@ var pbSize = flag.Int("pbsize", 64, "power bar icon size (only works w/ built-in
 var pbUseIconTheme = flag.Bool("pbuseicontheme", false, "use icon theme instead of built-in icons in power bar")
 var closeBtn = flag.String("closebtn", "none", "close button position: 'left' or 'right', 'none' by default")
 var debug = flag.Bool("d", false, "Turn on Debug messages")
+var disableFirstItemFocus = flag.Bool("df", false, "Disables automatic Focusing of the first searched item")
 
 func main() {
 	timeStart := time.Now()
@@ -628,14 +629,16 @@ func main() {
 	appFlowBox = setUpAppsFlowBox(nil, "")
 
 	// Focus 1st pinned item if any, otherwise focus 1st found app icon
-	var button gtk.Widget
-	if len(pinnedFlowBox.Children()) > 0 {
-		button = pinnedFlowBox.ChildAtIndex(0).Widget
-	} else {
-		button = appFlowBox.ChildAtIndex(0).Widget
-	}
-	if err == nil {
-		button.GrabFocus()
+	if !*disableFirstItemFocus {
+		var button gtk.Widget
+		if len(pinnedFlowBox.Children()) > 0 {
+			button = pinnedFlowBox.ChildAtIndex(0).Widget
+		} else {
+			button = appFlowBox.ChildAtIndex(0).Widget
+		}
+		if err == nil {
+			button.GrabFocus()
+		}
 	}
 
 	userDirsMap = mapXdgUserDirs()
@@ -770,14 +773,16 @@ func main() {
 							fileSearchResultWrapper.Hide()
 						}
 						// focus 1st element
-						var button gtk.Widget
-						if len(pinnedFlowBox.Children()) > 0 {
-							button = pinnedFlowBox.ChildAtIndex(0).Widget
-						} else {
-							button = appFlowBox.ChildAtIndex(0).Widget
-						}
-						if err == nil {
-							button.GrabFocus()
+						if !*disableFirstItemFocus {
+							var button gtk.Widget
+							if len(pinnedFlowBox.Children()) > 0 {
+								button = pinnedFlowBox.ChildAtIndex(0).Widget
+							} else {
+								button = appFlowBox.ChildAtIndex(0).Widget
+							}
+							if err == nil {
+								button.GrabFocus()
+							}
 						}
 					}
 

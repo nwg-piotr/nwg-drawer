@@ -517,7 +517,7 @@ func setUpSearchEntry() *gtk.SearchEntry {
 			var w *gtk.Button
 			if appFlowBox != nil {
 				b := appFlowBox.ChildAtIndex(0)
-				if b != nil {
+				if b != nil && !*disableFirstItemFocus {
 					button := b.Child().(*gtk.Button)
 					button.SetCanFocus(true)
 					button.GrabFocus()
@@ -526,7 +526,7 @@ func setUpSearchEntry() *gtk.SearchEntry {
 			}
 			if w == nil && fileSearchResultFlowBox != nil {
 				f := fileSearchResultFlowBox.ChildAtIndex(0)
-				if f != nil {
+				if f != nil && !*disableFirstItemFocus {
 					button := f.Child().(*gtk.Box)
 					button.SetCanFocus(true)
 					button.GrabFocus()
