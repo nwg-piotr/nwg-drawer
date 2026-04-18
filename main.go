@@ -43,6 +43,12 @@ var (
 	hyprlandMonitors []monitor
 	beenScrolled     bool
 	firstPowerBtn    *gtk.Button
+	iconPoweroff     string
+	iconSleep        string
+	iconReboot       string
+	iconExit         string
+	iconLock         string
+	cssFilePath      string
 )
 
 var categoryNames = [...]string{
@@ -338,7 +344,14 @@ func main() {
 
 	// Copy default style sheet if not found
 	if !pathExists(filepath.Join(configDirectory, "drawer.css")) {
-		err := copyFile(filepath.Join(dataDirectory, "drawer.css"), filepath.Join(configDirectory, "drawer.css"))
+		if pathExists(filepath.Join(dataDirectory, "drawer.css")) {
+			cssFilePath = filepath.Join(dataDirectory, "drawer.css")
+		} else if pathExists("/usr/local/share/nwg-drawer/drawer.css"){
+			cssFilePath = "/usr/local/share/nwg-drawer/drawer.css"
+		} else {
+			cssFilePath = "/usr/share/nwg-drawer/drawer.css"
+		}
+		err := copyFile(cssFilePath, filepath.Join(configDirectory, "drawer.css"))
 		if err != nil {
 			log.Errorf("Failed copying 'drawer.css' file: %s", err)
 		}
@@ -667,7 +680,14 @@ func main() {
 			if *pbPoweroff != "" {
 				btn := gtk.NewButton()
 				if !*pbUseIconTheme {
-					btn = powerButton(filepath.Join(dataDirectory, "img/poweroff.svg"), *pbPoweroff)
+					if pathExists(filepath.Join(dataDirectory, "img/poweroff.svg")) {
+						iconPoweroff = filepath.Join(dataDirectory, "img/poweroff.svg")
+					} else if pathExists("/usr/local/share/nwg-drawer/img/poweroff.svg"){
+						iconPoweroff = "/usr/local/share/nwg-drawer/img/poweroff.svg"
+					} else {
+						iconPoweroff = "/usr/share/nwg-drawer/img/poweroff.svg"
+					}
+					btn = powerButton(iconPoweroff, *pbPoweroff)
 				} else {
 					btn = powerButton("system-shutdown-symbolic", *pbPoweroff)
 				}
@@ -676,8 +696,15 @@ func main() {
 			}
 			if *pbSleep != "" {
 				btn := gtk.NewButton()
+				if pathExists(filepath.Join(dataDirectory, "img/sleep.svg")) {
+					iconSleep = filepath.Join(dataDirectory, "img/sleep.svg")
+				} else if pathExists("/usr/local/share/nwg-drawer/img/sleep.svg"){
+					iconSleep = "/usr/local/share/nwg-drawer/img/sleep.svg"
+				} else {
+					iconSleep = "/usr/share/nwg-drawer/img/sleep.svg"
+				}
 				if !*pbUseIconTheme {
-					btn = powerButton(filepath.Join(dataDirectory, "img/sleep.svg"), *pbSleep)
+					btn = powerButton(iconSleep, *pbSleep)
 				} else {
 					btn = powerButton("face-yawn-symbolic", *pbSleep)
 				}
@@ -686,8 +713,15 @@ func main() {
 			}
 			if *pbReboot != "" {
 				btn := gtk.NewButton()
+				if pathExists(filepath.Join(dataDirectory, "img/reboot.svg")) {
+					iconReboot = filepath.Join(dataDirectory, "img/reboot.svg")
+				} else if pathExists("/usr/local/share/nwg-drawer/img/reboot.svg"){
+					iconReboot = "/usr/local/share/nwg-drawer/img/reboot.svg"
+				} else {
+					iconReboot = "/usr/share/nwg-drawer/img/reboot.svg"
+				}
 				if !*pbUseIconTheme {
-					btn = powerButton(filepath.Join(dataDirectory, "img/reboot.svg"), *pbReboot)
+					btn = powerButton(iconReboot, *pbReboot)
 				} else {
 					btn = powerButton("system-reboot-symbolic", *pbReboot)
 				}
@@ -696,8 +730,15 @@ func main() {
 			}
 			if *pbExit != "" {
 				btn := gtk.NewButton()
+				if pathExists(filepath.Join(dataDirectory, "img/exit.svg")) {
+					iconExit = filepath.Join(dataDirectory, "img/exit.svg")
+				} else if pathExists("/usr/local/share/nwg-drawer/img/exit.svg"){
+					iconExit = "/usr/local/share/nwg-drawer/img/exit.svg"
+				} else {
+					iconExit = "/usr/share/nwg-drawer/img/exit.svg"
+				}
 				if !*pbUseIconTheme {
-					btn = powerButton(filepath.Join(dataDirectory, "img/exit.svg"), *pbExit)
+					btn = powerButton(iconExit, *pbExit)
 				} else {
 					btn = powerButton("system-log-out-symbolic", *pbExit)
 				}
@@ -706,8 +747,15 @@ func main() {
 			}
 			if *pbLock != "" {
 				btn := gtk.NewButton()
+				if pathExists(filepath.Join(dataDirectory, "img/lock.svg")) {
+					iconLock = filepath.Join(dataDirectory, "img/lock.svg")
+				} else if pathExists("/usr/local/share/nwg-drawer/img/lock.svg"){
+					iconLock = "/usr/local/share/nwg-drawer/img/lock.svg"
+				} else {
+					iconLock = "/usr/share/nwg-drawer/img/lock.svg"
+				}
 				if !*pbUseIconTheme {
-					btn = powerButton(filepath.Join(dataDirectory, "img/lock.svg"), *pbLock)
+					btn = powerButton(iconLock, *pbLock)
 				} else {
 					btn = powerButton("system-lock-screen-symbolic", *pbLock)
 				}
