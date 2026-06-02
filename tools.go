@@ -633,11 +633,11 @@ func launch(command string, terminal bool, terminate bool) {
 			log.Warn("$XDG_CURRENT_DESKTOP != 'niri', running command directly")
 		}
 	} else if *wm == "uwsm" {
-		if _, err := exec.LookPath("uwsm"); err == nil {
+		if _, err := exec.LookPath("uwsm-app"); err == nil {
 			cParts, _ := shlex.Split(command)
-			cmd = exec.Command("uwsm", append([]string{"app", "--"}, cParts...)...)
+			cmd = exec.Command("uwsm-app", append([]string{"--"}, cParts...)...)
 		} else {
-			log.Warn("Unable to find uwsm, running command directly")
+			log.Warn("Unable to find uwsm-app, running command directly")
 		}
 	}
 
