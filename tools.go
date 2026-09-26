@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"github.com/joshuarubin/go-sway"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/text/collate"
+	"golang.org/x/text/language"
 	"io"
 	"io/fs"
 	"net"
@@ -390,8 +392,9 @@ func setUpCategories() {
 			log.Errorf("Couldn't open %s", fp)
 		}
 	}
+	collator := collate.New(language.Und)
 	sort.Slice(categories, func(i, j int) bool {
-		return categories[i].DisplayName < categories[j].DisplayName
+		return collator.CompareString(categories[i].DisplayName, categories[j].DisplayName) < 0
 	})
 	categories = append(categories, other)
 }
@@ -423,8 +426,9 @@ func parseDesktopFiles(desktopFiles []string) string {
 		desktopEntries = append(desktopEntries, entry)
 		assignToLists(entry.DesktopID, entry.Category)
 	}
+	collator := collate.New(language.Und)
 	sort.Slice(desktopEntries, func(i, j int) bool {
-		return strings.ToLower(desktopEntries[i].NameLoc) < strings.ToLower(desktopEntries[j].NameLoc)
+		return collator.CompareString(desktopEntries[i].NameLoc, desktopEntries[j].NameLoc) < 0
 	})
 	summary := fmt.Sprintf("%v entries (+%v hidden)", len(desktopEntries)-hidden, hidden)
 	log.Infof("Skipped %v duplicates; %v .desktop entries hidden by \"NoDisplay=true\"", skipped, hidden)
