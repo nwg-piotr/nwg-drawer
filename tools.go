@@ -23,7 +23,6 @@ import (
 	"github.com/diamondburned/gotk4/pkg/gdk/v3"
 	"github.com/diamondburned/gotk4/pkg/gdkpixbuf/v2"
 	"github.com/diamondburned/gotk4/pkg/gtk/v3"
-	"github.com/google/shlex"
 )
 
 func wayland() bool {
@@ -572,60 +571,55 @@ func savePinned() {
 }
 
 func launch(command string, terminal bool, terminate bool) {
-	// trim % and everything afterwards
-	if strings.Contains(command, "%") {
-		cutAt := strings.Index(command, "%")
-		if cutAt != -1 {
-			command = command[:cutAt-1]
-		}
+	argv, err := splitExec(command)
+	if err != nil {
+		log.Warnf("Unable to parse command %q: %v", command, err)
+		return
+	}
+	argv = stripFieldCodes(argv)
+	if len(argv) == 0 {
+		return
 	}
 
 	if *wm != "uwsm" {
-		themeToPrepend := ""
 		//add "GTK_THEME=<default_gtk_theme>" environment variable
 		if *forceTheme {
 			settings := gtk.SettingsGetDefault()
 			th := settings.ObjectProperty("gtk-theme-name")
-			themeToPrepend = th.(string)
+			if name, ok := th.(string); ok && name != "" {
+				argv = append([]string{"GTK_THEME=" + name}, argv...)
+			}
 		}
-
-		if themeToPrepend != "" {
-			command = fmt.Sprintf("GTK_THEME=%q %s", themeToPrepend, command)
-		}
-	} else {
-		if *forceTheme {
-			log.Warn("We can't force GTK_THEME= while running a command through uwsm")
-		}
+	} else if *forceTheme {
+		log.Warn("We can't force GTK_THEME= while running a command through uwsm")
 	}
 
-	var elements = []string{"/usr/bin/env", "-S", command}
-
+	var elements = append([]string{"/usr/bin/env"}, argv...)
 	cmd := exec.Command(elements[0], elements[1:]...)
 
 	if terminal {
 		var prefixCommand = *term
 		var args []string
 		if prefixCommand != "foot" {
-			args = []string{"-e", command}
+			args = append([]string{"-e"}, argv...)
 		} else {
 			args = elements
 		}
 		cmd = exec.Command(prefixCommand, args...)
 	} else if *wm == "sway" {
 		if _, ok := os.LookupEnv("SWAYSOCK"); ok {
-			cmd = exec.Command("swaymsg", "exec", strings.Join(elements, " "))
+			cmd = exec.Command("swaymsg", "exec", shellJoin(elements))
 		} else {
 			log.Warn("Unable to find SWAYSOCK, running command directly")
 		}
 	} else if *wm == "hyprland" || *wm == "Hyprland" {
 		if _, ok := os.LookupEnv("HYPRLAND_INSTANCE_SIGNATURE"); ok {
-			cmd = exec.Command("hyprctl", "dispatch", "exec", strings.Join(elements, " "))
+			cmd = exec.Command("hyprctl", "dispatch", "exec", shellJoin(elements))
 		} else {
 			log.Warn("Unable to find HYPRLAND_INSTANCE_SIGNATURE, running command directly")
 		}
 	} else if *wm == "river" {
-		// a check if we're actually on river would be of use here, but we have none
-		cmd = exec.Command("riverctl", "spawn", strings.Join(elements, " "))
+		cmd = exec.Command("riverctl", "spawn", shellJoin(elements))
 	} else if *wm == "niri" {
 		if os.Getenv("XDG_CURRENT_DESKTOP") == "niri" {
 			cmd = exec.Command("niri", append([]string{"msg", "action", "spawn", "--"}, elements...)...)
@@ -634,8 +628,7 @@ func launch(command string, terminal bool, terminate bool) {
 		}
 	} else if *wm == "uwsm" {
 		if _, err := exec.LookPath("uwsm"); err == nil {
-			cParts, _ := shlex.Split(command)
-			cmd = exec.Command("uwsm", append([]string{"app", "--"}, cParts...)...)
+			cmd = exec.Command("uwsm", append([]string{"app", "--"}, argv...)...)
 		} else {
 			log.Warn("Unable to find uwsm, running command directly")
 		}
@@ -810,4 +803,90 @@ func listHyprlandMonitors() error {
 		err = json.Unmarshal([]byte(reply), &hyprlandMonitors)
 	}
 	return err
+}
+
+// unescapeString applies the escape sequences of the Desktop Entry "string" type.
+func unescapeString(s string) string {
+	var b strings.Builder
+	for i := 0; i < len(s); i++ {
+		if s[i] == '\\' && i+1 < len(s) {
+			if r := strings.IndexByte("strn\\", s[i+1]); r >= 0 {
+				b.WriteByte(" \t\r\n\\"[r])
+				i++
+				continue
+			}
+		}
+		b.WriteByte(s[i])
+	}
+	return b.String()
+}
+
+// splitExec splits a command line into arguments, honoring quotes.
+func splitExec(s string) ([]string, error) {
+	var args []string
+	var cur strings.Builder
+	var quote byte // 0, '"' or '\''
+	have := false
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		switch {
+		case quote == '\'':
+			if c == '\'' {
+				quote = 0
+			} else {
+				cur.WriteByte(c)
+			}
+		case quote == '"':
+			if c == '\\' && i+1 < len(s) && strings.IndexByte("\"`$\\", s[i+1]) >= 0 {
+				cur.WriteByte(s[i+1])
+				i++
+			} else if c == '"' {
+				quote = 0
+			} else {
+				cur.WriteByte(c)
+			}
+		case c == '"' || c == '\'':
+			quote, have = c, true
+		case c == ' ' || c == '\t':
+			if cur.Len() > 0 || have {
+				args = append(args, cur.String())
+				cur.Reset()
+				have = false
+			}
+		default:
+			cur.WriteByte(c)
+		}
+	}
+	if quote != 0 {
+		return nil, errors.New("unterminated quote")
+	}
+	if cur.Len() > 0 || have {
+		args = append(args, cur.String())
+	}
+	return args, nil
+}
+
+var fieldCodes = strings.NewReplacer("%f", "", "%F", "", "%u", "", "%U", "",
+	"%i", "", "%c", "", "%k", "", "%%", "%")
+
+// stripFieldCodes removes %f, %u... and turns %% into %.
+func stripFieldCodes(args []string) []string {
+	var out []string
+	for _, a := range args {
+		r := fieldCodes.Replace(a)
+		if r == "" && a != "" {
+			continue
+		}
+		out = append(out, r)
+	}
+	return out
+}
+
+// shellJoin quotes arguments for the -wm modes that pass a string to a shell.
+func shellJoin(args []string) string {
+	q := make([]string, len(args))
+	for i, a := range args {
+		q[i] = "'" + strings.ReplaceAll(a, "'", `'\''`) + "'"
+	}
+	return strings.Join(q, " ")
 }

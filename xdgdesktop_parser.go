@@ -20,7 +20,6 @@ func parseDesktopEntryFile(id string, path string) (e desktopEntry, err error) {
 }
 
 func parseDesktopEntry(id string, in io.Reader) (entry desktopEntry, err error) {
-	cleanexec := strings.NewReplacer("\"", "", "'", "")
 	entry.DesktopID = id
 	localizedName := fmt.Sprintf("Name[%s]", strings.Split(*lang, "_")[0])
 	localizedComment := fmt.Sprintf("Comment[%s]", strings.Split(*lang, "_")[0])
@@ -83,7 +82,7 @@ func parseDesktopEntry(id string, in io.Reader) (entry desktopEntry, err error) 
 				}
 			}
 		case "Exec":
-			entry.Exec = cleanexec.Replace(value)
+			entry.Exec = unescapeString(value)
 		}
 	}
 
