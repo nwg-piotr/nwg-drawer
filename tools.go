@@ -619,7 +619,12 @@ func launch(command string, terminal bool, terminate bool) {
 		}
 	} else if *wm == "hyprland" || *wm == "Hyprland" {
 		if _, ok := os.LookupEnv("HYPRLAND_INSTANCE_SIGNATURE"); ok {
-			cmd = exec.Command("hyprctl", "dispatch", "exec", strings.Join(elements, " "))
+			// Escape quotes and backslashes for the Lua string
+			var escaped = strings.Join(elements, " ")
+			escaped = strings.ReplaceAll(escaped, "\\", "\\\\")
+			escaped = strings.ReplaceAll(escaped, "\"", "\\\"")
+			// Run the command with Hyprland's Lua exec dispatcher
+			cmd = exec.Command("hyprctl", "dispatch", "hl.dsp.exec_cmd(\"" + escaped + "\")")
 		} else {
 			log.Warn("Unable to find HYPRLAND_INSTANCE_SIGNATURE, running command directly")
 		}
